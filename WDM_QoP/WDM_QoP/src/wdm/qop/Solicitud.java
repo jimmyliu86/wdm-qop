@@ -4,16 +4,17 @@ import wdm.*;
 import java.util.StringTokenizer;
 
 public class Solicitud {
-	private Nodo origen;
-	private Nodo destino;
-	private Nivel nivel;
-	private final Red red;
+	private final Nodo origen;
+	private final Nodo destino;
+	private final Nivel nivel;
 	
-	public Solicitud(Red red){
-		this.red = red;
+	public Solicitud(Nodo origen, Nodo destino, Nivel nivel){
+		this.origen = origen;
+		this.destino = destino;
+		this.nivel = nivel;
 	}
 	
-	public void parseSolicitud(String sSolicitud){
+	public Solicitud(Red red, String sSolicitud){	
 		StringTokenizer st = new StringTokenizer(sSolicitud,":",false);
 		
 		this.origen = red.get(st.nextToken());
@@ -24,22 +25,12 @@ public class Solicitud {
 	public Nodo getOrigen() {
 		return origen;
 	}
-	public void setOrigen(Nodo origen) {
-		this.origen = origen;
-	}
+
 	public Nodo getDestino() {
 		return destino;
 	}
-	public void setDestino(Nodo destino) {
-		this.destino = destino;
-	}
+
 	public Nivel getNivel() {
 		return nivel;
 	}
-	public void setNivel(Nivel nivel) {
-		this.nivel = nivel;
-	}
-	
-	/* ********************************* */
-	
 }

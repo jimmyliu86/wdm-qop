@@ -2,9 +2,11 @@ package wdm;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 
 public class Red {
 	private final HashMap<String, Nodo> nodos = new HashMap<String, Nodo>();
+	private final HashSet<CanalOptico> canales = new HashSet<CanalOptico>();
 	
 	public Red(){
 		nodos.clear();
