@@ -17,8 +17,8 @@ public class Solicitud {
 	public Solicitud(Red red, String sSolicitud){	
 		StringTokenizer st = new StringTokenizer(sSolicitud,":",false);
 		
-		this.origen = red.get(st.nextToken());
-		this.destino = red.get(st.nextToken());
+		this.origen = red.getNodo(st.nextToken());
+		this.destino = red.getNodo(st.nextToken());
 		this.nivel = Nivel.valueOf(st.nextToken());
 	}
 	

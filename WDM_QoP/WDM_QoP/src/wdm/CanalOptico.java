@@ -2,16 +2,24 @@ package wdm;
 
 import java.util.HashMap;
 
+/**
+ * Clase CanalOptico, utilizado para representar la agrupacion de enlaces
+ * que están definidos por longitud de onda por fibra por canal.
+ * @author albert
+ *
+ */
 public class CanalOptico {
-	private Nodo origen;
-	private Nodo destino;
-	private int fibras;
-	private int ldos;
+	private final Nodo origen;
+	private final Nodo destino;
+	private final int fibras;
+	private final int ldos;
 	
 	private final HashMap<String, Enlace> enlaces = new HashMap<String, Enlace>();
 	
 	/**
-	 * 
+	 * Constructor principal. Setea los atributos principales y genera los enlaces
+	 * del canal.
+	 *  
 	 * @param origen	Nodo Origen
 	 * @param destino	Nodo Destino
 	 * @param fibras	Cantidad de fibras en el canal
@@ -32,6 +40,9 @@ public class CanalOptico {
 		}
 	}
 	
+	/**
+	 * Inicializa los valores del canal, en caso de que algun enlace este bloqueado, reservado.
+	 */
 	public void inicializar(){
 		for( Enlace e: enlaces.values() ){
 			e.desbloquear();
@@ -39,40 +50,37 @@ public class CanalOptico {
 		}
 	}
 	
+	/**
+	 * Getter del nodo origen
+	 * @return Nodo origen
+	 */
 	public Nodo getOrigen() {
 		return origen;
 	}
 
-	public void setOrigen(Nodo origen) {
-		this.origen = origen;
-	}
-
+	/**
+	 * Getter del nodo Destino
+	 * @return Nodo Destino
+	 */
 	public Nodo getDestino() {
 		return destino;
 	}
 
-	public void setDestino(Nodo destino) {
-		this.destino = destino;
-	}
-
-	public int getFibras() {
-		return fibras;
-	}
-
-	public void setFibras(int fibras) {
-		this.fibras = fibras;
-	}
-
-	public int getLdos() {
-		return ldos;
-	}
-
-	public void setLdos(int ldos) {
-		this.ldos = ldos;
-	}
-
-	public HashMap<String, Enlace> getEnlaces() {
-		return enlaces;
+	/**
+	 * Retorna un enlace que no este bloqueado. Retorna null si no encuentra
+	 * un enlace libre.
+	 * @return Enlace libre
+	 */
+	public Enlace getEnlaceLibre(){
+		for(int i = 0; i < fibras; i++){
+			for(int j = 0; j < ldos; j++){
+				Enlace e = enlaces.get(i+"-"+j);
+				
+				if ( ! e.estaBloqueado() ) return e;
+			}
+		}
+		
+		return null;
 	}
 	
 	/* ************************
@@ -80,16 +88,11 @@ public class CanalOptico {
 	 **************************/
 
 	/**
-	 * Simula una falla
+	 * Simula una falla, echando cada enlace y notificando en cada servicio.
 	 */
-	public void echarCanal(){
-		/*
-		 * Se bloquea primeramente los enlaces y se notifica a los
-		 * servicios afectados.
-		 */
-		
+	public void echarCanal(){		
 		for( Enlace e: enlaces.values() ){
-			e.bloquear();
+			e.echar();
 		}
 	}
 }
