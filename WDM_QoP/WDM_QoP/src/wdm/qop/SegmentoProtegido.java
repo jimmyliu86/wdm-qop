@@ -8,6 +8,11 @@ public class SegmentoProtegido {
 	private final double pFalla;
 	private final double pRecuperacion;
 	
+	/**
+	 * Constructor Principal
+	 * @param primario
+	 * @param alternativo
+	 */
 	public SegmentoProtegido(Camino primario, Camino alternativo) {
 		super();
 		this.primario = primario;
@@ -17,11 +22,19 @@ public class SegmentoProtegido {
 		this.pRecuperacion = probabilidadRecuperacion();
 	}
 	
+	/**
+	 * Retorna la probabilidad de falla del segmento
+	 * @return
+	 */
 	private double probabilidadFalla(){
-		return 0.0;
+		return pFalla;
 	}
 	
+	/**
+	 * Retorna la probabilidad de recuperacion del segmento
+	 * @return
+	 */
 	private double probabilidadRecuperacion(){
-		return 0.0;
+		return pRecuperacion;
 	}
 }
