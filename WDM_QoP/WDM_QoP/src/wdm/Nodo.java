@@ -4,7 +4,18 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Set;
+import java.io.Serializable;
 
+import javax.persistence.CascadeType;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.ManyToMany;
+import javax.persistence.OneToMany;
+import javax.persistence.Table;
+
+@Entity
+@Table(name="Nodo")
 /**
  * Clase que representa a un Nodo de la red representada.
  * <P>
@@ -17,9 +28,13 @@ import java.util.Set;
  * 
  */
 public class Nodo {
-	private final String label = "";
+	
+	@Id
+	private String label = "";
 	private boolean usaConversor = false;
-	private final HashMap<Nodo, CanalOptico> canales = new HashMap<Nodo, CanalOptico>();
+	
+	@OneToMany(cascade=CascadeType.ALL)
+	private Set<CanalOptico> canales = new HashSet<CanalOptico>();
 
 	/**
 	 * Retorna la etiqueta del nodo.
@@ -28,6 +43,14 @@ public class Nodo {
 	 */
 	public String getLabel() {
 		return label;
+	}
+	
+	/**
+	 * Setter de la etiqueta del nodo
+	 * @param label
+	 */
+	public void setLabel(String label) {
+		this.label = label;
 	}
 
 	/**
@@ -54,17 +77,7 @@ public class Nodo {
 	public void inicializar() {
 		this.usaConversor = false;
 	}
-
-	/**
-	 * Obtiene la lista de nodos vecinos a este nodo.
-	 * 
-	 * @return HashSet<Nodo> vecinos.
-	 */
-	public Set<Nodo> getVecinos() {
-
-		return canales.keySet();
-	}
-
+		
 	/**
 	 * Retorna el camino mas corto al nodo especificado.
 	 * 
@@ -93,8 +106,8 @@ public class Nodo {
 			if (actual.equals(destino)) {
 				return caminoActual;
 			}
-
-			for (CanalOptico canal : actual.canales.values()) {
+			
+			for(CanalOptico canal : actual.canales){
 				Enlace e = canal.getEnlaceLibre();
 
 				if (e == null)
@@ -117,21 +130,45 @@ public class Nodo {
 		return this.label == b.label;
 	}
 
+	public CanalOptico romperEnlace(Nodo vecino){
+		for ( CanalOptico c: canales){
+			if (vecino.equals(c.getDestino())){
+				canales.remove(c);
+				return c;
+			}
+		}
+		
+		return null;
+	}
+	
 	/**
 	 * Elimina todos los enlaces del nodo.
 	 */
-	public void romperEnlaces() {
-		for (Nodo vecino : canales.keySet()) {
-
-			/* Se elimina el enlace del vecino al nodo */
-			vecino.canales.remove(this);
+	public void romperEnlaces(Red red){
+		for (CanalOptico canal : canales){
+			Nodo vecino = canal.getDestino();
+			
+			/*Se elimina el enlace del vecino al nodo*/
+			CanalOptico canalInverso = vecino.romperEnlace(this); 
 
 			/* Se elimina el enlace del nodo al vecino */
-			canales.remove(this);
+			canales.remove(canal);
 
 			/* Se elimina ambos enlaces de la red */
-			Red.getRed().removeCanal(canales.get(vecino));
-			Red.getRed().removeCanal(vecino.canales.get(this));
+			red.removeCanal(canal);
+			red.removeCanal(canalInverso);
 		}
+	}
+
+	public String toString(){
+		return this.label;
+	}
+
+	public Set<CanalOptico> getCanales() {
+		return canales;
+	}
+
+	public void setCanales(Set<CanalOptico> canales) {
+		this.canales = canales;
 	}
 }

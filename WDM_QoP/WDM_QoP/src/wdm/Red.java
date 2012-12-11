@@ -3,6 +3,16 @@ package wdm;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Set;
+import java.io.Serializable;
+import javax.persistence.CascadeType;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.OneToMany;
+import javax.persistence.Table;
+
+
 /**
  * Clase que representa la red sobre la que se simularán las solicitudes.
  * <p>
@@ -13,46 +23,31 @@ import java.util.HashSet;
  * @author aamadeo
  * 
  */
+@Entity
+@Table(name="Red")
 public class Red {
-	private static Red instancia = null;
-	private final HashMap<String, Nodo> nodos = new HashMap<String, Nodo>();
-	private final HashSet<CanalOptico> canales = new HashSet<CanalOptico>();
 
-	/**
-	 * Función de acceso a la instancia singleton de la red. Si no está
-	 * instanciada, instancia un objeto y luego lo devuelve.
-	 * 
-	 * @return Instancia de la red
-	 */
-	public static Red getRed() {
-		if (Red.instancia == null) {
-			Red.instancia = new Red();
-		}
-
-		return Red.instancia;
-	}
+	@OneToMany(cascade=CascadeType.ALL)
+	private Set<Nodo> nodos = new HashSet<Nodo>();
+	
+	@OneToMany(cascade=CascadeType.ALL)
+	private Set<CanalOptico> canales = new HashSet<CanalOptico>();
+	
+	private static final long serialVersionUID = -6192832626602644784L;
+	
+	@Id 
+	@GeneratedValue 
+	private int id; 
 
 	/**
 	 * Constructor principal
 	 */
-	private Red() {
+	public Red(){
 		nodos.clear();
 		canales.clear();
 	}
 
 	/* -----------------------Metodos delegados del conjunto----------------- */
-
-	/**
-	 * Función que controla la existencia de un nodo en la red a partir de su
-	 * etiqueta. Retorna true si el nodo ya forma parte de la red.
-	 * 
-	 * @param label
-	 *            Etiqueta del nodo
-	 * @return Existencia del nodo
-	 */
-	public boolean existeNodo(String label) {
-		return nodos.containsKey(label);
-	}
 
 	/**
 	 * Función que controla la existencia de un nodo en la red a partir de la
@@ -64,47 +59,31 @@ public class Red {
 	 * @return Existencia del nodo
 	 */
 	public boolean existeNodo(Nodo nodo) {
-		return nodos.containsValue(nodo);
-	}
-
-	/**
-	 * Retorna el nodo correspondiente a la etiqueta recibida.
-	 * 
-	 * @param label
-	 *            Etiqueta del Nodo
-	 * @return Nodo
-	 */
-	public Nodo getNodo(String label) {
-		return nodos.get(label);
+		return nodos.contains(nodo);
 	}
 
 	/**
 	 * Agrega un nodo a la red
-	 * 
-	 * @param key
-	 *            Etiqueta del nodo
-	 * @param value
-	 *            Nodo
-	 * @return El nodo agregado
+	 * @param key	Etiqueta del nodo
+	 * @param value	Nodo
+	 * @return		true si cambio la red
 	 */
-	public Nodo addNodo(String key, Nodo value) {
-		return nodos.put(key, value);
+	public boolean addNodo(Nodo value) {
+		return nodos.add(value);
 	}
 
 	/**
 	 * Elimina el nodo de la red, a partir de su clave.
 	 * 
-	 * @param clave
-	 * @return
+	 * @param nodo	Nodo a eliminar
+	 * @return		true si cambio la red
 	 */
-	public Nodo removeNodo(String clave) {
-		Nodo nodo = nodos.remove(clave);
-
-		if (nodo != null) {
-			nodo.romperEnlaces();
+	public boolean removeNodo(Nodo nodo) {
+		if ( nodo != null ){
+			nodo.romperEnlaces(this);
 		}
 
-		return nodo;
+		return nodos.remove(nodo);
 	}
 
 	/**
@@ -114,15 +93,6 @@ public class Red {
 	 */
 	public int cantidadNodos() {
 		return nodos.size();
-	}
-
-	/**
-	 * Retorna el conjunto de nodos
-	 * 
-	 * @return Conjunto de Nodos
-	 */
-	public Collection<Nodo> nodos() {
-		return nodos.values();
 	}
 
 	/**
@@ -164,5 +134,21 @@ public class Red {
 	 */
 	public int cantidadCanales() {
 		return canales.size();
+	}
+
+	public Set<Nodo> getNodos() {
+		return nodos;
+	}
+
+	public void setNodos(Set<Nodo> nodos) {
+		this.nodos = nodos;
+	}
+
+	public Set<CanalOptico> getCanales() {
+		return canales;
+	}
+
+	public void setCanales(Set<CanalOptico> canales) {
+		this.canales = canales;
 	}
 }

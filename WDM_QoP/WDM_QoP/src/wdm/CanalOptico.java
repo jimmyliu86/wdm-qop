@@ -1,6 +1,20 @@
 package wdm;
 
 import java.util.HashMap;
+import java.io.Serializable;
+import javax.persistence.CascadeType;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.Table;
+import javax.persistence.Transient;
+
+import org.hibernate.annotations.Cascade;
+
+@Entity
+@Table(name="CanalOptico")
 /**
  * Clase que representa los canales Ópticos que forman parte de la red.
  * <p>
@@ -12,13 +26,26 @@ import java.util.HashMap;
  * 
  */
 public class CanalOptico {
-	private final Nodo origen;
-	private final Nodo destino;
-	private final int fibras;
-	private final int ldos;
 
+	@Transient
 	private final HashMap<String, Enlace> enlaces = new HashMap<String, Enlace>();
 
+	private static final long serialVersionUID = -6192832626602644784L;
+	
+	@Id 
+	@GeneratedValue 
+	private int id;
+	
+	private int fibras;
+	
+	private int ldos;
+	
+	@ManyToOne(cascade=CascadeType.ALL)
+	private Nodo destino;
+	
+	@ManyToOne(cascade=CascadeType.ALL)
+	private Nodo origen;
+	
 	/**
 	 * Constructor principal. Setea los atributos principales y genera los
 	 * enlaces del canal.
@@ -57,16 +84,6 @@ public class CanalOptico {
 			e.eliminarReservas();
 		}
 	}
-
-	/**
-	 * Getter del nodo origen
-	 * 
-	 * @return Nodo origen
-	 */
-	public Nodo getOrigen() {
-		return origen;
-	}
-
 	/**
 	 * Getter del nodo Destino
 	 * 
@@ -107,5 +124,41 @@ public class CanalOptico {
 		for (Enlace e : enlaces.values()) {
 			e.echar();
 		}
+	}
+
+	public int getId() {
+		return id;
+	}
+
+	public void setId(int id) {
+		this.id = id;
+	}
+
+	public int getFibras() {
+		return fibras;
+	}
+
+	public void setFibras(int fibras) {
+		this.fibras = fibras;
+	}
+
+	public int getLdos() {
+		return ldos;
+	}
+
+	public void setLdos(int ldos) {
+		this.ldos = ldos;
+	}
+
+	public void setDestino(Nodo destino) {
+		this.destino = destino;
+	}
+
+	public Nodo getOrigen() {
+		return origen;
+	}
+
+	public void setOrigen(Nodo origen) {
+		this.origen = origen;
 	}
 }

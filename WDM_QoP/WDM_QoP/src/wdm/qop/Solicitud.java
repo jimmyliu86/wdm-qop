@@ -20,20 +20,6 @@ public class Solicitud {
 		this.destino = destino;
 		this.nivel = nivel;
 	}
-	/**
-	 * Constructor que toma los datos de un String. Utiliza la red
-	 * para obtener el objeto Nodo.
-	 * 
-	 * @param red
-	 * @param sSolicitud
-	 */
-	public Solicitud(Red red, String sSolicitud){	
-		StringTokenizer st = new StringTokenizer(sSolicitud,":",false);
-		
-		this.origen = red.getNodo(st.nextToken());
-		this.destino = red.getNodo(st.nextToken());
-		this.nivel = Nivel.valueOf(st.nextToken());
-	}
 	
 	/**
 	 * Getter del nodo Origen
