@@ -1,6 +1,17 @@
 package wdm;
 
-import java.util.LinkedList;
+import java.util.HashSet;
+import java.util.Set;
+
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.OneToMany;
+import javax.persistence.ManyToOne;
+import javax.persistence.CascadeType;
+import javax.persistence.Id;
+import javax.persistence.OrderBy;
+
+import wdm.qop.Servicio;
 
 /**
  * Clase Camino, representa un camino por su nodo origen, y una lista de
@@ -8,9 +19,23 @@ import java.util.LinkedList;
  * @author albert
  *
  */
+@Entity
 public class Camino {
-	private final Nodo origen;
-	private final LinkedList<Enlace> saltos;
+	@Id
+	@GeneratedValue
+	private long id;
+	
+	@ManyToOne(cascade=CascadeType.ALL)
+	private Nodo origen;
+	
+	@ManyToOne(cascade=CascadeType.ALL)
+	private Nodo destino;
+	
+	@OneToMany(cascade=CascadeType.ALL)
+	@OrderBy("secuencia ASC")
+	private Set<Salto> saltos;
+	
+	public Camino(){}
 	
 	/**
 	 * Constructor principal
@@ -18,7 +43,8 @@ public class Camino {
 	 */
 	public Camino(Nodo origen){
 		this.origen = origen;
-		this.saltos = new LinkedList<Enlace>();
+		this.destino = origen;
+		this.saltos = new HashSet<Salto>();
 		this.saltos.clear();
 	}
 	
@@ -28,15 +54,22 @@ public class Camino {
 	 */
 	public Camino(Camino c){
 		this.origen = c.origen;
-		this.saltos = (LinkedList<Enlace>) c.saltos.clone();
+		
+		this.saltos = new HashSet<Salto>();
+		this.saltos.addAll(c.saltos);
+		this.destino = c.destino;
 	}
 	
 	/**
 	 * Metodo para agregar un salto al camino
 	 * @param salto
 	 */
-	public void addSalto(Enlace salto){
+	public void addSalto(Salto salto){
 		saltos.add(salto);
+		
+		if (destino == null) destino = origen;
+		
+		destino = salto.getEnlace().getOtroExtremo(destino);
 	}
 	
 	/**
@@ -44,7 +77,7 @@ public class Camino {
 	 * @return El ultimo nodo visitado en el camino
 	 */
 	public Nodo getDestino(){
-		return saltos.getLast().getDestino();
+		return this.destino;
 	}
 	
 	/**
@@ -53,5 +86,45 @@ public class Camino {
 	 */
 	public int getDistancia(){
 		return saltos.size();
+	}
+
+	public long getId() {
+		return id;
+	}
+
+	public void setId(long id) {
+		this.id = id;
+	}
+	
+	public Set<Salto> getSaltos(){
+		return saltos;
+	}
+	
+	public void setSaltos(Set<Salto> saltos){
+		this.saltos = saltos;
+	}
+
+	public void setDestino(Nodo destino) {
+		this.destino = destino;
+	}
+	
+	public void bloquearEnlaces(){
+		for(Salto salto : saltos){
+			salto.getEnlace().bloquear();
+		}
+	}
+	
+	public void reservarEnlaces(Servicio s){
+		for(Salto salto: saltos){
+			salto.getEnlace().reservar(s);
+		}
+	}
+
+	public Nodo getOrigen() {
+		return origen;
+	}
+
+	public void setOrigen(Nodo origen) {
+		this.origen = origen;
 	}
 }

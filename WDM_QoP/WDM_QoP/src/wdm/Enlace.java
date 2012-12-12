@@ -1,28 +1,55 @@
 package wdm;
 
 import java.util.HashSet;
+import java.util.Set;
 
 import wdm.qop.Servicio;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.ManyToMany;
+import javax.persistence.ManyToOne;
+import javax.persistence.CascadeType;
+import javax.persistence.Id;
+import javax.persistence.OneToMany;
+import javax.persistence.Transient;
 
 /**
- * Clase que representa el enlace de un canal óptico.
+ * Clase que representa el enlace de un canal Optico.
  * <p>
- * Descripción: Enlace cuyos componentes son: longitud de Onda
+ * Descripcion: Enlace cuyos componentes son: longitud de Onda
  * </p>
  * 
  * @author aamadeo
  * 
  */
+
+@Entity
 public class Enlace {
-	private final int longitudOnda;
-	private final int fibra;
-	private final CanalOptico canal;
+	
+	@Id
+	@GeneratedValue
+	private long id;
+	
+	private int longitudDeOnda;
+	private int fibra;
+	
+	@ManyToOne(cascade=CascadeType.ALL)
+	private CanalOptico canal;
 
+	//Propiedad de Simulacion
+	@Transient
 	private Servicio servicio;
-	private final HashSet<Servicio> reservas = new HashSet<Servicio>();
+	
+	@ManyToMany
+	private Set<Servicio> reservas = new HashSet<Servicio>();
 
+	@Transient
 	private boolean bloqueado = false;
+	
+	@Transient
 	private boolean disponible = true;
+	
+	public Enlace(){}
 
 	/**
 	 * Constructor principal
@@ -34,8 +61,8 @@ public class Enlace {
 	 * @param canal
 	 *            Canal Optico que contiene al enlace
 	 */
-	public Enlace(int ldo, int fibra, CanalOptico canal) {
-		this.longitudOnda = ldo;
+	public Enlace(int fibra, int ldo,  CanalOptico canal) {
+		this.longitudDeOnda = ldo;
 		this.fibra = fibra;
 		this.canal = canal;
 	}
@@ -46,7 +73,7 @@ public class Enlace {
 	 * @return
 	 */
 	public int getLongitudDeOnda() {
-		return this.longitudOnda;
+		return this.longitudDeOnda;
 	}
 
 	/**
@@ -63,8 +90,8 @@ public class Enlace {
 	 * 
 	 * @return Nodo Origen
 	 */
-	public Nodo getOrigen() {
-		return canal.getOrigen();
+	public Nodo getExtremoA() {
+		return canal.getExtremoA();
 	}
 
 	/**
@@ -72,8 +99,8 @@ public class Enlace {
 	 * 
 	 * @return Nodo destino.
 	 */
-	public Nodo getDestino() {
-		return canal.getDestino();
+	public Nodo getExtremoB() {
+		return canal.getExtremoB();
 	}
 
 	/**
@@ -203,5 +230,41 @@ public class Enlace {
 		this.disponible = true;
 		this.reservas.clear();
 		this.servicio = null;
+	}
+
+	public CanalOptico getCanal() {
+		return canal;
+	}
+
+	public void setFibra(int fibra) {
+		this.fibra = fibra;
+	}
+
+	public void setCanal(CanalOptico canal) {
+		this.canal = canal;
+	}
+
+	public void setLongitudDeOnda(int longitudDeOnda) {
+		this.longitudDeOnda = longitudDeOnda;
+	}
+
+	public long getId() {
+		return id;
+	}
+
+	public void setId(long id) {
+		this.id = id;
+	}
+
+	public Set<Servicio> getReservas() {
+		return reservas;
+	}
+
+	public void setReservas(Set<Servicio> reservas) {
+		this.reservas = reservas;
+	}
+
+	public Nodo getOtroExtremo(Nodo a) {
+		return canal.getOtroExtremo(a);
 	}
 }

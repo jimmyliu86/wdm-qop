@@ -1,12 +1,28 @@
 package wdm.qop;
 
 import wdm.*;
-import java.util.StringTokenizer;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.ManyToOne;
+import javax.persistence.CascadeType;
+import javax.persistence.Id;
 
+@Entity
 public class Solicitud {
-	private final Nodo origen;
-	private final Nodo destino;
-	private final Nivel nivel;
+	
+	@Id
+	@GeneratedValue
+	private long id;
+	
+	@ManyToOne(cascade=CascadeType.ALL)
+	private Nodo origen;
+	
+	@ManyToOne(cascade=CascadeType.ALL)
+	private Nodo destino;
+	
+	private Nivel nivel;
+	
+	public Solicitud(){}
 	
 	/**
 	 * Constructor principal
@@ -43,5 +59,25 @@ public class Solicitud {
 	 */
 	public Nivel getNivel() {
 		return nivel;
+	}
+
+	public long getId() {
+		return id;
+	}
+
+	public void setId(long id) {
+		this.id = id;
+	}
+
+	public void setOrigen(Nodo origen) {
+		this.origen = origen;
+	}
+
+	public void setDestino(Nodo destino) {
+		this.destino = destino;
+	}
+
+	public void setNivel(Nivel nivel) {
+		this.nivel = nivel;
 	}
 }

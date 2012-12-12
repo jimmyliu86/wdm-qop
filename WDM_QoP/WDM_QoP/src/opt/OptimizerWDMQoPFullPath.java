@@ -1,10 +1,18 @@
 package opt;
 
+import java.util.HashMap;
+
 import wdm.*;
-import java.util.List;
+import wdm.qop.Nivel;
+import wdm.qop.SegmentoProtegido;
+import wdm.qop.Servicio;
+import wdm.qop.Solicitud;
+
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
+import javax.persistence.EntityTransaction;
 import javax.persistence.Persistence;
+
 
 /**
  * Clase de prueba de persistencia.
@@ -12,6 +20,9 @@ import javax.persistence.Persistence;
  *
  */
 public class OptimizerWDMQoPFullPath {
+	private static String [] nodos = {"A","B","C","D","E","F","G","H"};
+	private static String [] aristas = {"AB","AC","BD","BC","CD","DE","DH","DG","EF","GH"};
+	
 	private EntityManagerFactory emf;
 	private EntityManager em;
 	
@@ -24,26 +35,87 @@ public class OptimizerWDMQoPFullPath {
 	public void test(){
 		emf = Persistence.createEntityManagerFactory("tesis");
 		em = emf.createEntityManager();
-		em.getTransaction().begin();
 		
-		Nodo origen = new Nodo();
-		origen.setLabel("Origen");
+		HashMap<String,Nodo> nodoMap = new HashMap<String,Nodo>();
 		
-		Nodo destino = new Nodo();
-		destino.setLabel("Destino");
+		/* *** Se crea integramente la Red con sus nodos y enlaces*** */
+		/* Creacion de Nodos */
 		
 		Red red = new Red();
-		red.addNodo(origen);
-		red.addNodo(destino);
-		
-		CanalOptico canal = new CanalOptico(origen,destino,1,3);
-		
-		System.out.println("destino: " + canal.getDestino());
-		
-		red.addCanal(canal);
-
+		em.getTransaction().begin();
+		for(String label: nodos){
+			Nodo nodo = new Nodo();
+			nodo.setLabel(label);
+			nodoMap.put(label, nodo);
+			red.addNodo(nodo);
+		}
 		em.persist(red);
-		em.flush();
+		em.getTransaction().commit();
+		
+		/*Creando Canales Opticos apartir de su especificacion (coSpec)*/
+		em.getTransaction().begin();
+		for(String coSpec : aristas){
+			Nodo a = nodoMap.get(""+coSpec.charAt(0));
+			Nodo b = nodoMap.get(""+coSpec.charAt(1));
+			
+			CanalOptico canal = new CanalOptico(a,b,1,3);
+			
+			em.persist(canal);
+			red.addCanal(canal);
+		}
+		em.persist(red);
+		em.getTransaction().commit();
+		
+		for ( CanalOptico canal: red.getCanales()){
+			em.getTransaction().begin();
+			canal.getExtremoA().addCanal(canal);
+			em.getTransaction().commit();
+			em.getTransaction().begin();
+			canal.getExtremoB().addCanal(canal);
+			em.getTransaction().commit();
+		}
+		em.persist(red);
+		
+		/*
+		Red red = em.find(Red.class,1);
+		for(Nodo n : red.getNodos()){
+			nodoMap.put(n.getLabel(),n);
+		}		
+		*/
+		/*
+		 * Creando Solicitud A-F Oro
+		 * Creando Servicio para la solicitud {A,F,Oro}
+		 * Buscando el camino más corto desde A a F (primario)
+		 * Buscando el segundo camino de A a F.
+		 */
+		
+		
+		Nodo origen = nodoMap.get("A");
+		Nodo destino = nodoMap.get("F");
+		
+		Solicitud solicitud = new Solicitud(origen, destino, Nivel.Oro);
+		em.persist(solicitud);
+		
+		/*
+		Solicitud solicitud = em.find(Solicitud.class, new Long(48));
+		Nodo origen = solicitud.getOrigen();
+		Nodo destino = solicitud.getDestino();
+		*/
+		
+		Servicio servicio = new Servicio(solicitud); 
+		
+		Camino primario = origen.busquedaAnchura(destino);
+		primario.bloquearEnlaces();
+				
+		Camino alternativo = origen.busquedaAnchura(destino);
+		alternativo.reservarEnlaces(servicio);
+		
+		SegmentoProtegido proteccion = new SegmentoProtegido(primario, alternativo);
+		
+		servicio.addSegmento(proteccion);
+		
+		em.getTransaction().begin();
+		em.persist(servicio);
 		em.getTransaction().commit();
 	}
 }

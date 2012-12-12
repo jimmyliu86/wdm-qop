@@ -4,14 +4,11 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Set;
-import java.io.Serializable;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.ManyToMany;
-import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 @Entity
@@ -33,7 +30,7 @@ public class Nodo {
 	private String label = "";
 	private boolean usaConversor = false;
 	
-	@OneToMany(cascade=CascadeType.ALL)
+	@ManyToMany(cascade=CascadeType.ALL)
 	private Set<CanalOptico> canales = new HashSet<CanalOptico>();
 
 	/**
@@ -86,34 +83,46 @@ public class Nodo {
 	 * @return Camino mas corto al nodo destino.
 	 */
 	public Camino busquedaAnchura(Nodo destino) {
-		LinkedList<Nodo> aVisitar = new LinkedList<Nodo>();
+		LinkedList<Camino> aExplorar = new LinkedList<Camino>();
 		HashSet<Nodo> visitados = new HashSet<Nodo>();
-
-		Camino caminoActual = new Camino(this);
+		HashMap<Camino,Integer> ultimaLdO = new HashMap<Camino,Integer>();
 
 		/* Inicio del algoritmo de busqueda en anchura */
-		aVisitar.add(this);
+		Camino caminoBase = new Camino(this);
+		ultimaLdO.put(caminoBase, new Integer(-1));
+		aExplorar.add(caminoBase);
 
-		while (!aVisitar.isEmpty()) {
-			Nodo actual = aVisitar.poll();
+		while (!aExplorar.isEmpty()) {
+			Camino caminoActual = aExplorar.poll();
+			
+			Nodo nodoActual = caminoActual.getDestino();
 
-			if (visitados.contains(actual))
-				continue;
+			if (visitados.contains(nodoActual)) continue;
 
-			visitados.add(actual);
+			visitados.add(nodoActual);
 
 			/* Llegamos a destino */
-			if (actual.equals(destino)) {
+			if (nodoActual.equals(destino)) {
 				return caminoActual;
 			}
 			
-			for(CanalOptico canal : actual.canales){
-				Enlace e = canal.getEnlaceLibre();
-
-				if (e == null)
-					break;
-
-				aVisitar.add(e.getDestino());
+			for(CanalOptico canal : nodoActual.canales){
+				int ldoPreferida = ultimaLdO.get(caminoActual);
+				
+				Enlace e = canal.getEnlaceLibre( ldoPreferida );
+				
+				if ( e == null ) continue;
+				
+				Nodo otroExtremo = e.getOtroExtremo(nodoActual);
+				
+				if ( visitados.contains(otroExtremo) ) continue;
+				
+				Camino caminoNuevo = new Camino(caminoActual);
+				int secuencia = caminoActual.getDistancia()+1;
+				caminoNuevo.addSalto(new Salto(secuencia, e));
+				
+				aExplorar.add(caminoNuevo);
+				ultimaLdO.put(caminoNuevo, e.getLongitudDeOnda());
 			}
 		}
 
@@ -129,10 +138,16 @@ public class Nodo {
 	public boolean equals(Nodo b) {
 		return this.label == b.label;
 	}
+	
+	public void addCanal(CanalOptico canal){
+		if(! canales.contains(canal)){
+			canales.add(canal);
+		}
+	}
 
 	public CanalOptico romperEnlace(Nodo vecino){
 		for ( CanalOptico c: canales){
-			if (vecino.equals(c.getDestino())){
+			if (vecino.equals(c.getOtroExtremo(this))){
 				canales.remove(c);
 				return c;
 			}
@@ -146,7 +161,7 @@ public class Nodo {
 	 */
 	public void romperEnlaces(Red red){
 		for (CanalOptico canal : canales){
-			Nodo vecino = canal.getDestino();
+			Nodo vecino = canal.getOtroExtremo(this);
 			
 			/*Se elimina el enlace del vecino al nodo*/
 			CanalOptico canalInverso = vecino.romperEnlace(this); 

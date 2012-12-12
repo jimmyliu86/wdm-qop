@@ -1,13 +1,36 @@
 package wdm.qop;
 
 import java.util.HashSet;
+import java.util.Set;
 
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
+import javax.persistence.CascadeType;
+import javax.persistence.Id;
+import javax.persistence.Transient;
+
+@Entity
 public class Servicio {
 	
-	private final Solicitud solicitud;
+	@Id
+	@GeneratedValue
+	private long id;
+	
+	@ManyToOne(cascade=CascadeType.ALL)
+	private  Solicitud solicitud;
+	
+	@OneToMany(cascade=CascadeType.ALL)
+	private Set<SegmentoProtegido> segmentos = new HashSet<SegmentoProtegido>();
+	
+	@Transient
 	private double pFalla;
+	
+	@Transient
 	private double pRecuperacion;
-	private final HashSet<SegmentoProtegido> segmentos = new HashSet<SegmentoProtegido>();
+	
+	@Transient
 	private boolean disponible = true;
 	
 	/**
@@ -47,7 +70,7 @@ public class Servicio {
 	 * Retorna los segmentos protegidos
 	 * @return	Segmentos Protegidos
 	 */
-	public HashSet<SegmentoProtegido> getSegmentos() {
+	public Set<SegmentoProtegido> getSegmentos() {
 		return segmentos;
 	}
 
@@ -66,4 +89,26 @@ public class Servicio {
 	public void setDisponible(boolean disponible) {
 		this.disponible = disponible;
 	}
+
+	public long getId() {
+		return id;
+	}
+
+	public void setId(long id) {
+		this.id = id;
+	}
+
+	public void setSolicitud(Solicitud solicitud) {
+		this.solicitud = solicitud;
+	}
+
+	public void setSegmentos(Set<SegmentoProtegido> segmentos) {
+		this.segmentos = segmentos;
+	}
+
+	public boolean addSegmento(SegmentoProtegido e) {
+		return segmentos.add(e);
+	}
+	
+	
 }

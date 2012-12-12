@@ -1,17 +1,16 @@
 package wdm;
 
-import java.util.HashMap;
-import java.io.Serializable;
+import java.util.HashSet;
+import java.util.Set;
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
+import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
+import javax.persistence.OrderBy;
 import javax.persistence.Table;
-import javax.persistence.Transient;
-
-import org.hibernate.annotations.Cascade;
 
 @Entity
 @Table(name="CanalOptico")
@@ -27,10 +26,9 @@ import org.hibernate.annotations.Cascade;
  */
 public class CanalOptico {
 
-	@Transient
-	private final HashMap<String, Enlace> enlaces = new HashMap<String, Enlace>();
-
-	private static final long serialVersionUID = -6192832626602644784L;
+	@OneToMany(cascade=CascadeType.ALL)
+	@OrderBy("longitudDeOnda ASC")
+	private Set<Enlace> enlaces = new HashSet<Enlace>();
 	
 	@Id 
 	@GeneratedValue 
@@ -41,10 +39,12 @@ public class CanalOptico {
 	private int ldos;
 	
 	@ManyToOne(cascade=CascadeType.ALL)
-	private Nodo destino;
+	private Nodo extremoA;
 	
 	@ManyToOne(cascade=CascadeType.ALL)
-	private Nodo origen;
+	private Nodo extremoB;
+	
+	public CanalOptico(){}
 	
 	/**
 	 * Constructor principal. Setea los atributos principales y genera los
@@ -59,17 +59,20 @@ public class CanalOptico {
 	 * @param ldos
 	 *            Cantidad de Longitudes de Onda por fibra
 	 */
-	public CanalOptico(Nodo origen, Nodo destino, int fibras, int ldos) {
-		this.origen = origen;
-		this.destino = destino;
+	public CanalOptico(Nodo a, Nodo b, int fibras, int ldos) {
+		this.extremoA = a;
+		this.extremoB = b;
 		this.fibras = fibras;
 		this.ldos = ldos;
 
 		this.enlaces.clear();
-
+		crearEnlaces();
+	}
+	
+	public void crearEnlaces(){
 		for (int i = 0; i < fibras; i++) {
 			for (int j = 0; j < ldos; j++) {
-				this.enlaces.put(i + "-" + j, new Enlace(i, j, this));
+				this.enlaces.add(new Enlace(i, j, this));
 			}
 		}
 	}
@@ -79,7 +82,7 @@ public class CanalOptico {
 	 * bloqueado, reservado.
 	 */
 	public void inicializar() {
-		for (Enlace e : enlaces.values()) {
+		for (Enlace e : enlaces) {
 			e.desbloquear();
 			e.eliminarReservas();
 		}
@@ -89,8 +92,8 @@ public class CanalOptico {
 	 * 
 	 * @return Nodo Destino
 	 */
-	public Nodo getDestino() {
-		return destino;
+	public Nodo getExtremoB() {
+		return extremoB;
 	}
 
 	/**
@@ -99,17 +102,27 @@ public class CanalOptico {
 	 * 
 	 * @return Enlace libre
 	 */
-	public Enlace getEnlaceLibre() {
-		for (int i = 0; i < fibras; i++) {
-			for (int j = 0; j < ldos; j++) {
-				Enlace e = enlaces.get(i + "-" + j);
-
-				if (!e.estaBloqueado())
-					return e;
+	public Enlace getEnlaceLibre(int ldoPreferida) {
+		Enlace posible = null;
+		int posibilidades = fibras;  
+		
+		for ( Enlace e : enlaces) {
+			
+			if(e.getLongitudDeOnda() == ldoPreferida){
+				if(!e.estaBloqueado()) return e;
+				else posibilidades--;
+			} else { 			
+				if ( !e.estaBloqueado() ) {
+					if ( posibilidades > 0 ) {
+						posible = e;
+					} else {
+						return e;
+					}
+				}
 			}
 		}
 
-		return null;
+		return posible;
 	}
 
 	/* ************************
@@ -121,7 +134,7 @@ public class CanalOptico {
 	 * Simula una falla, echando cada enlace y notificando en cada servicio.
 	 */
 	public void echarCanal() {
-		for (Enlace e : enlaces.values()) {
+		for (Enlace e : enlaces) {
 			e.echar();
 		}
 	}
@@ -150,15 +163,23 @@ public class CanalOptico {
 		this.ldos = ldos;
 	}
 
-	public void setDestino(Nodo destino) {
-		this.destino = destino;
+	public void setDestino(Nodo b) {
+		this.extremoB = b;
 	}
 
-	public Nodo getOrigen() {
-		return origen;
+	public Nodo getExtremoA() {
+		return this.extremoA;
 	}
 
-	public void setOrigen(Nodo origen) {
-		this.origen = origen;
+	public void setOrigen(Nodo a) {
+		this.extremoA = a;
+	}
+	
+	public Nodo getOtroExtremo(Nodo a){
+		if(! a.equals(extremoA) && ! a.equals(extremoB)) return null;
+		
+		if(a.equals(extremoA)) return extremoB;
+		
+		return extremoA;
 	}
 }
