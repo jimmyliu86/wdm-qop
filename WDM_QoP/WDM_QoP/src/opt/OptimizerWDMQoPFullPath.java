@@ -2,16 +2,18 @@ package opt;
 
 import java.util.HashMap;
 
-import wdm.*;
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.Persistence;
+
+import wdm.Camino;
+import wdm.CanalOptico;
+import wdm.Nodo;
+import wdm.Red;
 import wdm.qop.Nivel;
 import wdm.qop.SegmentoProtegido;
 import wdm.qop.Servicio;
 import wdm.qop.Solicitud;
-
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.EntityTransaction;
-import javax.persistence.Persistence;
 
 
 /**
@@ -85,7 +87,7 @@ public class OptimizerWDMQoPFullPath {
 		/*
 		 * Creando Solicitud A-F Oro
 		 * Creando Servicio para la solicitud {A,F,Oro}
-		 * Buscando el camino más corto desde A a F (primario)
+		 * Buscando el camino mï¿½s corto desde A a F (primario)
 		 * Buscando el segundo camino de A a F.
 		 */
 		

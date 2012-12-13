@@ -3,15 +3,15 @@ package wdm;
 import java.util.HashSet;
 import java.util.Set;
 
-import wdm.qop.Servicio;
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
-import javax.persistence.CascadeType;
-import javax.persistence.Id;
-import javax.persistence.OneToMany;
 import javax.persistence.Transient;
+
+import wdm.qop.Servicio;
 
 /**
  * Clase que representa el enlace de un canal Optico.

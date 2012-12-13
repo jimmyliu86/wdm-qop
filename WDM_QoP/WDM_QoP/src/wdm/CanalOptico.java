@@ -2,11 +2,11 @@ package wdm;
 
 import java.util.HashSet;
 import java.util.Set;
+
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
-import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OrderBy;
@@ -108,15 +108,17 @@ public class CanalOptico {
 		
 		for ( Enlace e : enlaces) {
 			
-			if(e.getLongitudDeOnda() == ldoPreferida){
-				if(!e.estaBloqueado()) return e;
-				else posibilidades--;
-			} else { 			
-				if ( !e.estaBloqueado() ) {
-					if ( posibilidades > 0 ) {
+			if (e.getLongitudDeOnda() == ldoPreferida) {
+				if (!e.estaBloqueado())
+					posible = e;
+				else
+					posibilidades--;
+			} else {
+				if (!e.estaBloqueado()) {
+					if (posibilidades > 0) {
 						posible = e;
 					} else {
-						return e;
+						posible = e;
 					}
 				}
 			}

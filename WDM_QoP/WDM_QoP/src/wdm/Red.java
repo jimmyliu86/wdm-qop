@@ -1,10 +1,8 @@
 package wdm;
 
-import java.util.Collection;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
-import java.io.Serializable;
+
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -33,6 +31,7 @@ public class Red {
 	@OneToMany(cascade=CascadeType.ALL)
 	private Set<CanalOptico> canales = new HashSet<CanalOptico>();
 	
+	@SuppressWarnings("unused")
 	private static final long serialVersionUID = -6192832626602644784L;
 	
 	@Id 
