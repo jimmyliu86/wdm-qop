@@ -119,6 +119,7 @@ public class Nodo {
 				
 				Camino caminoNuevo = new Camino(caminoActual);
 				int secuencia = caminoActual.getDistancia()+1;
+				// TODO: se debe recibir el canal optico en vez del enlace
 				caminoNuevo.addSalto(new Salto(secuencia, e));
 				
 				aExplorar.add(caminoNuevo);
@@ -185,5 +186,10 @@ public class Nodo {
 
 	public void setCanales(Set<CanalOptico> canales) {
 		this.canales = canales;
+	}
+	
+	public Camino dijkstra(){
+		
+		return null;
 	}
 }

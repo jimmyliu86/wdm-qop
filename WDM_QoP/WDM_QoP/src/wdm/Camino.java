@@ -127,4 +127,8 @@ public class Camino {
 	public void setOrigen(Nodo origen) {
 		this.origen = origen;
 	}
+	
+	/**
+	 * TODO: Agregar bloquear nodo
+	 */
 }

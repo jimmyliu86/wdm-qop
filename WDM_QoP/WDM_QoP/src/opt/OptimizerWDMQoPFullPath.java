@@ -11,7 +11,6 @@ import wdm.CanalOptico;
 import wdm.Nodo;
 import wdm.Red;
 import wdm.qop.Nivel;
-import wdm.qop.SegmentoProtegido;
 import wdm.qop.Servicio;
 import wdm.qop.Solicitud;
 
@@ -112,9 +111,6 @@ public class OptimizerWDMQoPFullPath {
 		Camino alternativo = origen.busquedaAnchura(destino);
 		alternativo.reservarEnlaces(servicio);
 		
-		SegmentoProtegido proteccion = new SegmentoProtegido(primario, alternativo);
-		
-		servicio.addSegmento(proteccion);
 		
 		em.getTransaction().begin();
 		em.persist(servicio);
