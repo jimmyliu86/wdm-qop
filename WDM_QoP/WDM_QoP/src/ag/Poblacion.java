@@ -1,11 +1,12 @@
 package ag;
 
+import java.util.ArrayList;
 import java.util.Set;
 
 import ag.operadores.OperadorCruce;
 import ag.operadores.OperadorMutacion;
 import ag.operadores.OperadorSeleccion;
-
+import ag.operadores.impl.TorneoBinario;
 
 /**
  * Clase Población que implementar las operaciones propias de la Población.
@@ -22,17 +23,17 @@ public class Poblacion {
 	/*
 	 * Individuos de la población
 	 */
-	private Set<Individuo> individuos;
+	private ArrayList<Individuo> individuos;
 
 	/*
 	 * Hijos de los individuos selectos
 	 */
-	private Set<Individuo> hijos;
+	private ArrayList<Individuo> hijos;
 
 	/*
 	 * Valor de calidad de un cromosoma
 	 */
-	private Set<Double> fitness;
+	private ArrayList<Double> fitness;
 
 	/*
 	 * Operador de cruce
@@ -48,6 +49,16 @@ public class Poblacion {
 	 * Operador de selección
 	 */
 	private OperadorSeleccion operadorSeleccion;
+
+	/**
+	 * Constructor de la Población;
+	 * 
+	 * @param individuos
+	 */
+	public Poblacion(ArrayList<Individuo> individuos) {
+		this.individuos = individuos;
+		this.operadorSeleccion = new TorneoBinario();
+	}
 
 	/**
 	 * Operación de cruce de Individuos de un conjunto selecto de individuos.
@@ -70,9 +81,8 @@ public class Poblacion {
 	 * 
 	 * @return individuos seleccionados
 	 */
-	public Set<Individuo> seleccionar() {
-		// TODO Implementar la seleccion.
-		return null;
+	public Individuo[] seleccionar() {
+		return this.operadorSeleccion.seleccionar(this);
 	}
 
 	/**
@@ -80,32 +90,31 @@ public class Poblacion {
 	 * 
 	 * @return tamaño
 	 */
-	public int getTamaño() {
-		// TODO Implementar obtener tamaño de la poblacion
-		return 0;
+	public int getTamanho() {
+		return this.individuos.size();
 	}
 
-	public Set<Individuo> getIndividuos() {
+	public ArrayList<Individuo> getIndividuos() {
 		return individuos;
 	}
 
-	public void setIndividuos(Set<Individuo> individuos) {
+	public void setIndividuos(ArrayList<Individuo> individuos) {
 		this.individuos = individuos;
 	}
 
-	public Set<Individuo> getHijos() {
+	public ArrayList<Individuo> getHijos() {
 		return hijos;
 	}
 
-	public void setHijos(Set<Individuo> hijos) {
+	public void setHijos(ArrayList<Individuo> hijos) {
 		this.hijos = hijos;
 	}
 
-	public Set<Double> getFitness() {
+	public ArrayList<Double> getFitness() {
 		return fitness;
 	}
 
-	public void setFitness(Set<Double> fitness) {
+	public void setFitness(ArrayList<Double> fitness) {
 		this.fitness = fitness;
 	}
 

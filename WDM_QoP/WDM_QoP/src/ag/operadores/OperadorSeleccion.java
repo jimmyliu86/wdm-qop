@@ -1,7 +1,5 @@
 package ag.operadores;
 
-import java.util.Set;
-
 import ag.Individuo;
 import ag.Poblacion;
 
@@ -19,5 +17,5 @@ public interface OperadorSeleccion {
 	 *            La población sobre la cual realizar la selección
 	 * @return Individuos seleccionados
 	 */
-	public Set<Individuo> seleccionar(Poblacion poblacion);
+	public Individuo[] seleccionar(Poblacion poblacion);
 }
