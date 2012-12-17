@@ -10,6 +10,7 @@ import wdm.Camino;
 import wdm.CanalOptico;
 import wdm.Nodo;
 import wdm.Red;
+import wdm.Salto;
 import wdm.qop.Nivel;
 import wdm.qop.Servicio;
 import wdm.qop.Solicitud;
@@ -22,7 +23,7 @@ import wdm.qop.Solicitud;
  */
 public class OptimizerWDMQoPFullPath {
 	private static String [] nodos = {"A","B","C","D","E","F","G","H"};
-	private static String [] aristas = {"AB","AC","BD","BC","CD","DE","DH","DG","EF","GH"};
+	private static String [] aristas = {"AB","AC","BC","BH","CD","DE","DG","EF","FG","GH"};
 	
 	private EntityManagerFactory emf;
 	private EntityManager em;
@@ -105,12 +106,30 @@ public class OptimizerWDMQoPFullPath {
 		
 		Servicio servicio = new Servicio(solicitud); 
 		
-		Camino primario = origen.busquedaAnchura(destino);
-		primario.bloquearEnlaces();
-				
-		Camino alternativo = origen.busquedaAnchura(destino);
-		alternativo.reservarEnlaces(servicio);
 		
+		System.out.println("Buscando camino primario");
+		Camino primario = origen.dijkstra(destino);
+		primario.bloquearNodos();
+		
+		System.out.println("Primario : " + primario.getDistancia());
+		System.out.print("A");
+		Nodo actual = origen;
+		for( Salto s : primario.getSaltos()){
+			actual = s.getCanal().getOtroExtremo(actual);
+			System.out.print("-"+actual.getLabel());
+		}
+		
+		System.out.println();
+		
+		System.out.println("Buscando camino alternativo");
+		Camino alternativo = origen.dijkstra(destino);
+		System.out.println("Alternativo : " + alternativo.getDistancia());
+		System.out.print("A");
+		actual = origen;
+		for( Salto s : alternativo.getSaltos()){
+			actual = s.getCanal().getOtroExtremo(actual);
+			System.out.print("-"+actual.getLabel());
+		}
 		
 		em.getTransaction().begin();
 		em.persist(servicio);
