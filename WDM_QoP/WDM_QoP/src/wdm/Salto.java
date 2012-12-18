@@ -9,7 +9,7 @@ import javax.persistence.ManyToOne;
 public class Salto{
 	
 	@ManyToOne
-	private Enlace enlace;
+	private CanalOptico canal;
 	
 	private int secuencia;
 	
@@ -19,8 +19,8 @@ public class Salto{
 	
 	public Salto(){}
 	
-	public Salto(int secuencia, Enlace e){
-		this.enlace = e;
+	public Salto(int secuencia, CanalOptico c){
+		this.canal = c;
 		this.secuencia = secuencia;
 	}
 	
@@ -44,11 +44,11 @@ public class Salto{
 		this.id = id;
 	}
 
-	public Enlace getEnlace() {
-		return enlace;
+	public CanalOptico getCanal() {
+		return canal;
 	}
 
-	public void setEnlace(Enlace enlace) {
-		this.enlace = enlace;
+	public void setCanal(CanalOptico c) {
+		this.canal = c;
 	}
 }

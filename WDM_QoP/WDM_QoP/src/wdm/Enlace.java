@@ -42,9 +42,6 @@ public class Enlace {
 	
 	@ManyToMany
 	private Set<Servicio> reservas = new HashSet<Servicio>();
-
-	@Transient
-	private boolean bloqueado = false;
 	
 	@Transient
 	private boolean disponible = true;
@@ -141,30 +138,6 @@ public class Enlace {
 		reservas.clear();
 	}
 
-	/**
-	 * Bloquear el enlace porque forma parte del camino primario de algun
-	 * Servicio
-	 */
-	public void bloquear() {
-		this.bloqueado = true;
-	}
-
-	/**
-	 * Desbloquea el enlace porque ya no forma parte del camino primario de
-	 * algun Servicio
-	 */
-	public void desbloquear() {
-		this.bloqueado = false;
-	}
-
-	/**
-	 * Retorna true si el enlace está bloqueado.
-	 * 
-	 * @return
-	 */
-	public boolean estaBloqueado() {
-		return this.bloqueado;
-	}
 
 	/**
 	 * Funcion de simulación, que provee conexion al servicio en cuestion.
@@ -226,7 +199,6 @@ public class Enlace {
 	 * Restablece los valores iniciales del enlace
 	 */
 	public void inicializar() {
-		this.bloqueado = false;
 		this.disponible = true;
 		this.reservas.clear();
 		this.servicio = null;

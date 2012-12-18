@@ -69,7 +69,7 @@ public class Camino {
 		
 		if (destino == null) destino = origen;
 		
-		destino = salto.getEnlace().getOtroExtremo(destino);
+		destino = salto.getCanal().getOtroExtremo(destino);
 	}
 	
 	/**
@@ -108,15 +108,21 @@ public class Camino {
 		this.destino = destino;
 	}
 	
-	public void bloquearEnlaces(){
+	public void bloquearCanales(){
 		for(Salto salto : saltos){
-			salto.getEnlace().bloquear();
+			salto.getCanal().bloquear();
 		}
 	}
 	
-	public void reservarEnlaces(Servicio s){
-		for(Salto salto: saltos){
-			salto.getEnlace().reservar(s);
+	public void bloquearNodos(){
+		Nodo actual = this.origen;
+		
+		int i = 0;
+		for(Salto salto : saltos){
+			actual = salto.getCanal().getOtroExtremo(actual);
+			i++;
+			
+			if( i < saltos.size()) actual.bloquear();
 		}
 	}
 

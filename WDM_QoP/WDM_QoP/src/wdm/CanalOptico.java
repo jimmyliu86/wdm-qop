@@ -11,6 +11,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OrderBy;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 @Entity
 @Table(name="CanalOptico")
@@ -43,6 +44,9 @@ public class CanalOptico {
 	
 	@ManyToOne(cascade=CascadeType.ALL)
 	private Nodo extremoB;
+	
+	@Transient
+	private boolean bloqueado = false;
 	
 	public CanalOptico(){}
 	
@@ -82,8 +86,9 @@ public class CanalOptico {
 	 * bloqueado, reservado.
 	 */
 	public void inicializar() {
+		this.desbloquear();
+		
 		for (Enlace e : enlaces) {
-			e.desbloquear();
 			e.eliminarReservas();
 		}
 	}
@@ -94,37 +99,6 @@ public class CanalOptico {
 	 */
 	public Nodo getExtremoB() {
 		return extremoB;
-	}
-
-	/**
-	 * Retorna un enlace que no este bloqueado. Retorna null si no encuentra un
-	 * enlace libre.
-	 * 
-	 * @return Enlace libre
-	 */
-	public Enlace getEnlaceLibre(int ldoPreferida) {
-		Enlace posible = null;
-		int posibilidades = fibras;  
-		
-		for ( Enlace e : enlaces) {
-			
-			if (e.getLongitudDeOnda() == ldoPreferida) {
-				if (!e.estaBloqueado())
-					posible = e;
-				else
-					posibilidades--;
-			} else {
-				if (!e.estaBloqueado()) {
-					if (posibilidades > 0) {
-						posible = e;
-					} else {
-						posible = e;
-					}
-				}
-			}
-		}
-
-		return posible;
 	}
 
 	/* ************************
@@ -184,4 +158,31 @@ public class CanalOptico {
 		
 		return extremoA;
 	}
+	
+	/**
+	 * Bloquear el enlace porque forma parte del camino primario de algun
+	 * Servicio
+	 */
+	public void bloquear() {
+		this.bloqueado = true;
+	}
+
+	/**
+	 * Desbloquea el enlace porque ya no forma parte del camino primario de
+	 * algun Servicio
+	 */
+	public void desbloquear() {
+		this.bloqueado = false;
+	}
+
+	/**
+	 * Retorna true si el enlace está bloqueado.
+	 * 
+	 * @return
+	 */
+	public boolean estaBloqueado() {
+		return this.bloqueado;
+	}
+
+	
 }

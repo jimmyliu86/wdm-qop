@@ -3,6 +3,7 @@ package wdm;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.PriorityQueue;
 import java.util.Set;
 
 import javax.persistence.CascadeType;
@@ -10,6 +11,7 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.ManyToMany;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 @Entity
 @Table(name="Nodo")
@@ -32,6 +34,9 @@ public class Nodo {
 	
 	@ManyToMany(cascade=CascadeType.ALL)
 	private Set<CanalOptico> canales = new HashSet<CanalOptico>();
+	
+	@Transient
+	private boolean bloqueado = false;
 
 	/**
 	 * Retorna la etiqueta del nodo.
@@ -48,6 +53,18 @@ public class Nodo {
 	 */
 	public void setLabel(String label) {
 		this.label = label;
+	}
+	
+	public boolean estaBloqueado(){
+		return this.bloqueado;
+	}
+	
+	public void bloquear(){
+		this.bloqueado = true;
+	}
+	
+	public void desbloquear(){
+		this.bloqueado = false;
 	}
 
 	/**
@@ -85,11 +102,9 @@ public class Nodo {
 	public Camino busquedaAnchura(Nodo destino) {
 		LinkedList<Camino> aExplorar = new LinkedList<Camino>();
 		HashSet<Nodo> visitados = new HashSet<Nodo>();
-		HashMap<Camino,Integer> ultimaLdO = new HashMap<Camino,Integer>();
 
 		/* Inicio del algoritmo de busqueda en anchura */
 		Camino caminoBase = new Camino(this);
-		ultimaLdO.put(caminoBase, new Integer(-1));
 		aExplorar.add(caminoBase);
 
 		while (!aExplorar.isEmpty()) {
@@ -106,24 +121,16 @@ public class Nodo {
 				return caminoActual;
 			}
 			
-			for(CanalOptico canal : nodoActual.canales){
-				int ldoPreferida = ultimaLdO.get(caminoActual);
-				
-				Enlace e = canal.getEnlaceLibre( ldoPreferida );
-				
-				if ( e == null ) continue;
-				
-				Nodo otroExtremo = e.getOtroExtremo(nodoActual);
+			for(CanalOptico canal : nodoActual.canales){				
+				Nodo otroExtremo = canal.getOtroExtremo(nodoActual);
 				
 				if ( visitados.contains(otroExtremo) ) continue;
 				
 				Camino caminoNuevo = new Camino(caminoActual);
 				int secuencia = caminoActual.getDistancia()+1;
-				// TODO: se debe recibir el canal optico en vez del enlace
-				caminoNuevo.addSalto(new Salto(secuencia, e));
+				caminoNuevo.addSalto(new Salto(secuencia, canal));
 				
 				aExplorar.add(caminoNuevo);
-				ultimaLdO.put(caminoNuevo, e.getLongitudDeOnda());
 			}
 		}
 
@@ -188,7 +195,111 @@ public class Nodo {
 		this.canales = canales;
 	}
 	
-	public Camino dijkstra(){
+	private class NodoDijkstra implements Comparable {
+		private final Nodo nodo;
+		private Camino camino;
+		private int distancia = Integer.MAX_VALUE;
+		
+		public NodoDijkstra(Nodo nodo, int distancia){
+			this.nodo = nodo;
+			this.distancia = distancia;
+		}
+		
+		@Override
+		public boolean equals(Object o){
+			if(o instanceof Nodo){
+				return ((Nodo)o).label.equalsIgnoreCase(nodo.label);
+			}
+			
+			if (o instanceof NodoDijkstra){
+				return ((NodoDijkstra)o).nodo.label.equalsIgnoreCase(nodo.label);
+			}
+			
+			return false;
+		}
+		
+		@Override
+		public int compareTo(Object arg0) {
+			
+			if ( arg0 instanceof NodoDijkstra){
+				return -1;
+			}
+			
+			NodoDijkstra b = (NodoDijkstra) arg0;
+			
+			return b.distancia - this.distancia;
+		}
+		
+		public int getDistancia(){
+			return this.distancia;
+		}
+
+		public Nodo getNodo() {
+			return nodo;
+		}
+
+		public Camino getCamino() {
+			return camino;
+		}
+
+		public void setCamino(Camino camino) {
+			this.camino = camino;
+		}
+	}
+	
+	/**
+	 * Retorna el camino mas corto al nodo especificado utilizando el algoritmo de dijkstra.
+	 * 
+	 * @param destino
+	 *            Nodo destino
+	 * @return Camino mas corto al nodo destino.
+	 */
+	public Camino dijkstra(Nodo destino){
+		
+		PriorityQueue<NodoDijkstra> aVisitar = new PriorityQueue<NodoDijkstra>();
+		HashMap<Nodo,Integer> distancias = new HashMap<Nodo,Integer>();
+		HashSet<Nodo> visitados = new HashSet<Nodo>();
+		
+		NodoDijkstra nodoOrigen = new NodoDijkstra(this,0);
+		nodoOrigen.setCamino(new Camino(this));
+		aVisitar.add(nodoOrigen);
+		distancias.put(this, new Integer(0));
+		
+		while(! aVisitar.isEmpty()){
+			NodoDijkstra dNodo = aVisitar.poll();
+			Nodo actual = dNodo.getNodo();
+			Camino camino = dNodo.getCamino();
+			
+			if(actual.equals(destino)) {
+				return camino;
+			}
+
+			if (visitados.contains(actual)) continue;
+			
+			
+			visitados.add(actual);
+			
+			for(CanalOptico canal : actual.canales){
+				Nodo vecino = canal.getOtroExtremo(actual);
+				
+				if (vecino.estaBloqueado()) continue;
+				if (visitados.contains(vecino)) continue;
+				
+				if(distancias.containsKey(vecino)){
+					int dActual = distancias.get(vecino);
+					
+					if( dActual <= dNodo.getDistancia()+1) continue;
+					else distancias.remove(vecino);
+				}
+				
+				NodoDijkstra nuevoNodo = new NodoDijkstra(vecino,dNodo.getDistancia()+1);
+				Camino caminoNuevo = new Camino(camino);
+				caminoNuevo.addSalto(new Salto(dNodo.getDistancia()+1, canal));
+				nuevoNodo.setCamino(caminoNuevo);
+				aVisitar.add(nuevoNodo);
+				distancias.put(nuevoNodo.getNodo(), nuevoNodo.distancia);
+			}
+		}
 		
 		return null;
 	}
