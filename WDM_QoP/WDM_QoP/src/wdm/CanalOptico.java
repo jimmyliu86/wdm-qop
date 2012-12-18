@@ -39,6 +39,8 @@ public class CanalOptico {
 	
 	private int ldos;
 	
+	private int costo;
+	
 	@ManyToOne(cascade=CascadeType.ALL)
 	private Nodo extremoA;
 	
@@ -182,6 +184,14 @@ public class CanalOptico {
 	 */
 	public boolean estaBloqueado() {
 		return this.bloqueado;
+	}
+
+	public int getCosto() {
+		return costo;
+	}
+
+	public void setCosto(int costo) {
+		this.costo = costo;
 	}
 
 	

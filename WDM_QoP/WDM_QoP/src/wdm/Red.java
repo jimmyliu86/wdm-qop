@@ -37,6 +37,8 @@ public class Red {
 	@Id 
 	@GeneratedValue 
 	private int id; 
+	
+	private String nombre;
 
 	/**
 	 * Constructor principal
@@ -149,5 +151,13 @@ public class Red {
 
 	public void setCanales(Set<CanalOptico> canales) {
 		this.canales = canales;
+	}
+
+	public String getNombre() {
+		return nombre;
+	}
+
+	public void setNombre(String nombre) {
+		this.nombre = nombre;
 	}
 }
