@@ -5,7 +5,10 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToOne;
 import javax.persistence.Transient;
+
+import wdm.Camino;
 
 @Entity
 public class Servicio {
@@ -16,6 +19,12 @@ public class Servicio {
 	
 	@ManyToOne(cascade=CascadeType.ALL)
 	private  Solicitud solicitud;
+	
+	@OneToOne(cascade=CascadeType.ALL)
+	private Camino primario;
+	
+	@OneToOne(cascade=CascadeType.ALL)
+	private Camino alternativo;
 	
 	@Transient
 	private double pFalla;
@@ -86,6 +95,22 @@ public class Servicio {
 
 	public void setSolicitud(Solicitud solicitud) {
 		this.solicitud = solicitud;
+	}
+
+	public Camino getPrimario() {
+		return primario;
+	}
+
+	public void setPrimario(Camino primario) {
+		this.primario = primario;
+	}
+
+	public Camino getAlternativo() {
+		return alternativo;
+	}
+
+	public void setAlternativo(Camino alternativo) {
+		this.alternativo = alternativo;
 	}
 	
 }
