@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Set;
 
 import ag.operadores.OperadorCruce;
-import ag.operadores.OperadorMutacion;
 import ag.operadores.OperadorSeleccion;
 import ag.operadores.impl.TorneoBinario;
 
@@ -12,7 +11,7 @@ import ag.operadores.impl.TorneoBinario;
  * Clase Población que implementar las operaciones propias de la Población.
  * <p>
  * Administrar: Individuos, hijos, fitness, operador de cruce y operador de
- * mutacion, operador de Selección.
+ * Selección.
  * </p>
  * 
  * @author mrodas
@@ -41,17 +40,12 @@ public class Poblacion {
 	private OperadorCruce operadorCruce;
 
 	/*
-	 * Operador de mutación
-	 */
-	private OperadorMutacion operadorMutacion;
-
-	/*
 	 * Operador de selección
 	 */
 	private OperadorSeleccion operadorSeleccion;
 
 	/**
-	 * Constructor de la Población;
+	 * Constructor de la Población.
 	 * 
 	 * @param individuos
 	 */
@@ -67,13 +61,6 @@ public class Poblacion {
 	 */
 	public void cruzar(Set<Individuo> selectos) {
 		// TODO Implementar el cruce
-	};
-
-	/**
-	 * Operación de mutación de Individuos de la Población.
-	 */
-	public void mutar() {
-		// TODO Implementar la mutación
 	};
 
 	/**
@@ -124,14 +111,6 @@ public class Poblacion {
 
 	public void setOperadorCruce(OperadorCruce operadorCruce) {
 		this.operadorCruce = operadorCruce;
-	}
-
-	public OperadorMutacion getOperadorMutacion() {
-		return operadorMutacion;
-	}
-
-	public void setOperadorMutacion(OperadorMutacion operadorMutacion) {
-		this.operadorMutacion = operadorMutacion;
 	}
 
 	public OperadorSeleccion getOperadorSeleccion() {
