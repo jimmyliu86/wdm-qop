@@ -3,13 +3,34 @@ package ag;
 import java.util.HashSet;
 import java.util.Set;
 
+import javax.persistence.CascadeType;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.OneToMany;
+import javax.persistence.Table;
+
 /**
- * Clase Solución que implementa al Individuo. TODO: La solución final se debe
- * persistir.
+ * Clase Solución que implementa al Individuo.
+ * <p>
+ * Conceptualmente esta clase es el Cromosoma del Algoritmo Genético. Tiene el
+ * conjunto de genes que representan las partes de la solución, su fitness y su
+ * costo.
+ * </p>
+ * <p>
+ * TODO: La solución final se debe probar si persiste.
+ * </p>
  */
+@Entity
+@Table(name="Solucion")
 public class Solucion implements Individuo {
 
+	@Id
+	@GeneratedValue
+	private long id;
+	
 	// Genes de la solución
+	@OneToMany(cascade=CascadeType.ALL)
 	private Set<Gen> genes;
 
 	// Fitness de la Solución
