@@ -1,8 +1,6 @@
 package ag.operadores;
 
-import java.util.Set;
-
-import ag.Individuo;
+import ag.Solucion;
 
 /**
  * Interfaz OperadorCruce que define la implementación de una operación de
@@ -22,6 +20,6 @@ public interface OperadorCruce {
 	 *            Segundo Individuo a cruzar
 	 * @return Individuos hijos
 	 */
-	public Set<Individuo> cruzar(Individuo i1, Individuo i2);
+	public Solucion cruzar(Solucion i1, Solucion i2);
 
 }

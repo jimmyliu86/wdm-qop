@@ -42,11 +42,11 @@ public class TorneoBinario implements OperadorSeleccion {
 			}
 
 			// Se extrae los fitness de los correspondientes individuos
-			double costo1 = individuo1.evaluar();
-			double costo2 = individuo2.evaluar();
+			double fitness1 = individuo1.evaluar();
+			double fitness2 = individuo2.evaluar();
 
 			// Competencia
-			if (costo1 >= costo2) {
+			if (fitness1 >= fitness2) {
 				// Ganó individuo 1
 				mejores[i] = individuo1;
 			} else {

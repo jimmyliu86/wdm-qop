@@ -10,6 +10,8 @@ import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
+import wdm.qop.Solicitud;
+
 /**
  * Clase Solución que implementa al Individuo.
  * <p>
@@ -22,16 +24,19 @@ import javax.persistence.Table;
  * </p>
  */
 @Entity
-@Table(name="Solucion")
+@Table(name = "Solucion")
 public class Solucion implements Individuo {
 
 	@Id
 	@GeneratedValue
 	private long id;
-	
+
 	// Genes de la solución
-	@OneToMany(cascade=CascadeType.ALL)
+	@OneToMany(cascade = CascadeType.ALL)
 	private Set<Gen> genes;
+
+	// Demandas realizadas
+	private Set<Solicitud> solicitudes;
 
 	// Fitness de la Solución
 	private double fitness;
@@ -46,8 +51,15 @@ public class Solucion implements Individuo {
 
 	@Override
 	public double evaluar() {
-		// TODO Implementar el algoritmo de evaluación
-		return 0;
+		// Calculamos el costo de la solución
+		double total = 0.0;
+		for (Gen gen : this.genes) {
+			total += gen.getCosto();
+		}
+
+		this.costo = total;
+		this.fitness = 1 / this.costo;
+		return this.fitness;
 	}
 
 	/**
@@ -86,6 +98,30 @@ public class Solucion implements Individuo {
 	 */
 	public void setCosto(Double costo) {
 		this.costo = costo;
+	}
+
+	public long getId() {
+		return id;
+	}
+
+	public void setId(long id) {
+		this.id = id;
+	}
+
+	public Set<Gen> getGenes() {
+		return genes;
+	}
+
+	public void setGenes(Set<Gen> genes) {
+		this.genes = genes;
+	}
+
+	public Set<Solicitud> getSolicitudes() {
+		return solicitudes;
+	}
+
+	public void setSolicitudes(Set<Solicitud> solicitudes) {
+		this.solicitudes = solicitudes;
 	}
 
 }

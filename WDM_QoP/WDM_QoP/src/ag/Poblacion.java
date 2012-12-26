@@ -1,6 +1,7 @@
 package ag;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.Set;
 
 import ag.operadores.OperadorCruce;
@@ -56,12 +57,38 @@ public class Poblacion {
 
 	/**
 	 * Operación de cruce de Individuos de un conjunto selecto de individuos.
+	 * <p>
+	 * La operacion de cruce se realiza con los individuos ya seleccionados.
+	 * </p>
 	 * 
 	 * @param selectos
 	 */
-	public void cruzar(Set<Individuo> selectos) {
-		// TODO Implementar el cruce
-	};
+	public void cruzar(Set<Solucion> selectos) {
+		Solucion primero = null;
+		Solucion miPrimero = null;
+		Solucion segundo = null;
+		Solucion nuevo = null;
+		Iterator<Solucion> i = selectos.iterator();
+
+		if (i.hasNext()) {
+			primero = i.next();
+			miPrimero = primero;
+			int index = 0;
+
+			// cruces en pares desde el principio
+			while (i.hasNext()) {
+				segundo = i.next();
+				this.seleccionar();
+				nuevo = operadorCruce.cruzar(primero, segundo);
+				this.hijos.set(index, nuevo);
+				index++;
+				primero = segundo;
+			}
+			// cruce entre el primero del grupo con el último.
+			nuevo = operadorCruce.cruzar(miPrimero, segundo);
+			this.hijos.set(index, nuevo);
+		}
+	}
 
 	/**
 	 * Operación de seleccion de Individuos para cruzar.

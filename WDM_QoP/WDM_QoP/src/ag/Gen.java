@@ -53,5 +53,9 @@ public class Gen {
 	public void setSecundario(CanalOptico secundario) {
 		this.secundario = secundario;
 	}
+	
+	public double getCosto(){
+		return this.primario.getCosto();
+	}
 
 }
