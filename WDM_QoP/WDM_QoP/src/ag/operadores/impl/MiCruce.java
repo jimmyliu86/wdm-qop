@@ -2,7 +2,10 @@ package ag.operadores.impl;
 
 import java.util.ArrayList;
 
+import wdm.Camino;
 import wdm.CanalOptico;
+import wdm.Nodo;
+import wdm.Salto;
 import ag.Gen;
 import ag.Solucion;
 import ag.operadores.OperadorCruce;
@@ -28,8 +31,8 @@ public class MiCruce implements OperadorCruce {
 			ArrayList<CanalOptico> primarioGen1 = gen1.getPrimario();
 			ArrayList<CanalOptico> primarioGen2 = gen2.getPrimario();
 
-			auxiliar = new ArrayList<>(primarioGen1.size());
-			// Se recorre el primario más corto
+			auxiliar = new ArrayList<CanalOptico>(primarioGen1.size());
+			// Se recorre el primario mï¿½s corto
 			if (primarioGen1.size() <= primarioGen2.size()) {
 
 				for (CanalOptico co : primarioGen1) {
@@ -51,10 +54,29 @@ public class MiCruce implements OperadorCruce {
 		}
 
 		// se carga el nuevo Camino Primario.
-		nuevoPrimario = new ArrayList<>(auxiliar.size());
+		nuevoPrimario = new ArrayList<CanalOptico>(auxiliar.size());
+		Nodo inicio = null;
+		Nodo fin = null;
+
 		for (int j = 0; j < auxiliar.size(); j++) {
 			if (auxiliar.get(j) == null) {
+				if (j > 0) {
+					inicio = auxiliar.get(j - 1).getExtremoB();
+				} else {
+					inicio = s1.getSolicitudes().get(j).getOrigen();
+				}
+
+				while (auxiliar.get(j) == null) {
+					j++;
+				}
+				fin = auxiliar.get(j).getExtremoA();
 				// Realizar algoritmo Shortest Path Disjktra (SPD) para restante
+				Camino caminito = inicio.dijkstra(fin);
+				// Se agrega el camino encontrado
+				for (Salto s : caminito.getSaltos()) {
+					nuevoPrimario.add(s.getCanal());
+				}
+
 			} else {
 				nuevoPrimario.add(auxiliar.get(j));
 			}
