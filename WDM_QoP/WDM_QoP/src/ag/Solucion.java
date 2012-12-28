@@ -1,7 +1,6 @@
 package ag;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
@@ -31,12 +30,12 @@ public class Solucion implements Individuo {
 	@GeneratedValue
 	private long id;
 
-	// Genes de la solución
+	// Genes de la solución (caminos a cada demanda)
 	@OneToMany(cascade = CascadeType.ALL)
-	private Set<Gen> genes;
+	private ArrayList<Gen> genes;
 
 	// Demandas realizadas
-	private Set<Solicitud> solicitudes;
+	private ArrayList<Solicitud> solicitudes;
 
 	// Fitness de la Solución
 	private double fitness;
@@ -46,7 +45,15 @@ public class Solucion implements Individuo {
 
 	public Solucion() {
 		super();
-		genes = new HashSet<>();
+		genes = new ArrayList<Gen>();
+		solicitudes = new ArrayList<Solicitud>();
+	}
+	
+	public Solucion(ArrayList<Solicitud> solicitudes) {
+		super();
+		int size = solicitudes.size();
+		genes = new ArrayList<Gen>(size);
+		solicitudes = new ArrayList<Solicitud>(size);
 	}
 
 	@Override
@@ -108,20 +115,39 @@ public class Solucion implements Individuo {
 		this.id = id;
 	}
 
-	public Set<Gen> getGenes() {
+	public ArrayList<Gen> getGenes() {
 		return genes;
 	}
 
-	public void setGenes(Set<Gen> genes) {
+	public void setGenes(ArrayList<Gen> genes) {
 		this.genes = genes;
 	}
 
-	public Set<Solicitud> getSolicitudes() {
+	public ArrayList<Solicitud> getSolicitudes() {
 		return solicitudes;
 	}
 
-	public void setSolicitudes(Set<Solicitud> solicitudes) {
+	public void setSolicitudes(ArrayList<Solicitud> solicitudes) {
 		this.solicitudes = solicitudes;
 	}
 
+	/**
+	 * Función que contrala si tiene las mismas solicitudes que la solicitud
+	 * recibida.
+	 * 
+	 * @param solucion
+	 * @return
+	 */
+	public boolean mismasSolicitudes(Solucion solucion) {
+		int contador = 0;
+		for (int i = 0; i < this.getSolicitudes().size(); i++) {
+			if (this.getSolicitudes().get(i)
+					.equals(solucion.getSolicitudes().get(i)))
+				contador++;
+		}
+		boolean retorno = false;
+		if (contador == this.getSolicitudes().size())
+			retorno = true;
+		return retorno;
+	}
 }

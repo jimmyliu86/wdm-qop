@@ -14,7 +14,7 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 
 @Entity
-@Table(name="CanalOptico")
+@Table(name = "CanalOptico")
 /**
  * Clase que representa los canales Ópticos que forman parte de la red.
  * <p>
@@ -27,31 +27,32 @@ import javax.persistence.Transient;
  */
 public class CanalOptico {
 
-	@OneToMany(cascade=CascadeType.ALL)
+	@OneToMany(cascade = CascadeType.ALL)
 	@OrderBy("longitudDeOnda ASC")
 	private Set<Enlace> enlaces = new HashSet<Enlace>();
-	
-	@Id 
-	@GeneratedValue 
+
+	@Id
+	@GeneratedValue
 	private int id;
-	
+
 	private int fibras;
-	
+
 	private int ldos;
-	
+
 	private int costo;
-	
-	@ManyToOne(cascade=CascadeType.ALL)
+
+	@ManyToOne(cascade = CascadeType.ALL)
 	private Nodo extremoA;
-	
-	@ManyToOne(cascade=CascadeType.ALL)
+
+	@ManyToOne(cascade = CascadeType.ALL)
 	private Nodo extremoB;
-	
+
 	@Transient
 	private boolean bloqueado = false;
-	
-	public CanalOptico(){}
-	
+
+	public CanalOptico() {
+	}
+
 	/**
 	 * Constructor principal. Setea los atributos principales y genera los
 	 * enlaces del canal.
@@ -74,8 +75,8 @@ public class CanalOptico {
 		this.enlaces.clear();
 		crearEnlaces();
 	}
-	
-	public void crearEnlaces(){
+
+	public void crearEnlaces() {
 		for (int i = 0; i < fibras; i++) {
 			for (int j = 0; j < ldos; j++) {
 				this.enlaces.add(new Enlace(i, j, this));
@@ -89,11 +90,12 @@ public class CanalOptico {
 	 */
 	public void inicializar() {
 		this.desbloquear();
-		
+
 		for (Enlace e : enlaces) {
 			e.eliminarReservas();
 		}
 	}
+
 	/**
 	 * Getter del nodo Destino
 	 * 
@@ -152,15 +154,17 @@ public class CanalOptico {
 	public void setOrigen(Nodo a) {
 		this.extremoA = a;
 	}
-	
-	public Nodo getOtroExtremo(Nodo a){
-		if(! a.equals(extremoA) && ! a.equals(extremoB)) return null;
-		
-		if(a.equals(extremoA)) return extremoB;
-		
+
+	public Nodo getOtroExtremo(Nodo a) {
+		if (!a.equals(extremoA) && !a.equals(extremoB))
+			return null;
+
+		if (a.equals(extremoA))
+			return extremoB;
+
 		return extremoA;
 	}
-	
+
 	/**
 	 * Bloquear el enlace porque forma parte del camino primario de algun
 	 * Servicio
@@ -194,5 +198,41 @@ public class CanalOptico {
 		this.costo = costo;
 	}
 
-	
+	/**
+	 * Se controla que sean iguales los atributos del Objeto.
+	 */
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+
+		CanalOptico other = (CanalOptico) obj;
+		// id
+		if (id != other.id)
+			return false;
+		// extremo A
+		if (extremoA == null) {
+			if (other.extremoA != null)
+				return false;
+		} else if (!extremoA.equals(other.extremoA))
+			return false;
+		// extremo B
+		if (extremoB == null) {
+			if (other.extremoB != null)
+				return false;
+		} else if (!extremoB.equals(other.extremoB))
+			return false;
+		// cantidad de fibras
+		if (fibras != other.fibras)
+			return false;
+		// cantidad de longitudes de onda
+		if (ldos != other.ldos)
+			return false;
+		return true;
+	}
+
 }

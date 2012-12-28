@@ -1,5 +1,7 @@
 package ag;
 
+import java.util.ArrayList;
+
 import wdm.CanalOptico;
 
 /**
@@ -14,20 +16,33 @@ import wdm.CanalOptico;
 public class Gen {
 
 	/*
-	 * Canal Optico principal que es solución para una Solicitud realizada.
+	 * Conjunto de Canales Opticos primarios que representan la solución para
+	 * una Solicitud realizada.
 	 */
-	private CanalOptico primario;
+	private ArrayList<CanalOptico> primario;
 
 	/*
 	 * Canal Optico de respaldo que es posible solución para una Solicitud
 	 * realizada.
 	 */
-	private CanalOptico secundario;
+	private ArrayList<CanalOptico> secundario;
+
+	public Gen() {
+		this.primario = null;
+		this.secundario = null;
+	}
+
+	public Gen(ArrayList<CanalOptico> primario,
+			ArrayList<CanalOptico> secundario) {
+		super();
+		this.primario = primario;
+		this.secundario = secundario;
+	}
 
 	/**
 	 * @return Canal Optico Primario.
 	 */
-	public CanalOptico getPrimario() {
+	public ArrayList<CanalOptico> getPrimario() {
 		return primario;
 	}
 
@@ -35,14 +50,14 @@ public class Gen {
 	 * @param primario
 	 *            Canal Optico Primario.
 	 */
-	public void setPrimario(CanalOptico primario) {
+	public void setPrimario(ArrayList<CanalOptico> primario) {
 		this.primario = primario;
 	}
 
 	/**
 	 * @return Canal Optico Secundario.
 	 */
-	public CanalOptico getSecundario() {
+	public ArrayList<CanalOptico> getSecundario() {
 		return secundario;
 	}
 
@@ -50,12 +65,16 @@ public class Gen {
 	 * @param secundario
 	 *            Canal Optico Secundario.
 	 */
-	public void setSecundario(CanalOptico secundario) {
+	public void setSecundario(ArrayList<CanalOptico> secundario) {
 		this.secundario = secundario;
 	}
-	
-	public double getCosto(){
-		return this.primario.getCosto();
+
+	public double getCosto() {
+		double total = 0.0;
+		for (CanalOptico co : this.primario) {
+			total += co.getCosto();
+		}
+		return total;
 	}
 
 }
