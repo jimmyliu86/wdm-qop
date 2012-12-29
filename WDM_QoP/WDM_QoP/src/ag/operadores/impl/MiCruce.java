@@ -34,7 +34,10 @@ public class MiCruce implements OperadorCruce {
 	@Override
 	public Solucion cruzar(Solucion s1, Solucion s2) {
 
-		// Comprobamos que las solicitudes sea las mismas
+		// TODO: Falta la tercera parte: Asignar las longitudes de onda.
+		/*
+		 * Comprobamos que las solicitudes sea las mismas ¿Es necesaria esta comprobación?
+		 */
 		if (!s1.mismasSolicitudes(s2))
 			throw new Error("Las solicitudes no coinciden");
 
@@ -57,17 +60,17 @@ public class MiCruce implements OperadorCruce {
 			// Se recorre el primario más corto
 			if (primarioGen1.size() <= primarioGen2.size()) {
 
-				for (CanalOptico co : primarioGen1) {
-					if (primarioGen2.contains(co))
-						auxiliar.add(co);
+				for (CanalOptico canalOptico : primarioGen1) {
+					if (primarioGen2.contains(canalOptico))
+						auxiliar.add(canalOptico);
 					else
 						auxiliar.add(null);
 				}
 
 			} else {
-				for (CanalOptico co : primarioGen2) {
-					if (primarioGen1.contains(co))
-						auxiliar.add(co);
+				for (CanalOptico canalOptico : primarioGen2) {
+					if (primarioGen1.contains(canalOptico))
+						auxiliar.add(canalOptico);
 					else
 						auxiliar.add(null);
 				}
