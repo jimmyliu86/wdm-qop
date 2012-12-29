@@ -12,14 +12,14 @@ import javax.persistence.Table;
 import wdm.qop.Solicitud;
 
 /**
- * Clase Soluci髇 que implementa al Individuo.
+ * Clase Soluci贸n que implementa al Individuo.
  * <p>
- * Conceptualmente esta clase es el Cromosoma del Algoritmo Gen閠ico. Tiene el
- * conjunto de genes que representan las partes de la soluci髇, su fitness y su
+ * Conceptualmente esta clase es el Cromosoma del Algoritmo Gen茅tico. Tiene el
+ * conjunto de genes que representan las partes de la soluci贸n, su fitness y su
  * costo.
  * </p>
  * <p>
- * TODO: La soluci髇 final se debe probar si persiste.
+ * TODO: La soluci贸n final se debe probar si persiste.
  * </p>
  */
 @Entity
@@ -30,17 +30,17 @@ public class Solucion implements Individuo {
 	@GeneratedValue
 	private long id;
 
-	// Genes de la soluci髇 (caminos a cada demanda)
+	// Genes de la soluci贸n (caminos a cada demanda)
 	@OneToMany(cascade = CascadeType.ALL)
 	private ArrayList<Gen> genes;
 
 	// Demandas realizadas
 	private ArrayList<Solicitud> solicitudes;
 
-	// Fitness de la Soluci髇
+	// Fitness de la Soluci贸n
 	private double fitness;
 
-	// Costo de la Soluci髇
+	// Costo de la Soluci贸n
 	private Double costo;
 
 	public Solucion() {
@@ -48,7 +48,7 @@ public class Solucion implements Individuo {
 		genes = new ArrayList<Gen>();
 		solicitudes = new ArrayList<Solicitud>();
 	}
-	
+
 	public Solucion(ArrayList<Solicitud> solicitudes) {
 		super();
 		int size = solicitudes.size();
@@ -58,7 +58,7 @@ public class Solucion implements Individuo {
 
 	@Override
 	public double evaluar() {
-		// Calculamos el costo de la soluci髇
+		// Calculamos el costo de la soluci贸n
 		double total = 0.0;
 		for (Gen gen : this.genes) {
 			total += gen.getCosto();
@@ -82,7 +82,7 @@ public class Solucion implements Individuo {
 	 * Asignar Fitness.
 	 * 
 	 * @param fitness
-	 *            de la soluci髇
+	 *            de la soluci贸n
 	 */
 	public void setFitness(double fitness) {
 		this.fitness = fitness;
@@ -132,7 +132,7 @@ public class Solucion implements Individuo {
 	}
 
 	/**
-	 * Funci髇 que contrala si tiene las mismas solicitudes que la solicitud
+	 * Funci贸n que contrala si tiene las mismas solicitudes que la solicitud
 	 * recibida.
 	 * 
 	 * @param solucion

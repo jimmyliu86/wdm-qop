@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import wdm.CanalOptico;
 
 /**
- * Clase Gen que representa la soluci�n particular para una Solicitud realizada.
+ * Clase Gen que representa la solución particular para una Solicitud realizada.
  * <p>
  * Consiste en un canal primario + un canal secundario.
  * </p>
@@ -16,13 +16,13 @@ import wdm.CanalOptico;
 public class Gen {
 
 	/*
-	 * Conjunto de Canales Opticos primarios que representan la soluci�n para
+	 * Conjunto de Canales Ópticos primarios que representan la solución para
 	 * una Solicitud realizada.
 	 */
 	private ArrayList<CanalOptico> primario;
 
 	/*
-	 * Canal Optico de respaldo que es posible soluci�n para una Solicitud
+	 * Canal Óptico de respaldo que es posible solución para una Solicitud
 	 * realizada.
 	 */
 	private ArrayList<CanalOptico> secundario;
@@ -40,7 +40,7 @@ public class Gen {
 	}
 
 	/**
-	 * @return Canal Optico Primario.
+	 * @return Canal Óptico Primario.
 	 */
 	public ArrayList<CanalOptico> getPrimario() {
 		return primario;
@@ -48,14 +48,14 @@ public class Gen {
 
 	/**
 	 * @param primario
-	 *            Canal Optico Primario.
+	 *            Canal Óptico Primario.
 	 */
 	public void setPrimario(ArrayList<CanalOptico> primario) {
 		this.primario = primario;
 	}
 
 	/**
-	 * @return Canal Optico Secundario.
+	 * @return Canal Óptico Secundario.
 	 */
 	public ArrayList<CanalOptico> getSecundario() {
 		return secundario;
@@ -63,16 +63,38 @@ public class Gen {
 
 	/**
 	 * @param secundario
-	 *            Canal Optico Secundario.
+	 *            Canal Óptico Secundario.
 	 */
 	public void setSecundario(ArrayList<CanalOptico> secundario) {
 		this.secundario = secundario;
 	}
 
+	static int VALOR_DISTANCIA = 1;
+	static int VALOR_CAMBIO_LDO = 1;
+
+	/**
+	 * Calcula el Costo total del Gen
+	 * 
+	 * @return Costo total del Gen
+	 */
 	public double getCosto() {
+		// TODO: Implementar completamente el Costo
 		double total = 0.0;
-		for (CanalOptico co : this.primario) {
-			total += co.getCosto();
+		boolean primero = true;
+		int longitudOnda = 0;
+		for (CanalOptico canalOptico : this.primario) {
+			if (primero) {
+				longitudOnda = canalOptico.getLdos();
+				primero = false;
+			} else {
+				if (longitudOnda > 0) {
+					// Si hay cambio en la longitud de onda aumenta el Costo
+				}
+			}
+
+			// total_1 = distancia total del Canal Optico * VALOR_DISTANCIA
+			// + Cantidad de cambios de longitud de onda * VALOR_CAMBIO_LDO
+			total += canalOptico.getCosto() * VALOR_DISTANCIA;
 		}
 		return total;
 	}

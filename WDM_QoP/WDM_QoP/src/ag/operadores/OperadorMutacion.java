@@ -3,10 +3,10 @@ package ag.operadores;
 import ag.Individuo;
 
 /**
- * Interfaz que define la operacion de mutaci髇.
+ * Interfaz que define la operaci贸n de mutaci贸n.
  * <p>
- * OBSERVACION: No se utiliza un operador de mutaci髇, debido a las
- * caracter韘ticas aleatorias del cruce implementado.
+ * OBSERVACION: No se utiliza un operador de mutaci贸n, debido a las
+ * caracter铆sticas aleatorias del cruce implementado.
  * </p>
  * 
  * @author mrodas
@@ -14,7 +14,7 @@ import ag.Individuo;
  */
 public interface OperadorMutacion {
 	/**
-	 * Realiza una operaci髇 de mutaci髇 sobre un Individuo dado.
+	 * Realiza una operaci锟絥 de mutaci贸n sobre un Individuo dado.
 	 * 
 	 * @param i
 	 *            El Individuo a ser mutado

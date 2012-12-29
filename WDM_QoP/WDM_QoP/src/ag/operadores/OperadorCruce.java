@@ -3,7 +3,7 @@ package ag.operadores;
 import ag.Solucion;
 
 /**
- * Interfaz OperadorCruce que define la implementación de una operación de
+ * Interfaz OperadorCruce que define la implementaciÃ³n de una operaciÃ³n de
  * cruce.
  * 
  * @author mrodas
@@ -11,7 +11,7 @@ import ag.Solucion;
  */
 public interface OperadorCruce {
 	/**
-	 * Realiza una operación de cruce entre dos Individuos, produciendo un
+	 * Realiza una operaciÃ³n de cruce entre dos Individuos, produciendo un
 	 * conjunto de Individuos hijos.
 	 * 
 	 * @param i1

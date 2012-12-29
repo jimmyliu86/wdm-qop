@@ -4,17 +4,17 @@ import ag.Individuo;
 import ag.Poblacion;
 
 /**
- * Interfaz que define la operaci髇 de selecci髇.
+ * Interfaz que define la operaci贸n de selecci贸n.
  * 
  * @author mrodas
  * 
  */
 public interface OperadorSeleccion {
 	/**
-	 * Realiza la operaci髇 de selecci髇 sobre una poblaci髇 de individuos.
+	 * Realiza la operaci贸n de selecci贸n sobre una poblaci贸n de individuos.
 	 * 
 	 * @param poblacion
-	 *            La poblaci髇 sobre la cual realizar la selecci髇
+	 *            La poblaci贸n sobre la cual realizar la selecci贸n
 	 * @return Individuos seleccionados
 	 */
 	public Individuo[] seleccionar(Poblacion poblacion);

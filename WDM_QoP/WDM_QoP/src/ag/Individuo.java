@@ -9,7 +9,7 @@ package ag;
 public interface Individuo {
 
 	/**
-	 * Función para calcular el Fitness del Individuo.
+	 * FunciÃ³n para calcular el Fitness del Individuo.
 	 * 
 	 * @return fitness del Individuo
 	 */

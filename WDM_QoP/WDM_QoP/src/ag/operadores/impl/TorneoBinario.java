@@ -11,9 +11,9 @@ public class TorneoBinario implements OperadorSeleccion {
 	@Override
 	public Individuo[] seleccionar(Poblacion poblacion) {
 		if (poblacion == null)
-			throw new Error("La población no existe.");
+			throw new Error("La poblaciï¿½n no existe.");
 
-		// Tamaño de población seleccionada
+		// Tamaï¿½o de poblaciÃ³n seleccionada
 		int cantMejores = poblacion.getTamanho();
 
 		// Cromosomas seleccionados
@@ -47,10 +47,10 @@ public class TorneoBinario implements OperadorSeleccion {
 
 			// Competencia
 			if (fitness1 >= fitness2) {
-				// Ganó individuo 1
+				// GanÃ³ individuo 1
 				mejores[i] = individuo1;
 			} else {
-				// Ganó individuo 2
+				// GanÃ³ individuo 2
 				mejores[i] = individuo2;
 			}
 		}

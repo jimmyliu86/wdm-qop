@@ -9,10 +9,10 @@ import ag.operadores.OperadorSeleccion;
 import ag.operadores.impl.TorneoBinario;
 
 /**
- * Clase Poblaci髇 que implementar las operaciones propias de la Poblaci髇.
+ * Clase Poblaci贸n que implementar las operaciones propias de la Poblaci贸n.
  * <p>
  * Administrar: Individuos, hijos, fitness, operador de cruce y operador de
- * Selecci髇.
+ * Selecci贸n.
  * </p>
  * 
  * @author mrodas
@@ -21,7 +21,7 @@ import ag.operadores.impl.TorneoBinario;
 public class Poblacion {
 
 	/*
-	 * Individuos de la poblaci髇
+	 * Individuos de la poblaci贸n
 	 */
 	private ArrayList<Individuo> individuos;
 
@@ -41,12 +41,12 @@ public class Poblacion {
 	private OperadorCruce operadorCruce;
 
 	/*
-	 * Operador de selecci髇
+	 * Operador de selecci锟絥
 	 */
 	private OperadorSeleccion operadorSeleccion;
 
 	/**
-	 * Constructor de la Poblaci髇.
+	 * Constructor de la Poblaci贸n.
 	 * 
 	 * @param individuos
 	 */
@@ -56,7 +56,7 @@ public class Poblacion {
 	}
 
 	/**
-	 * Operaci髇 de cruce de Individuos de un conjunto selecto de individuos.
+	 * Operaci贸n de cruce de Individuos de un conjunto selecto de individuos.
 	 * <p>
 	 * La operacion de cruce se realiza con los individuos ya seleccionados.
 	 * </p>
@@ -84,14 +84,14 @@ public class Poblacion {
 				index++;
 				primero = segundo;
 			}
-			// cruce entre el primero del grupo con el 鷏timo.
+			// cruce entre el primero del grupo con el 煤ltimo.
 			nuevo = operadorCruce.cruzar(miPrimero, segundo);
 			this.hijos.set(index, nuevo);
 		}
 	}
 
 	/**
-	 * Operaci髇 de seleccion de Individuos para cruzar.
+	 * Operaci贸n de seleccion de Individuos para cruzar.
 	 * 
 	 * @return individuos seleccionados
 	 */
@@ -100,9 +100,9 @@ public class Poblacion {
 	}
 
 	/**
-	 * Funci髇 que obtiene el tama駉 de la poblaci髇
+	 * Funci贸n que obtiene el tama帽o de la poblaci贸n
 	 * 
-	 * @return tama駉
+	 * @return tamanho
 	 */
 	public int getTamanho() {
 		return this.individuos.size();

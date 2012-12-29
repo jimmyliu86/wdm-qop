@@ -36,7 +36,8 @@ public class MiCruce implements OperadorCruce {
 
 		// TODO: Falta la tercera parte: Asignar las longitudes de onda.
 		/*
-		 * Comprobamos que las solicitudes sea las mismas ¿Es necesaria esta comprobación?
+		 * Comprobamos que las solicitudes sea las mismas ¿Es necesaria esta
+		 * comprobación?
 		 */
 		if (!s1.mismasSolicitudes(s2))
 			throw new Error("Las solicitudes no coinciden");
