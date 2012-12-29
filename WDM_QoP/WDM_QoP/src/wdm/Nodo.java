@@ -15,7 +15,7 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 
 @Entity
-@Table(name = "Nodo")
+@Table(name="Nodo")
 /**
  * Clase que representa a un Nodo de la red representada.
  * <P>
@@ -28,17 +28,16 @@ import javax.persistence.Transient;
  * 
  */
 public class Nodo {
-
+	
 	@Id
 	@GeneratedValue
 	private long id;
-
+	
 	private String label = "";
-	private boolean usaConversor = false;
-
-	@ManyToMany(cascade = CascadeType.ALL)
+	
+	@ManyToMany(cascade=CascadeType.ALL)
 	private Set<CanalOptico> canales = new HashSet<CanalOptico>();
-
+	
 	@Transient
 	private boolean bloqueado = false;
 
@@ -50,53 +49,34 @@ public class Nodo {
 	public String getLabel() {
 		return label;
 	}
-
+	
 	/**
 	 * Setter de la etiqueta del nodo
-	 * 
 	 * @param label
 	 */
 	public void setLabel(String label) {
 		this.label = label;
 	}
-
-	public boolean estaBloqueado() {
+	
+	public boolean estaBloqueado(){
 		return this.bloqueado;
 	}
-
-	public void bloquear() {
+	
+	public void bloquear(){
 		this.bloqueado = true;
 	}
-
-	public void desbloquear() {
+	
+	public void desbloquear(){
 		this.bloqueado = false;
 	}
 
 	/**
-	 * Retorna true si el nodo necesita utilizar un conversor de longitudes de
-	 * onda.
-	 * 
-	 * @return boolean Necesidad del conversor.
-	 */
-	public boolean usaConversor() {
-		return usaConversor;
-	}
-
-	/**
-	 * Indica que el nodo necesita un conversor de longitud onda.
-	 */
-	public void utilizarConversor() {
-		this.usaConversor = true;
-	}
-
-	/**
-	 * Función que cambia el nodo como que no necesita un conversor de longitud
-	 * de onda.
+	 * Resetea el estado del nodo.
 	 */
 	public void inicializar() {
-		this.usaConversor = false;
+		this.bloqueado = false;
 	}
-
+		
 	/**
 	 * Retorna el camino mas corto al nodo especificado.
 	 * 
@@ -114,11 +94,10 @@ public class Nodo {
 
 		while (!aExplorar.isEmpty()) {
 			Camino caminoActual = aExplorar.poll();
-
+			
 			Nodo nodoActual = caminoActual.getDestino();
 
-			if (visitados.contains(nodoActual))
-				continue;
+			if (visitados.contains(nodoActual)) continue;
 
 			visitados.add(nodoActual);
 
@@ -126,17 +105,16 @@ public class Nodo {
 			if (nodoActual.equals(destino)) {
 				return caminoActual;
 			}
-
-			for (CanalOptico canal : nodoActual.canales) {
+			
+			for(CanalOptico canal : nodoActual.canales){				
 				Nodo otroExtremo = canal.getOtroExtremo(nodoActual);
-
-				if (visitados.contains(otroExtremo))
-					continue;
-
+				
+				if ( visitados.contains(otroExtremo) ) continue;
+				
 				Camino caminoNuevo = new Camino(caminoActual);
-				int secuencia = caminoActual.getDistancia() + 1;
+				int secuencia = caminoActual.getDistancia()+canal.getCosto();
 				caminoNuevo.addSalto(new Salto(secuencia, canal));
-
+				
 				aExplorar.add(caminoNuevo);
 			}
 		}
@@ -150,36 +128,36 @@ public class Nodo {
 	 * @param b
 	 * @return
 	 */
-	public boolean equals(Object b) {
-		return this.label == ((Nodo) b).label;
+	public boolean equals(Nodo b) {
+		return this.label == b.label;
 	}
-
-	public void addCanal(CanalOptico canal) {
-		if (!canales.contains(canal)) {
+	
+	public void addCanal(CanalOptico canal){
+		if(! canales.contains(canal)){
 			canales.add(canal);
 		}
 	}
 
-	public CanalOptico romperEnlace(Nodo vecino) {
-		for (CanalOptico c : canales) {
-			if (vecino.equals(c.getOtroExtremo(this))) {
+	public CanalOptico romperEnlace(Nodo vecino){
+		for ( CanalOptico c: canales){
+			if (vecino.equals(c.getOtroExtremo(this))){
 				canales.remove(c);
 				return c;
 			}
 		}
-
+		
 		return null;
 	}
-
+	
 	/**
 	 * Elimina todos los enlaces del nodo.
 	 */
-	public void romperEnlaces(Red red) {
-		for (CanalOptico canal : canales) {
+	public void romperEnlaces(Red red){
+		for (CanalOptico canal : canales){
 			Nodo vecino = canal.getOtroExtremo(this);
-
-			/* Se elimina el enlace del vecino al nodo */
-			CanalOptico canalInverso = vecino.romperEnlace(this);
+			
+			/*Se elimina el enlace del vecino al nodo*/
+			CanalOptico canalInverso = vecino.romperEnlace(this); 
 
 			/* Se elimina el enlace del nodo al vecino */
 			canales.remove(canal);
@@ -190,7 +168,7 @@ public class Nodo {
 		}
 	}
 
-	public String toString() {
+	public String toString(){
 		return this.label;
 	}
 
@@ -201,44 +179,38 @@ public class Nodo {
 	public void setCanales(Set<CanalOptico> canales) {
 		this.canales = canales;
 	}
-
-	private class NodoDijkstra implements Comparable {
+	
+	private class NodoDijkstra implements Comparable<NodoDijkstra> {
 		private final Nodo nodo;
 		private Camino camino;
 		private int distancia = Integer.MAX_VALUE;
-
-		public NodoDijkstra(Nodo nodo, int distancia) {
+		
+		public NodoDijkstra(Nodo nodo, int distancia){
 			this.nodo = nodo;
 			this.distancia = distancia;
 		}
-
+		
 		@Override
-		public boolean equals(Object o) {
-			if (o instanceof Nodo) {
-				return ((Nodo) o).label.equalsIgnoreCase(nodo.label);
+		public boolean equals(Object o){
+			if(o instanceof Nodo){
+				return ((Nodo)o).label.equalsIgnoreCase(nodo.label);
 			}
-
-			if (o instanceof NodoDijkstra) {
-				return ((NodoDijkstra) o).nodo.label
-						.equalsIgnoreCase(nodo.label);
+			
+			if (o instanceof NodoDijkstra){
+				return ((NodoDijkstra)o).nodo.label.equalsIgnoreCase(nodo.label);
 			}
-
+			
 			return false;
 		}
-
+		
 		@Override
-		public int compareTo(Object arg0) {
-
-			if (arg0 instanceof NodoDijkstra) {
-				return -1;
-			}
-
+		public int compareTo(NodoDijkstra arg0) {			
 			NodoDijkstra b = (NodoDijkstra) arg0;
-
-			return b.distancia - this.distancia;
+			
+			return this.distancia - b.distancia;
 		}
-
-		public int getDistancia() {
+		
+		public int getDistancia(){
 			return this.distancia;
 		}
 
@@ -254,68 +226,65 @@ public class Nodo {
 			this.camino = camino;
 		}
 	}
-
+	
 	/**
-	 * Retorna el camino mas corto al nodo especificado utilizando el algoritmo
-	 * de dijkstra.
+	 * Retorna el camino mas corto al nodo especificado utilizando el algoritmo de dijkstra.
 	 * 
 	 * @param destino
 	 *            Nodo destino
 	 * @return Camino mas corto al nodo destino.
 	 */
-	public Camino dijkstra(Nodo destino) {
-
+	public Camino dijkstra(Nodo destino){
+		
 		PriorityQueue<NodoDijkstra> aVisitar = new PriorityQueue<NodoDijkstra>();
-		HashMap<Nodo, Integer> distancias = new HashMap<Nodo, Integer>();
+		HashMap<Nodo,Integer> distancias = new HashMap<Nodo,Integer>();
 		HashSet<Nodo> visitados = new HashSet<Nodo>();
-
-		NodoDijkstra nodoOrigen = new NodoDijkstra(this, 0);
+		
+		NodoDijkstra nodoOrigen = new NodoDijkstra(this,0);
 		nodoOrigen.setCamino(new Camino(this));
 		aVisitar.add(nodoOrigen);
 		distancias.put(this, new Integer(0));
-
-		while (!aVisitar.isEmpty()) {
+		
+		while(! aVisitar.isEmpty()){
 			NodoDijkstra dNodo = aVisitar.poll();
 			Nodo actual = dNodo.getNodo();
 			Camino camino = dNodo.getCamino();
-
-			if (actual.equals(destino)) {
+			
+			if(actual.equals(destino)) {
 				return camino;
 			}
 
-			if (visitados.contains(actual))
-				continue;
-
+			if (visitados.contains(actual)) continue;
+			
 			visitados.add(actual);
-
-			for (CanalOptico canal : actual.canales) {
+			
+			for(CanalOptico canal : actual.canales){
 				Nodo vecino = canal.getOtroExtremo(actual);
-
-				if (vecino.estaBloqueado())
-					continue;
-				if (visitados.contains(vecino))
-					continue;
-
-				if (distancias.containsKey(vecino)) {
+				int costo = canal.getCosto();
+				
+				if (canal.estaBloqueado())	continue;
+				if (vecino.estaBloqueado())	continue;
+				if (visitados.contains(vecino)) continue;
+				
+				if(distancias.containsKey(vecino)){
 					int dActual = distancias.get(vecino);
-
-					if (dActual <= dNodo.getDistancia() + 1)
-						continue;
-					else
+					
+					if( dActual <= dNodo.getDistancia()+costo) continue;
+					else {
+						aVisitar.remove(vecino);
 						distancias.remove(vecino);
+					}
 				}
-
-				NodoDijkstra nuevoNodo = new NodoDijkstra(vecino,
-						dNodo.getDistancia() + 1);
+				
+				NodoDijkstra nuevoNodo = new NodoDijkstra(vecino,dNodo.getDistancia()+costo);
 				Camino caminoNuevo = new Camino(camino);
-				caminoNuevo
-						.addSalto(new Salto(dNodo.getDistancia() + 1, canal));
+				caminoNuevo.addSalto(new Salto(camino.getSaltos().size()+1, canal));
 				nuevoNodo.setCamino(caminoNuevo);
 				aVisitar.add(nuevoNodo);
 				distancias.put(nuevoNodo.getNodo(), nuevoNodo.distancia);
 			}
 		}
-
+		
 		return null;
 	}
 
@@ -326,4 +295,15 @@ public class Nodo {
 	public void setId(long id) {
 		this.id = id;
 	}
+	
+	@Override
+	public int hashCode() {
+		int labelInt = Integer.parseInt(label);
+		
+		if (labelInt > 0) return labelInt; 
+		
+		return super.hashCode();
+	}
+	
+	
 }

@@ -1,5 +1,9 @@
 package wdm.qop;
 
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedList;
+
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -9,9 +13,12 @@ import javax.persistence.OneToOne;
 import javax.persistence.Transient;
 
 import wdm.Camino;
+import wdm.CanalOptico;
+import wdm.Nodo;
+import wdm.Salto;
 
 @Entity
-public class Servicio {
+public class Servicio{
 	
 	@Id
 	@GeneratedValue
@@ -112,5 +119,9 @@ public class Servicio {
 	public void setAlternativo(Camino alternativo) {
 		this.alternativo = alternativo;
 	}
-	
+			
+	@Override
+	public String toString() {
+		return "s"+solicitud.getOrigen()+"_"+solicitud.getDestino();
+	}
 }

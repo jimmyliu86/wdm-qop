@@ -1,15 +1,20 @@
 package wdm;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
+import javax.persistence.Transient;
 
 @Entity
-public class Salto{
+public class Salto implements Comparable<Salto>{
 	
-	@ManyToOne
+	@Transient
 	private CanalOptico canal;
+	
+	@ManyToOne(cascade=CascadeType.ALL)
+	private Enlace enlace;
 	
 	private int secuencia;
 	
@@ -50,5 +55,31 @@ public class Salto{
 
 	public void setCanal(CanalOptico c) {
 		this.canal = c;
+		this.enlace = null;
 	}
+
+	public Enlace getEnlace() {
+		return enlace;
+	}
+
+	public void setEnlace(Enlace enlace) {
+		this.enlace = enlace;
+	}
+	
+	public int setEnlace(int ldO){
+		if(ldO < 0 ) this.enlace = canal.getEnlaceLibre();
+		else 		 this.enlace = canal.getEnlaceLibre(ldO);
+		
+		enlace.bloquear();
+		
+		return enlace.getLongitudDeOnda();
+	}
+
+	@Override
+	public int compareTo(Salto b) {
+		
+		return this.secuencia - b.secuencia;
+	}
+	
+	
 }

@@ -7,7 +7,6 @@ import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
-import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.Transient;
 
@@ -40,8 +39,11 @@ public class Enlace {
 	@Transient
 	private Servicio servicio;
 	
-	@ManyToMany
+	@Transient
 	private Set<Servicio> reservas = new HashSet<Servicio>();
+	
+	@Transient
+	private boolean bloqueado = false;
 	
 	@Transient
 	private boolean disponible = true;
@@ -199,6 +201,7 @@ public class Enlace {
 	 * Restablece los valores iniciales del enlace
 	 */
 	public void inicializar() {
+		this.bloqueado = false;
 		this.disponible = true;
 		this.reservas.clear();
 		this.servicio = null;
@@ -238,5 +241,27 @@ public class Enlace {
 
 	public Nodo getOtroExtremo(Nodo a) {
 		return canal.getOtroExtremo(a);
+	}
+
+	public boolean isBloqueado() {
+		return bloqueado;
+	}
+	
+	public void bloquear(){
+		this.bloqueado = true;
+		
+		System.out.println("Bloqueando " + canal + "." + longitudDeOnda);
+	
+		for(Enlace e : canal.getEnlaces()){
+			if(!e.bloqueado) return;
+		}
+		
+		canal.bloquear();
+	}
+	
+	public void desbloquear(){
+		System.out.println("Desloqueando " + canal + "." + longitudDeOnda);
+		this.bloqueado = false;
+		this.canal.desbloquear();
 	}
 }

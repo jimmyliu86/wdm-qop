@@ -14,12 +14,12 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 
 @Entity
-@Table(name = "CanalOptico")
+@Table(name="CanalOptico")
 /**
- * Clase que representa los canales Ópticos que forman parte de la red.
+ * Clase que representa los canales opticos que forman parte de la red.
  * <p>
- * Descripción: Canal Óptico utilizado para representar la agrupacion de enlaces
- * que están definidos por longitud de onda, por fibra, y por canal.
+ * Descripcion: Canal Óptico utilizado para representar la agrupacion de enlaces
+ * que estan definidos por longitud de onda, por fibra, y por canal.
  * </p>
  * 
  * @author aamadeo
@@ -27,32 +27,31 @@ import javax.persistence.Transient;
  */
 public class CanalOptico {
 
-	@OneToMany(cascade = CascadeType.ALL)
+	@OneToMany(cascade=CascadeType.ALL)
 	@OrderBy("longitudDeOnda ASC")
 	private Set<Enlace> enlaces = new HashSet<Enlace>();
-
-	@Id
-	@GeneratedValue
+	
+	@Id 
+	@GeneratedValue 
 	private int id;
-
+	
 	private int fibras;
-
+	
 	private int ldos;
-
+	
 	private int costo;
-
-	@ManyToOne(cascade = CascadeType.ALL)
+	
+	@ManyToOne(cascade=CascadeType.ALL)
 	private Nodo extremoA;
-
-	@ManyToOne(cascade = CascadeType.ALL)
+	
+	@ManyToOne(cascade=CascadeType.ALL)
 	private Nodo extremoB;
-
+	
 	@Transient
 	private boolean bloqueado = false;
-
-	public CanalOptico() {
-	}
-
+	
+	public CanalOptico(){}
+	
 	/**
 	 * Constructor principal. Setea los atributos principales y genera los
 	 * enlaces del canal.
@@ -75,8 +74,8 @@ public class CanalOptico {
 		this.enlaces.clear();
 		crearEnlaces();
 	}
-
-	public void crearEnlaces() {
+	
+	public void crearEnlaces(){
 		for (int i = 0; i < fibras; i++) {
 			for (int j = 0; j < ldos; j++) {
 				this.enlaces.add(new Enlace(i, j, this));
@@ -90,12 +89,11 @@ public class CanalOptico {
 	 */
 	public void inicializar() {
 		this.desbloquear();
-
+		
 		for (Enlace e : enlaces) {
-			e.eliminarReservas();
+			e.inicializar();
 		}
 	}
-
 	/**
 	 * Getter del nodo Destino
 	 * 
@@ -154,17 +152,40 @@ public class CanalOptico {
 	public void setOrigen(Nodo a) {
 		this.extremoA = a;
 	}
-
-	public Nodo getOtroExtremo(Nodo a) {
-		if (!a.equals(extremoA) && !a.equals(extremoB))
-			return null;
-
-		if (a.equals(extremoA))
-			return extremoB;
-
+	
+	public Nodo getOtroExtremo(Nodo a){
+		if(! a.equals(extremoA) && ! a.equals(extremoB)) return null;
+		
+		if(a.equals(extremoA)) return extremoB;
+		
 		return extremoA;
 	}
-
+	
+	public Enlace getEnlaceLibre(){
+		if(bloqueado) return null;
+		
+		for(Enlace e: enlaces){
+			if(!e.isBloqueado()) return e;
+		}
+			
+		return null;
+	}
+	
+	public Enlace getEnlaceLibre(int ldO){
+		if(bloqueado)return null;
+		
+		Enlace segundaOpcion = null;
+		
+		for(Enlace e: enlaces){
+			if (!e.isBloqueado()){
+				if(e.getLongitudDeOnda() == ldO) return e;
+				segundaOpcion = e;
+			}
+		}
+		
+		return segundaOpcion;
+	}
+	
 	/**
 	 * Bloquear el enlace porque forma parte del camino primario de algun
 	 * Servicio
@@ -198,41 +219,27 @@ public class CanalOptico {
 		this.costo = costo;
 	}
 
-	/**
-	 * Se controla que sean iguales los atributos del Objeto.
-	 */
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-
-		CanalOptico other = (CanalOptico) obj;
-		// id
-		if (id != other.id)
-			return false;
-		// extremo A
-		if (extremoA == null) {
-			if (other.extremoA != null)
-				return false;
-		} else if (!extremoA.equals(other.extremoA))
-			return false;
-		// extremo B
-		if (extremoB == null) {
-			if (other.extremoB != null)
-				return false;
-		} else if (!extremoB.equals(other.extremoB))
-			return false;
-		// cantidad de fibras
-		if (fibras != other.fibras)
-			return false;
-		// cantidad de longitudes de onda
-		if (ldos != other.ldos)
-			return false;
-		return true;
+	public Set<Enlace> getEnlaces() {
+		return enlaces;
 	}
 
+	public void setEnlaces(Set<Enlace> enlaces) {
+		this.enlaces = enlaces;
+	}
+
+	@Override
+	public String toString() {
+		return extremoA + "-" + extremoB;
+	}
+	
+	public int getUso(){
+		double total = 0;
+		double utilizados = 0;
+		for(Enlace e : enlaces){
+			total+=1;
+			if(e.isBloqueado()) utilizados+=1;
+		}
+		
+		return (int) (100.0*utilizados/total);
+	}
 }

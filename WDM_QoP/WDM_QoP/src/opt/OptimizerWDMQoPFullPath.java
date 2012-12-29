@@ -1,10 +1,13 @@
 package opt;
 
+import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
+import javax.persistence.TypedQuery;
 
 import wdm.Camino;
 import wdm.CanalOptico;
@@ -25,22 +28,18 @@ public class OptimizerWDMQoPFullPath {
 	private static String [] nodos = {"A","B","C","D","E","F","G","H"};
 	private static String [] aristas = {"AB","AC","BC","BH","CD","DE","DG","EF","FG","GH"};
 	
-	private static EntityManagerFactory emf;
-	private static EntityManager em;
+	private static EntityManagerFactory emf = Persistence.createEntityManagerFactory("tesis");
+	private static EntityManager em = emf.createEntityManager();
 	
 	public static void main(String args []){
-		OptimizerWDMQoPFullPath opt = new OptimizerWDMQoPFullPath();
-		emf = Persistence.createEntityManagerFactory("tesis");
-		em = emf.createEntityManager();
-
-		/*NSF*/
-		int [][] nsf_enlaces = {
-				{0,1,9},{0,2,9},{0,3,7},{1,3,13},{1,6,20},{2,0,9},{2,4,7},{2,7,16},{3,10,15},{4,5,7},
-				{4,10,11},{5,6,7},{6,9,7},{7,8,5},{7,13,8},{8,9,5},{8,12,7},{9,11,8},{9,13,8},{10,11,9},
-				{10,12,14},{12,13,4}
-		};		
-		opt.persistNet(14,nsf_enlaces, "NSF");
-		
+		if(args.length > 0){
+			if(args[0].equalsIgnoreCase("genRedes")) genRedes();
+			if(args[0].equalsIgnoreCase("testNetwork")) testNetworkPersistence();
+		}
+	}
+	
+	
+	public static void genRedes(){
 		/*arpanet*/
 		int [] [] arpanet_enlaces = {
 
@@ -48,7 +47,7 @@ public class OptimizerWDMQoPFullPath {
 		{8,9,1},{9,10,1},{10,21,1},{10,12,1},{11,12,1},{12,13,1},{13,14,1},{14,15,1},{15,16,1},{16,17,1},{17,18,1},
 		{18,19,1},{18,21,1},{19,20,1},
 		};
-		opt.persistNet(21,arpanet_enlaces, "arpanet");
+		persistNet(21,arpanet_enlaces, "arpanet");
 		
 		/*BELLCOREYERSE*/
 		int [] [] bellcoreyerse_enlaces = {
@@ -58,7 +57,7 @@ public class OptimizerWDMQoPFullPath {
 		{11,12,1},{12,13,1},{13,14,1},{13,15,1},{14,15,1}
 		
 		};
-		opt.persistNet(15,bellcoreyerse_enlaces, "BELLCOREYERSE");
+		persistNet(15,bellcoreyerse_enlaces, "BELLCOREYERSE");
 		
 		/*chinaNet*/
 		int [] [] chinaNet_enlaces = {
@@ -76,7 +75,7 @@ public class OptimizerWDMQoPFullPath {
 		{60,61,1},{61,63,1},{62,64,1},{62,63,1},{63,64,1},{64,68,1},{64,67,1},{65,66,1},{66,68,1},{66,67,1},{67,68,1}
 
 		};
-		opt.persistNet(68,chinaNet_enlaces, "chinaNet");
+		persistNet(68,chinaNet_enlaces, "chinaNet");
 		
 		/*eufrance*/
 		int [] [] eufrance_enlaces = {
@@ -90,7 +89,7 @@ public class OptimizerWDMQoPFullPath {
 		{41,42,1},{41,43,1},{42,43,1},
 		
 		};
-		opt.persistNet(43,eufrance_enlaces, "eufrance");
+		persistNet(43,eufrance_enlaces, "eufrance");
 		
 		/*eugerman*/
 		int [] [] eugerman_enlaces = {
@@ -99,10 +98,10 @@ public class OptimizerWDMQoPFullPath {
 		{7,12,1},{7,9,1},{8,13,1},{9,12,1},{9,14,1},{9,10,1},{10,11,1},{11,15,1},{12,13,1},{12,14,1},{14,15,1},
 		{14,17,1},{15,16,1},{16,17,1},
 		};
-		opt.persistNet(17,eugerman_enlaces, "eugerman");
+		persistNet(17,eugerman_enlaces, "eugerman");
 	}
 	
-	public void test(){
+	public static void testNetworkPersistence(){
 		emf = Persistence.createEntityManagerFactory("tesis");
 		em = emf.createEntityManager();
 		
@@ -159,7 +158,6 @@ public class OptimizerWDMQoPFullPath {
 		 * Buscando el segundo camino de A a F.
 		 */
 		
-		
 		Nodo origen = nodoMap.get("A");
 		Nodo destino = nodoMap.get("F");
 		
@@ -207,20 +205,20 @@ public class OptimizerWDMQoPFullPath {
 		em.getTransaction().commit();
 	}
 	
-	public void persistNet(int nodos, int [] [] enlaces, String nombre){
+	public static void persistNet(int nodos, int [] [] enlaces, String nombre){
 		
 		HashMap<String,Nodo> nodoMap = new HashMap<String,Nodo>();
-		Red nsf = new Red();
-		nsf.setNombre(nombre);
+		Red red = new Red();
+		red.setNombre(nombre);
 		
 		em.getTransaction().begin();
-		for(int i = 0; i < nodos; i++){
+		for(int i = 1; i <= nodos; i++){
 			Nodo nodo = new Nodo();
 			nodo.setLabel(""+i);
 			nodoMap.put(""+i, nodo);
-			nsf.addNodo(nodo);
+			red.addNodo(nodo);
 		}
-		em.persist(nsf);
+		em.persist(red);
 		em.getTransaction().commit();
 		
 		em.getTransaction().begin();
@@ -228,10 +226,12 @@ public class OptimizerWDMQoPFullPath {
 			Nodo a = nodoMap.get(""+enlaces[i][0]);
 			Nodo b = nodoMap.get(""+enlaces[i][1]);
 			CanalOptico canal = new CanalOptico(a,b,1,3);
+			a.addCanal(canal);
+			b.addCanal(canal);
 			canal.setCosto(enlaces[i][2]);
-			nsf.addCanal(canal);			
+			red.addCanal(canal);			
 		}
-		em.persist(nsf);
+		em.persist(red);
 		em.getTransaction().commit();
 	}
 }

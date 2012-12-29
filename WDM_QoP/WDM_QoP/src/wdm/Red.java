@@ -1,6 +1,7 @@
 package wdm;
 
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Set;
 
 import javax.persistence.CascadeType;
@@ -30,9 +31,6 @@ public class Red {
 	
 	@OneToMany(cascade=CascadeType.ALL)
 	private Set<CanalOptico> canales = new HashSet<CanalOptico>();
-	
-	@SuppressWarnings("unused")
-	private static final long serialVersionUID = -6192832626602644784L;
 	
 	@Id 
 	@GeneratedValue 
@@ -159,5 +157,37 @@ public class Red {
 
 	public void setNombre(String nombre) {
 		this.nombre = nombre;
+	}
+	
+	public Nodo randomNodo(){
+		double i = Math.random()*((double) nodos.size());
+		int j = 1;
+		
+		Iterator<Nodo> iter = nodos.iterator();
+		
+		while(j < i){
+			iter.next();
+			j++;
+		}
+		
+		return iter.next();
+	}
+
+	public int getId() {
+		return id;
+	}
+
+	public void setId(int id) {
+		this.id = id;
+	}
+	
+	public void inicializar(){
+		for(CanalOptico canal: canales){
+			canal.inicializar();
+		}
+		
+		for(Nodo nodo: nodos){
+			nodo.inicializar();
+		}
 	}
 }
