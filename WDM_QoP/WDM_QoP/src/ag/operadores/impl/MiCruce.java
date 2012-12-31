@@ -1,12 +1,11 @@
 package ag.operadores.impl;
 
-import java.util.ArrayList;
+import java.util.Iterator;
 
 import wdm.Camino;
-import wdm.CanalOptico;
 import wdm.Nodo;
 import wdm.Salto;
-import ag.Gen;
+import wdm.qop.Servicio;
 import ag.Solucion;
 import ag.operadores.OperadorCruce;
 
@@ -42,83 +41,92 @@ public class MiCruce implements OperadorCruce {
 		if (!s1.mismasSolicitudes(s2))
 			throw new Error("Las solicitudes no coinciden");
 
-		Solucion hijo = new Solucion(s1.getSolicitudes());
-		Gen gen1 = new Gen();
-		Gen gen2 = new Gen();
-		ArrayList<CanalOptico> auxiliar = null;
-		ArrayList<CanalOptico> nuevoPrimario = null;
-		ArrayList<CanalOptico> nuevoSecundario = null;
+		Solucion hijo = new Solucion(s1.getGenes());
+
+		Camino auxiliar = null;
+		Camino nuevoPrimario = null;
+		Camino nuevoSecundario = null;
 		/*
 		 * Cálculos del Nuevo Camino Primario y del Nuevo Camino Secundario.
 		 */
 		for (int i = 0; i < s1.getGenes().size(); i++) {
+			Servicio gen1 = new Servicio(s1.getGenes().get(i).getSolicitud());
+			Servicio gen2 = new Servicio(s2.getGenes().get(i).getSolicitud());
 			gen1 = s1.getGenes().get(i);
 			gen2 = s2.getGenes().get(i);
-			ArrayList<CanalOptico> primarioGen1 = gen1.getPrimario();
-			ArrayList<CanalOptico> primarioGen2 = gen2.getPrimario();
+			Camino primario1 = gen1.getPrimario();
+			Camino primario2 = gen2.getPrimario();
 
-			auxiliar = new ArrayList<CanalOptico>(primarioGen1.size());
+			auxiliar = new Camino(primario1.getOrigen());
+			auxiliar.setDestino(primario1.getDestino());
+
 			// Se recorre el primario más corto
-			if (primarioGen1.size() <= primarioGen2.size()) {
+			if (primario1.getSaltos().size() <= primario2.getSaltos().size()) {
 
-				for (CanalOptico canalOptico : primarioGen1) {
-					if (primarioGen2.contains(canalOptico))
-						auxiliar.add(canalOptico);
-					else
-						auxiliar.add(null);
+				for (Salto salto : primario1.getSaltos()) {
+					if (primario2.getSaltos().contains(salto)) {
+						auxiliar.addSalto(salto);
+					} else {
+						auxiliar.addNull();
+					}
 				}
 
 			} else {
-				for (CanalOptico canalOptico : primarioGen2) {
-					if (primarioGen1.contains(canalOptico))
-						auxiliar.add(canalOptico);
-					else
-						auxiliar.add(null);
+				for (Salto salto : primario2.getSaltos()) {
+					if (primario1.getSaltos().contains(salto)) {
+						auxiliar.addSalto(salto);
+					} else {
+						auxiliar.addNull();
+					}
 				}
 			}
 
 			// se carga el nuevo Camino Primario.
-			nuevoPrimario = new ArrayList<CanalOptico>(auxiliar.size());
-			nuevoSecundario = new ArrayList<CanalOptico>(auxiliar.size());
-			Nodo inicio = null;
+			nuevoPrimario = new Camino(primario1.getOrigen());
+			nuevoSecundario = new Camino(primario1.getOrigen());
+			// El inicio auxiliar ya se asigna al primer Nodo de Origen.
+			Nodo inicio = auxiliar.getOrigen();
 			Nodo fin = null;
 
-			for (int j = 0; j < auxiliar.size(); j++) {
+			Iterator<Salto> saltos = auxiliar.getSaltos().iterator();
+
+			while (saltos.hasNext()) {
+				Salto salto = saltos.next();
+
 				/*
 				 * Caso null: los genes con valor null son los que se deben
 				 * sustituir por nuevos caminos (a través de SPD).
 				 */
-				if (auxiliar.get(j) == null) {
+				if (salto == null) {
 					/*
 					 * Primero: Se debe obtener el Nodo inicio y el Nodo fin
 					 */
-					if (j > 0)
-						inicio = auxiliar.get(j - 1).getExtremoB();
-					else
-						inicio = s1.getSolicitudes().get(j).getOrigen();
-
-					while (auxiliar.get(j) == null) {
-						j++;
+					while (salto == null && saltos.hasNext()) {
+						salto = saltos.next();
 					}
-					// Nodo Fin
-					fin = auxiliar.get(j).getExtremoA();
-
+					if (saltos.hasNext()) // sigue por el medio del Servicio
+						fin = salto.getEnlace().getExtremoA();
+					else
+						// Llegó al último Nodo y no hay camino
+						fin = auxiliar.getDestino();
+					
 					/*
 					 * Segundo: Realizar algoritmo Shortest Path Disjktra (SPD)
 					 * desde el Nodo inicio al Nodo fin.
 					 */
 					Camino subCamino = inicio.dijkstra(fin);
 					// Se agrega el camino encontrado al Nuevo Camino Primario
-					for (Salto salto : subCamino.getSaltos()) {
-						nuevoPrimario.add(salto.getCanal());
+					for (Salto saltoAux : subCamino.getSaltos()) {
+						nuevoSecundario.addSalto(saltoAux);
 					}
-
 				} else {
 					/*
-					 * Caso not null: los genes not null son iguales entre los
-					 * padres y por ende se agregan directamente.
+					 * Caso not null: los genes not null (que son iguales entre
+					 * los padres) se agregan directamente.
 					 */
-					nuevoPrimario.add(auxiliar.get(j));
+					nuevoPrimario.addSalto(salto);
+					// se asigna como inicio del siguiente el fin de este salto.
+					inicio = salto.getEnlace().getExtremoB();
 				}
 			}
 
@@ -126,18 +134,18 @@ public class MiCruce implements OperadorCruce {
 			 * Cargar Nuevo Secundario: Realizar algoritmo Shortest Path
 			 * Disjktra (SPD) desde el Nodo inicio al Nodo fin.
 			 */
-			Nodo nodoA = s1.getSolicitudes().get(i).getOrigen();
-			Nodo nodoB = s1.getSolicitudes().get(i).getDestino();
+			Nodo nodoA = primario1.getOrigen();
+			Nodo nodoB = primario1.getDestino();
 			Camino subCamino = nodoA.dijkstra(nodoB);
-			// Se agrega el camino encontrado al Nuevo Camino Primario
+			// Se agrega el camino encontrado al Nuevo Camino Secundario
 			for (Salto salto : subCamino.getSaltos()) {
-				nuevoSecundario.add(salto.getCanal());
+				nuevoSecundario.addSalto(salto);
 			}
-			Gen nuevoGen = new Gen(nuevoPrimario, nuevoSecundario);
+			Servicio newServicio = new Servicio(nuevoPrimario, nuevoSecundario);
 			/*
 			 * Cargar Genes al hijo.
 			 */
-			hijo.getGenes().add(i, nuevoGen);
+			hijo.getGenes().add(i, newServicio);
 		}
 		return hijo;
 	}

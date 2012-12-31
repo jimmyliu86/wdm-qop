@@ -4,12 +4,12 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.TreeSet;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
-import javax.persistence.OneToMany;
-import javax.persistence.ManyToOne;
-import javax.persistence.CascadeType;
 import javax.persistence.Id;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.OrderBy;
 
 /**
@@ -76,6 +76,9 @@ public class Camino {
 		distancia = salto.getCanal().getCosto();
 	}
 	
+	public void addNull() {
+		saltos.add(null);
+	}
 	/**
 	 * Utilizado para obtener el destino del camino
 	 * @return El ultimo nodo visitado en el camino
@@ -86,7 +89,7 @@ public class Camino {
 	
 	/**
 	 * Utilizado para obtener la longitud del camino en saltos
-	 * @return La cantidad de saltos, es decir el tamaño de la lista saltos
+	 * @return La cantidad de saltos, es decir el tamaï¿½o de la lista saltos
 	 */
 	public int getDistancia(){
 		return this.distancia;

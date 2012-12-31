@@ -1,9 +1,5 @@
 package wdm.qop;
 
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedList;
-
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -13,9 +9,6 @@ import javax.persistence.OneToOne;
 import javax.persistence.Transient;
 
 import wdm.Camino;
-import wdm.CanalOptico;
-import wdm.Nodo;
-import wdm.Salto;
 
 @Entity
 public class Servicio{
@@ -50,6 +43,18 @@ public class Servicio{
 		super();
 		this.solicitud = solicitud;
 	}
+	
+	/**
+	 * Constructor usado para crear hijos 
+	 * @param primario
+	 * @param alternativo
+	 */
+	public Servicio(Camino primario, Camino alternativo) {
+		super();
+		this.primario = primario;
+		this.alternativo = alternativo;
+	}
+
 
 	/**
 	 * Getter de la solicitud

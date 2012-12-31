@@ -9,7 +9,7 @@ import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
-import wdm.qop.Solicitud;
+import wdm.qop.Servicio;
 
 /**
  * Clase Solución que implementa al Individuo.
@@ -30,12 +30,9 @@ public class Solucion implements Individuo {
 	@GeneratedValue
 	private long id;
 
-	// Genes de la solución (caminos a cada demanda)
+	// Genes de la solución (caminos a cada demanda - Servicios)
 	@OneToMany(cascade = CascadeType.ALL)
-	private ArrayList<Gen> genes;
-
-	// Demandas realizadas
-	private ArrayList<Solicitud> solicitudes;
+	private ArrayList<Servicio> genes;
 
 	// Fitness de la Solución
 	private double fitness;
@@ -45,23 +42,22 @@ public class Solucion implements Individuo {
 
 	public Solucion() {
 		super();
-		genes = new ArrayList<Gen>();
-		solicitudes = new ArrayList<Solicitud>();
+		genes = new ArrayList<Servicio>();
+		// solicitudes = new ArrayList<Solicitud>();
 	}
 
-	public Solucion(ArrayList<Solicitud> solicitudes) {
+	public Solucion(ArrayList<Servicio> servicios) {
 		super();
-		int size = solicitudes.size();
-		genes = new ArrayList<Gen>(size);
-		solicitudes = new ArrayList<Solicitud>(size);
+		int size = servicios.size();
+		genes = new ArrayList<Servicio>(size);
 	}
 
 	@Override
 	public double evaluar() {
 		// Calculamos el costo de la solución
 		double total = 0.0;
-		for (Gen gen : this.genes) {
-			total += gen.getCosto();
+		for (Servicio gen : this.genes) {
+			total += gen.getPrimario().getDistancia();
 		}
 
 		this.costo = total;
@@ -88,10 +84,6 @@ public class Solucion implements Individuo {
 		this.fitness = fitness;
 	}
 
-	public Gen[] genesToArray() {
-		return (Gen[]) genes.toArray();
-	}
-
 	/**
 	 * @return the costo
 	 */
@@ -115,20 +107,12 @@ public class Solucion implements Individuo {
 		this.id = id;
 	}
 
-	public ArrayList<Gen> getGenes() {
+	public ArrayList<Servicio> getGenes() {
 		return genes;
 	}
 
-	public void setGenes(ArrayList<Gen> genes) {
+	public void setGenes(ArrayList<Servicio> genes) {
 		this.genes = genes;
-	}
-
-	public ArrayList<Solicitud> getSolicitudes() {
-		return solicitudes;
-	}
-
-	public void setSolicitudes(ArrayList<Solicitud> solicitudes) {
-		this.solicitudes = solicitudes;
 	}
 
 	/**
@@ -140,13 +124,13 @@ public class Solucion implements Individuo {
 	 */
 	public boolean mismasSolicitudes(Solucion solucion) {
 		int contador = 0;
-		for (int i = 0; i < this.getSolicitudes().size(); i++) {
-			if (this.getSolicitudes().get(i)
-					.equals(solucion.getSolicitudes().get(i)))
+		for (int i = 0; i < this.getGenes().size(); i++) {
+			if (this.getGenes().get(i).getSolicitud()
+					.equals(solucion.getGenes().get(i).getSolicitud()))
 				contador++;
 		}
 		boolean retorno = false;
-		if (contador == this.getSolicitudes().size())
+		if (contador == this.getGenes().size())
 			retorno = true;
 		return retorno;
 	}
