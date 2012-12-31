@@ -164,26 +164,27 @@ public class CanalOptico {
 	public Enlace getEnlaceLibre(){
 		if(bloqueado) return null;
 		
-		for(Enlace e: enlaces){
-			if(!e.isBloqueado()) return e;
+		Enlace [] enlaces = new Enlace[fibras*ldos];
+		int i = 0;
+		for(Enlace e: this.enlaces){
+			if(!e.isBloqueado()) enlaces[i++] = e;
 		}
+		
+		int sorteado = (int)(Math.random()*(double)i);
 			
-		return null;
+		return enlaces[sorteado];
 	}
 	
 	public Enlace getEnlaceLibre(int ldO){
 		if(bloqueado)return null;
 		
-		Enlace segundaOpcion = null;
-		
 		for(Enlace e: enlaces){
 			if (!e.isBloqueado()){
 				if(e.getLongitudDeOnda() == ldO) return e;
-				segundaOpcion = e;
 			}
 		}
 		
-		return segundaOpcion;
+		return getEnlaceLibre();
 	}
 	
 	/**
