@@ -13,6 +13,7 @@ import wdm.CanalOptico;
  * @author mrodas
  * 
  */
+@Deprecated
 public class Gen {
 
 	/*
