@@ -57,7 +57,7 @@ public class Camino {
 	public Camino(Camino c){
 		this.origen = c.origen;
 		
-		this.saltos = new HashSet<Salto>();
+		this.saltos = new TreeSet<Salto>();
 		this.saltos.addAll(c.saltos);
 		this.destino = c.destino;
 		this.distancia = c.distancia;
