@@ -6,7 +6,7 @@ import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
-import javax.persistence.OneToMany;
+import javax.persistence.ManyToMany;
 import javax.persistence.Table;
 
 import wdm.qop.Servicio;
@@ -15,11 +15,9 @@ import wdm.qop.Servicio;
  * Clase Solución que implementa al Individuo.
  * <p>
  * Conceptualmente esta clase es el Cromosoma del Algoritmo Genético. Tiene el
- * conjunto de genes que representan las partes de la solución, su fitness y su
- * costo.
- * </p>
- * <p>
- * TODO: La solución final se debe probar si persiste.
+ * conjunto de genes que representan las partes de la solución: genes (Conjunto
+ * de Servicios (tiene la solicitud, el camino primario y el camino
+ * secundario)), su fitness y su costo.
  * </p>
  */
 @Entity
@@ -30,20 +28,21 @@ public class Solucion implements Individuo {
 	@GeneratedValue
 	private long id;
 
-	// Genes de la solución (caminos a cada demanda - Servicios)
-	@OneToMany(cascade = CascadeType.ALL)
+	// Genes de la solución (Conjunto de Servicios)
+	@ManyToMany(cascade = CascadeType.ALL)
 	private ArrayList<Servicio> genes;
 
 	// Fitness de la Solución
 	private double fitness;
 
 	// Costo de la Solución
-	private Double costo;
+	private double costo;
 
 	public Solucion() {
 		super();
-		genes = new ArrayList<Servicio>();
-		// solicitudes = new ArrayList<Solicitud>();
+		this.genes = new ArrayList<Servicio>();
+		this.fitness = 0.0;
+		this.costo = 0.0;
 	}
 
 	public Solucion(ArrayList<Servicio> servicios) {
@@ -55,6 +54,7 @@ public class Solucion implements Individuo {
 	@Override
 	public double evaluar() {
 		// Calculamos el costo de la solución
+		// TODO: Implementar completamente el Costo
 		double total = 0.0;
 		for (Servicio gen : this.genes) {
 			total += gen.getPrimario().getDistancia();

@@ -79,7 +79,6 @@ public class Gen {
 	 * @return Costo total del Gen
 	 */
 	public double getCosto() {
-		// TODO: Implementar completamente el Costo
 		double total = 0.0;
 		boolean primero = true;
 		int longitudOnda = 0;
