@@ -1,13 +1,10 @@
 package opt;
 
-import java.util.Calendar;
-import java.util.Date;
 import java.util.HashMap;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
-import javax.persistence.TypedQuery;
 
 import wdm.Camino;
 import wdm.CanalOptico;

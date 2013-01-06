@@ -1,6 +1,5 @@
 package wdm;
 
-import java.util.HashSet;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -125,12 +124,12 @@ public class Camino {
 		Nodo actual = this.origen;
 		actual.bloquear();
 		
-		int i = 0;
+		//int i = 0;
 		for(Salto salto : saltos){
 			CanalOptico canal = salto.getCanal();
 			Nodo anterior = actual;
 			actual = canal.getOtroExtremo(actual);
-			i++;
+			//i++;
 			
 //			System.out.print("["+i+"/"+saltos.size()+"] ");
 //			System.out.println("Bloqueando : " + canal+"("+anterior+")");
@@ -143,10 +142,10 @@ public class Camino {
 	public void desbloquearNodos(){
 		Nodo actual = this.origen;
 		
-		int i = 0;
+		//int i = 0;
 		for(Salto salto : saltos){
 			actual = salto.getCanal().getOtroExtremo(actual);
-			i++;
+			//i++;
 			
 			actual.desbloquear();
 		}
