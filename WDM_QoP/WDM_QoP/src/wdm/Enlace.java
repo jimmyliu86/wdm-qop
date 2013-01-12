@@ -29,8 +29,8 @@ public class Enlace {
 	@GeneratedValue
 	private long id;
 	
-	private int longitudDeOnda;
-	private int fibra;
+	private int longitudDeOnda = -1;
+	private int fibra = -1;
 	
 	@ManyToOne(cascade=CascadeType.ALL)
 	private CanalOptico canal;

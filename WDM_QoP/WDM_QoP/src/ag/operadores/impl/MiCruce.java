@@ -13,15 +13,15 @@ import ag.operadores.OperadorCruce;
  * Implementación específica del Cruce mencionado en paper de cnunez.
  * <p>
  * Este cruce se define asi: dada dos soluciones de entrada (s1 y s2), en una
- * primera parte se copian los Caminos que son iguales entre los genes de los
- * padres.
+ * primera parte (P1) se copian los Caminos cuyos genes son iguales entre los
+ * genes de los padres.
  * </p>
  * <p>
- * Luego, en una segunda parte, se utiliza el algoritmo SPD para completar los
- * caminos faltantes.
+ * Luego, en una segunda parte (P2), se utiliza el algoritmo SPD para completar
+ * los caminos faltantes.
  * </p>
  * <p>
- * Finalmente, en una tercera parte se asignan las longitudes de onda, la
+ * Finalmente, en una tercera parte (P3) se asignan las longitudes de onda, la
  * primera de forma aleatoria, y luego se trata de mantener dicha longitud de
  * onda. En el caso que no se encuentra disponible la longitud de onda se
  * procederá a elegir otro randomicamente. Así sucecivamente hasta llegar al
@@ -33,7 +33,6 @@ public class MiCruce implements OperadorCruce {
 	@Override
 	public Solucion cruzar(Solucion s1, Solucion s2) {
 
-		// TODO: Ya se asignan las longitudes de onda, pero se debe seleccionar mejor.
 		/*
 		 * Comprobamos que las solicitudes sea las mismas ¿Es necesaria esta
 		 * comprobación?
@@ -60,13 +59,17 @@ public class MiCruce implements OperadorCruce {
 
 			auxiliar = new Camino(primario1.getOrigen());
 			auxiliar.setDestino(primario1.getDestino());
+			
 
-			// Se recorre el primario más corto
+			/*
+			 * P1. Se copian los Caminos cuyos genes son iguales entre los genes
+			 * de los padres. Se recorre el primario más corto de entre los
+			 * padres.
+			 */
 			if (primario1.getSaltos().size() <= primario2.getSaltos().size()) {
 
 				for (Salto salto : primario1.getSaltos()) {
 					if (primario2.getSaltos().contains(salto)) {
-						salto.setEnlace(-1);
 						auxiliar.addSalto(salto);
 					} else {
 						auxiliar.addNull();
@@ -76,7 +79,6 @@ public class MiCruce implements OperadorCruce {
 			} else {
 				for (Salto salto : primario2.getSaltos()) {
 					if (primario1.getSaltos().contains(salto)) {
-						salto.setEnlace(-1);
 						auxiliar.addSalto(salto);
 					} else {
 						auxiliar.addNull();
@@ -90,6 +92,7 @@ public class MiCruce implements OperadorCruce {
 			// El inicio auxiliar ya se asigna al primer Nodo de Origen.
 			Nodo inicio = auxiliar.getOrigen();
 			Nodo fin = null;
+			int longitudDeOnda = -1;
 
 			Iterator<Salto> saltos = auxiliar.getSaltos().iterator();
 
@@ -107,28 +110,34 @@ public class MiCruce implements OperadorCruce {
 					while (salto == null && saltos.hasNext()) {
 						salto = saltos.next();
 					}
-					if (saltos.hasNext()) // sigue por el medio del Servicio
+					if (saltos.hasNext()) { // sigue por el medio del Servicio
 						fin = salto.getEnlace().getExtremoA();
-					else
+						longitudDeOnda = salto.getEnlace().getLongitudDeOnda();
+					} else {
 						// Llegó al último Nodo y no hay camino
 						fin = auxiliar.getDestino();
-					
+					}
+
 					/*
-					 * Segundo: Realizar algoritmo Shortest Path Disjktra (SPD)
-					 * desde el Nodo inicio al Nodo fin.
+					 * P2: Se utiliza el algoritmo Shortest Path Disjktra (SPD)
+					 * desde el Nodo inicio al Nodo fin para completar los
+					 * caminos faltantes.
 					 */
 					Camino subCamino = inicio.dijkstra(fin);
 					// Se agrega el camino encontrado al Nuevo Camino Primario
 					for (Salto saltoAux : subCamino.getSaltos()) {
-						saltoAux.setEnlace(-1);
+						saltoAux.setEnlace(longitudDeOnda);
+						longitudDeOnda = salto.getEnlace().getLongitudDeOnda();
 						nuevoSecundario.addSalto(saltoAux);
 					}
 				} else {
 					/*
 					 * Caso not null: los genes not null (que son iguales entre
-					 * los padres) se agregan directamente.
+					 * los padres) se agregan directamente. LDO ya está
+					 * asignado.
 					 */
-					salto.setEnlace(-1);
+					salto.getEnlace().setLongitudDeOnda(longitudDeOnda);
+					longitudDeOnda = salto.getEnlace().getLongitudDeOnda();
 					nuevoPrimario.addSalto(salto);
 					// se asigna como inicio del siguiente el fin de este salto.
 					inicio = salto.getEnlace().getExtremoB();
@@ -142,9 +151,11 @@ public class MiCruce implements OperadorCruce {
 			Nodo nodoA = primario1.getOrigen();
 			Nodo nodoB = primario1.getDestino();
 			Camino subCamino = nodoA.dijkstra(nodoB);
+			longitudDeOnda = -1;
 			// Se agrega el camino encontrado al Nuevo Camino Secundario
 			for (Salto salto : subCamino.getSaltos()) {
-				salto.setEnlace(-1);
+				salto.setEnlace(longitudDeOnda);
+				longitudDeOnda = salto.getEnlace().getLongitudDeOnda();
 				nuevoSecundario.addSalto(salto);
 			}
 			Servicio newServicio = new Servicio(nuevoPrimario, nuevoSecundario);
@@ -153,6 +164,7 @@ public class MiCruce implements OperadorCruce {
 			 */
 			hijo.getGenes().add(newServicio);
 		}
+
 		return hijo;
 	}
 }
