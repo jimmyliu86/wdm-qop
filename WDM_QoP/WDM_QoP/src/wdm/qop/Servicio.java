@@ -11,7 +11,7 @@ import javax.persistence.Transient;
 import wdm.Camino;
 
 @Entity
-public class Servicio{
+public class Servicio implements Comparable<Servicio>{
 	
 	@Id
 	@GeneratedValue
@@ -128,5 +128,11 @@ public class Servicio{
 	@Override
 	public String toString() {
 		return "s"+solicitud.getOrigen()+"_"+solicitud.getDestino();
+	}
+	
+	@Override
+	public int compareTo(Servicio otro) {
+		int retorno = (int) (this.getSolicitud().getId() - otro.getSolicitud().getId());
+		return retorno;
 	}
 }

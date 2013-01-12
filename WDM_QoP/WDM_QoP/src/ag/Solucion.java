@@ -1,6 +1,8 @@
 package ag;
 
-import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.Set;
+import java.util.TreeSet;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
@@ -30,7 +32,7 @@ public class Solucion implements Individuo {
 
 	// Genes de la solución (Conjunto de Servicios)
 	@ManyToMany(cascade = CascadeType.ALL)
-	private ArrayList<Servicio> genes;
+	private Set<Servicio> genes;
 
 	// Fitness de la Solución
 	private double fitness;
@@ -40,15 +42,14 @@ public class Solucion implements Individuo {
 
 	public Solucion() {
 		super();
-		this.genes = new ArrayList<Servicio>();
+		this.genes = new TreeSet<Servicio>();
 		this.fitness = 0.0;
 		this.costo = 0.0;
 	}
 
-	public Solucion(ArrayList<Servicio> servicios) {
+	public Solucion(Set<Servicio> servicios) {
 		super();
-		int size = servicios.size();
-		genes = new ArrayList<Servicio>(size);
+		genes = new TreeSet<Servicio>(servicios);
 	}
 
 	@Override
@@ -107,11 +108,11 @@ public class Solucion implements Individuo {
 		this.id = id;
 	}
 
-	public ArrayList<Servicio> getGenes() {
-		return genes;
+	public TreeSet<Servicio> getGenes() {
+		return (TreeSet<Servicio>) genes;
 	}
 
-	public void setGenes(ArrayList<Servicio> genes) {
+	public void setGenes(TreeSet<Servicio> genes) {
 		this.genes = genes;
 	}
 
@@ -124,14 +125,30 @@ public class Solucion implements Individuo {
 	 */
 	public boolean mismasSolicitudes(Solucion solucion) {
 		int contador = 0;
-		for (int i = 0; i < this.getGenes().size(); i++) {
-			if (this.getGenes().get(i).getSolicitud()
-					.equals(solucion.getGenes().get(i).getSolicitud()))
-				contador++;
-		}
 		boolean retorno = false;
-		if (contador == this.getGenes().size())
+		
+		if (this.getGenes().size() != solucion.getGenes().size()) {
+			return retorno;
+		}
+		
+		int size = this.getGenes().size();
+		Iterator<Servicio> i1 = this.getGenes().iterator();
+		Iterator<Servicio> i2 = solucion.getGenes().iterator();
+		
+		for (int i = 0; i < size; i++) {
+			Servicio s1 = i1.next();
+			Servicio s2 = i2.next();
+			if (s1.getSolicitud().equals(s2.getSolicitud())){
+				contador++;
+			} else {
+				retorno = false;
+				i = size;
+			}
+		}
+		
+		if (contador == size)
 			retorno = true;
+		
 		return retorno;
 	}
 }
