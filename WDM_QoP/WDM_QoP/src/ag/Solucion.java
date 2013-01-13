@@ -1,5 +1,6 @@
 package ag;
 
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.TreeSet;
@@ -11,6 +12,9 @@ import javax.persistence.Id;
 import javax.persistence.ManyToMany;
 import javax.persistence.Table;
 
+import wdm.Camino;
+import wdm.CanalOptico;
+import wdm.Salto;
 import wdm.qop.Servicio;
 
 /**
@@ -65,20 +69,50 @@ public class Solucion implements Individuo {
 	 */
 	@Override
 	public double evaluar() {
+		int size = this.cantidadEnlaces();
+		double total_Distancia = 0.0;
+		double total_LDO = 0.0;
+		int contador = 0;
 
-		double total1 = 0.0;
-		double total2 = 0.0;
+		Set<CanalOptico> auxiliar = new HashSet<CanalOptico>(size);
+
 		for (Servicio gen : this.genes) {
-			total1 += gen.getPrimario().getDistancia();
-			total2 += gen.getPrimario().getCambiosLDO();
+
+			Camino primario = gen.getPrimario();
+			for (Salto s : primario.getSaltos()) {
+				CanalOptico ca = s.getEnlace().getCanal();
+				boolean inserto = auxiliar.add(ca);
+				// inserto es false cuando ya existía en auxiliar
+				if (!inserto)
+					contador++;
+			}
+
+			total_LDO += primario.getCambiosLDO();
 		}
+		
+		// se descuentan los enlaces cuyos canales opticos ya existen.
+		total_Distancia = size - contador;
 
 		// Fórmula de Costo de una Solucion
-		this.costo = total1 * a + total2 * b;
+		this.costo = total_Distancia * a + total_LDO * b;
 		// Fitness de la Solución
 		this.fitness = 1 / this.costo;
 
 		return this.fitness;
+	}
+
+	/**
+	 * Obtiene la cantidad total de enlaces utilizados en la solución.
+	 * Independientemente si pasa o no por el mismo Canal Optico.
+	 * 
+	 * @return
+	 */
+	public int cantidadEnlaces() {
+		int size = 0;
+		for (Servicio gen : this.genes) {
+			size += gen.getPrimario().getDistancia();
+		}
+		return size;
 	}
 
 	/**
