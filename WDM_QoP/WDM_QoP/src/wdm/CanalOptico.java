@@ -34,9 +34,11 @@ public class CanalOptico {
 	@Id 
 	@GeneratedValue 
 	private int id;
-	
+
+	// Cantidad de fibras de Onda del Canal Óptico.
 	private int fibras;
 	
+	// Cantidad de Longitudes de Onda del Canal Óptico.
 	private int ldos;
 	
 	private int costo;

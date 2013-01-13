@@ -54,7 +54,7 @@ public class Camino {
 	}
 
 	/**
-	 * Constructor apartir de un camin existente
+	 * Constructor apartir de un camino existente
 	 * 
 	 * @param c
 	 *            Camino existente
@@ -80,7 +80,7 @@ public class Camino {
 			destino = origen;
 
 		destino = salto.getCanal().getOtroExtremo(destino);
-		distancia = salto.getCanal().getCosto();
+		distancia += salto.getCanal().getCosto();
 	}
 
 	public void addNull() {
