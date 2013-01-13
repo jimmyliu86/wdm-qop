@@ -40,6 +40,11 @@ public class Solucion implements Individuo {
 	// Costo de la Solución
 	private double costo;
 
+	// Valor por kilometro.
+	public static double a = 0.1;
+	// Valor por cambio de longitud de onda
+	public static double b = 2;
+
 	public Solucion() {
 		super();
 		this.genes = new TreeSet<Servicio>();
@@ -52,17 +57,27 @@ public class Solucion implements Individuo {
 		genes = new TreeSet<Servicio>(servicios);
 	}
 
+	/**
+	 * Calcula el costo en función de la Fórmula de Evaluación Definida.
+	 * <p>
+	 * Costo = suma_de_distancia x a + suma_de_cambios_LDO x b
+	 * </p>
+	 */
 	@Override
 	public double evaluar() {
-		// Calculamos el costo de la solución
-		// TODO: Implementar completamente el Costo
-		double total = 0.0;
+
+		double total1 = 0.0;
+		double total2 = 0.0;
 		for (Servicio gen : this.genes) {
-			total += gen.getPrimario().getDistancia();
+			total1 += gen.getPrimario().getDistancia();
+			total2 += gen.getPrimario().getCambiosLDO();
 		}
 
-		this.costo = total;
+		// Fórmula de Costo de una Solucion
+		this.costo = total1 * a + total2 * b;
+		// Fitness de la Solución
 		this.fitness = 1 / this.costo;
+
 		return this.fitness;
 	}
 
@@ -126,29 +141,29 @@ public class Solucion implements Individuo {
 	public boolean mismasSolicitudes(Solucion solucion) {
 		int contador = 0;
 		boolean retorno = false;
-		
+
 		if (this.getGenes().size() != solucion.getGenes().size()) {
 			return retorno;
 		}
-		
+
 		int size = this.getGenes().size();
 		Iterator<Servicio> i1 = this.getGenes().iterator();
 		Iterator<Servicio> i2 = solucion.getGenes().iterator();
-		
+
 		for (int i = 0; i < size; i++) {
 			Servicio s1 = i1.next();
 			Servicio s2 = i2.next();
-			if (s1.getSolicitud().equals(s2.getSolicitud())){
+			if (s1.getSolicitud().equals(s2.getSolicitud())) {
 				contador++;
 			} else {
 				retorno = false;
 				i = size;
 			}
 		}
-		
+
 		if (contador == size)
 			retorno = true;
-		
+
 		return retorno;
 	}
 }
