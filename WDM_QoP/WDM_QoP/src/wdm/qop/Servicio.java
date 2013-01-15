@@ -8,6 +8,8 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import javax.persistence.Transient;
 
+import ag.Solucion;
+
 import wdm.Camino;
 
 @Entity
@@ -53,6 +55,7 @@ public class Servicio implements Comparable<Servicio>{
 		super();
 		this.primario = primario;
 		this.alternativo = alternativo;
+		this.solicitud = new Solicitud(primario.getOrigen(),primario.getDestino(),Nivel.Oro);
 	}
 
 
@@ -134,5 +137,22 @@ public class Servicio implements Comparable<Servicio>{
 	public int compareTo(Servicio otro) {
 		int retorno = (int) (this.getSolicitud().getId() - otro.getSolicitud().getId());
 		return retorno;
+	}
+	
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Servicio other = (Servicio) obj;
+		if (solicitud == null) {
+			if (other.solicitud != null)
+				return false;
+		} else if (!solicitud.equals(other.solicitud))
+			return false;
+		return true;
 	}
 }

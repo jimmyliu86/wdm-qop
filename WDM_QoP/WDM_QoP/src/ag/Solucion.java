@@ -58,7 +58,9 @@ public class Solucion implements Individuo {
 
 	public Solucion(Set<Servicio> servicios) {
 		super();
-		genes = new TreeSet<Servicio>(servicios);
+		this.genes = new TreeSet<Servicio>(servicios);
+		this.fitness = 0.0;
+		this.costo = 0.0;
 	}
 
 	/**
@@ -110,6 +112,7 @@ public class Solucion implements Individuo {
 	public int cantidadEnlaces() {
 		int size = 0;
 		for (Servicio gen : this.genes) {
+			if (gen != null)
 			size += gen.getPrimario().getDistancia();
 		}
 		return size;
@@ -161,8 +164,8 @@ public class Solucion implements Individuo {
 		return (TreeSet<Servicio>) genes;
 	}
 
-	public void setGenes(TreeSet<Servicio> genes) {
-		this.genes = genes;
+	public void setGenes(Set<Servicio> genes) {
+		this.genes = (TreeSet<Servicio>) genes;
 	}
 
 	/**
@@ -199,5 +202,22 @@ public class Solucion implements Individuo {
 			retorno = true;
 
 		return retorno;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Solucion other = (Solucion) obj;
+		if (genes == null) {
+			if (other.genes != null)
+				return false;
+		} else if (!genes.equals(other.genes))
+			return false;
+		return true;
 	}
 }

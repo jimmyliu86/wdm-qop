@@ -40,6 +40,14 @@ public class Nodo {
 	
 	@Transient
 	private boolean bloqueado = false;
+	
+	public Nodo() {
+		label = "";
+	}
+
+	public Nodo(String label) {
+		this.label = label;
+	}
 
 	/**
 	 * Retorna la etiqueta del nodo.
