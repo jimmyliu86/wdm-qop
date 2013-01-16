@@ -190,4 +190,16 @@ public class Red {
 			nodo.inicializar();
 		}
 	}
+	
+	public void imprimirRed(){
+		System.out.println("NODOS: ");
+		for (Nodo c : this.getNodos()) {
+			System.out.println("("+c.getId()+") "+c.getLabel());
+		}
+		
+		System.out.println("CANALES: ");
+		for (CanalOptico co : this.getCanales()) {
+			System.out.println("("+co.getExtremoA().getLabel()+" => "+co.getExtremoB().getLabel()+") ");
+		}
+	}
 }
