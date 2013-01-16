@@ -46,14 +46,15 @@ public class AGTest {
 
 		s1.evaluar();
 		s2.evaluar();
+		System.out.println(" $ "+s1.getFitness()+" - "+s2.getFitness()+" $ ");
 		assertTrue(s1.getFitness() == s2.getFitness());
 	}
 
 	@Test
 	public void testMismasSolicitudes() {
-		Solucion s1 = new Solucion(this.getServicios(5));
+		Solucion s1 = new Solucion(getServicios(5));
 
-		Solucion s2 = new Solucion(this.getServicios(5));
+		Solucion s2 = new Solucion(getServicios(6));
 
 		assertTrue(s1.mismasSolicitudes(s2));
 
