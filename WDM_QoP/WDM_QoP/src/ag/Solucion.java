@@ -233,13 +233,13 @@ public class Solucion implements Individuo {
 	@Override
 	public String toString() {
 		final int maxLen = genes.size();
-		return "Solucion [fitness=" + fitness + ", costo=" + costo + ", genes="
+		return "[Solucion [fitness=" + fitness + ", costo=" + costo + ", \ngenes="
 				+ (genes != null ? toString(genes, maxLen) : null) + "]";
 	}
 
 	private String toString(Set<Servicio> collection, int maxLen) {
 		StringBuilder builder = new StringBuilder();
-		builder.append("[");
+		builder.append("\n[");
 		int i = 0;
 		for (Iterator<Servicio> iterator = collection.iterator(); iterator
 				.hasNext(); i++) {

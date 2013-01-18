@@ -137,7 +137,11 @@ public class Servicio implements Comparable<Servicio> {
 
 	@Override
 	public String toString() {
-		return "De:" + solicitud.getOrigen() + " A:" + solicitud.getDestino();
+		String retorno =  "Servicio [De:" + solicitud.getOrigen() + "-A:" + solicitud.getDestino() + "\n";
+		retorno += "[PRIMARIO: "+this.primario.toString()+"] \n";
+		retorno += "[ALTERNATIVO: "+this.alternativo.toString()+"] ";
+		retorno += "] \n";
+		return retorno;
 	}
 
 	@Override
@@ -180,6 +184,9 @@ public class Servicio implements Comparable<Servicio> {
 		Nodo origen = this.solicitud.getOrigen();
 		Nodo destino = this.solicitud.getDestino();
 		route = origen.dijkstra(destino);
+		// TODO: verificar si está correcto
+		if (route == null)
+			route = new Camino(origen, destino);
 		route.setEnlaces();
 		return route;
 	}

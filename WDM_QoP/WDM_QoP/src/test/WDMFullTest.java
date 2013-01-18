@@ -34,6 +34,7 @@ public class WDMFullTest {
 	public void testRed() {
 		NSFNET.imprimirRed();
 		assertNotNull(NSFNET);
+		//cargarPrueba("prueba2");
 	}
 
 	@Test
@@ -56,17 +57,15 @@ public class WDMFullTest {
 	public void algoritmoGenetico() {
 		// 0. Ya se cuenta con la red NSFNET.
 		// 1. Obtener el caso de prueba (Solicitudes)
-		Caso prueba1 = em.find(Caso.class, "prueba1");
+		Caso prueba1 = em.find(Caso.class, "prueba2");
 		// 2. Crear las soluciones con las Solicitudes
 		Solucion solucion = new Solucion(prueba1.getSolicitudes());
 		solucion.evaluar();
 		System.out.println(prueba1.getSolicitudes().toString());
-		System.out.print("Fitness: " + solucion.getFitness());
-		System.out.print(" - Costo: " + solucion.getCosto());
 		System.out.println(solucion.toString());
 
 		// 3.
-		assertTrue(prueba1.getSolicitudes().size() == 1);
+		assertTrue(prueba1.getSolicitudes().size() == 3);
 	}
 
 	/**
@@ -75,12 +74,12 @@ public class WDMFullTest {
 	 * @param nombre
 	 */
 	private void cargarPrueba(String nombre) {
-		Caso prueba1 = new Caso(NSFNET, 1, probNiveles);
+		Caso prueba = new Caso(NSFNET, 3, probNiveles);
 		// Un nombre = prueba1
-		prueba1.setNombre(nombre);
+		prueba.setNombre(nombre);
 
 		em.getTransaction().begin();
-		em.persist(prueba1);
+		em.persist(prueba);
 		em.getTransaction().commit();
 	}
 
