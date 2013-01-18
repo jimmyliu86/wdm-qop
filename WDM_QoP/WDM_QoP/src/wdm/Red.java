@@ -193,9 +193,10 @@ public class Red {
 	
 	public void imprimirRed(){
 		
-		System.out.println("CANALES: ");
+		System.out.println("[RED: "+this.nombre+" [");
 		for (CanalOptico co : this.getCanales()) {
-			System.out.println("("+co.getExtremoA().getLabel()+" => "+co.getExtremoB().getLabel()+") ");
+			System.out.print("["+co.getExtremoA().getLabel()+"->"+co.getExtremoB().getLabel()+"] ");
 		}
+		System.out.println("] \n]");
 	}
 }
