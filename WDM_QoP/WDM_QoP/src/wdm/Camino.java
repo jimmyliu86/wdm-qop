@@ -45,9 +45,9 @@ public class Camino {
 	 * 
 	 * @param origen
 	 */
-	public Camino(Nodo origen) {
+	public Camino(Nodo origen, Nodo destino) {
 		this.origen = origen;
-		this.destino = origen;
+		this.destino = destino;
 		this.saltos = new TreeSet<Salto>();
 		this.saltos.clear();
 		this.distancia = 0;
@@ -225,9 +225,9 @@ public class Camino {
 		ldo1 = isaltos.next().getEnlace().getLongitudDeOnda();
 		while (isaltos.hasNext()) {
 			ldo2 = isaltos.next().getEnlace().getLongitudDeOnda();
-			if (ldo1 != ldo2) 
+			if (ldo1 != ldo2)
 				retorno++;
-			
+
 			ldo1 = ldo2;
 		}
 

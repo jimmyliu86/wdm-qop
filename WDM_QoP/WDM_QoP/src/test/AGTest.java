@@ -23,9 +23,9 @@ public class AGTest {
 
 	@Test
 	public void testSolucion() {
-		Solucion s1 = new Solucion(this.getServicios(5));
+		Solucion s1 = new Solucion(this.getSolicitudes(5));
 
-		Solucion s2 = new Solucion(this.getServicios(5));
+		Solucion s2 = new Solucion(this.getSolicitudes(5));
 
 		assertEquals(s1.getGenes(), s2.getGenes());
 		assertNotSame("No son lo mismo.", s1, s2);
@@ -33,15 +33,15 @@ public class AGTest {
 
 	@Test
 	public void testEvaluar() {
-		Solucion s1 = new Solucion(this.getServicios(5));
+		Solucion s1 = new Solucion(this.getSolicitudes(5));
 		Set<Servicio> genes = new TreeSet<Servicio>();
 		Camino primario = new Camino();
 		Camino secundario = new Camino();
-		Servicio serv = new Servicio(primario, secundario);
+		Servicio serv = new Servicio(primario, secundario, Nivel.Oro);
 		serv.setId(1);
 		s1.setGenes(genes);
 
-		Solucion s2 = new Solucion(this.getServicios(5));
+		Solucion s2 = new Solucion(this.getSolicitudes(5));
 		s2.setGenes(genes);
 
 		s1.evaluar();
@@ -52,31 +52,28 @@ public class AGTest {
 
 	@Test
 	public void testMismasSolicitudes() {
-		Solucion s1 = new Solucion(getServicios(5));
+		Solucion s1 = new Solucion(getSolicitudes(5));
 
-		Solucion s2 = new Solucion(getServicios(6));
+		Solucion s2 = new Solucion(getSolicitudes(6));
 
 		assertTrue(s1.mismasSolicitudes(s2));
 
 	}
 
-	private Set<Servicio> getServicios(int size) {
-
-		Set<Servicio> servicios = new HashSet<Servicio>(size * 2);
+	private Set<Solicitud> getSolicitudes(int size) {
+		
+		Set<Solicitud> solicitudes = new TreeSet<Solicitud>();
 		for (int i = 4; i < size; i++) {
 			Nodo A = new Nodo("A");
 			Nodo B = new Nodo("B");
 			Solicitud solicitud1 = new Solicitud(A, B, Nivel.Oro);
 			Solicitud solicitud2 = new Solicitud(A, B, Nivel.Bronce);
 			Solicitud solicitud3 = new Solicitud(B, A, Nivel.Bronce);
-			Servicio servicio = new Servicio(solicitud1);
-			servicios.add(servicio);
-			servicio = new Servicio(solicitud2);
-			servicios.add(servicio);
-			servicio = new Servicio(solicitud3);
-			servicios.add(servicio);
+			solicitudes.add(solicitud1);
+			solicitudes.add(solicitud2);
+			solicitudes.add(solicitud3);
 		}
-		return servicios;
+		return solicitudes;
 	}
 
 }

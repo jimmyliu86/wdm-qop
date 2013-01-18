@@ -5,6 +5,7 @@ import java.util.Iterator;
 import wdm.Camino;
 import wdm.Nodo;
 import wdm.Salto;
+import wdm.qop.Nivel;
 import wdm.qop.Servicio;
 import ag.Solucion;
 import ag.operadores.OperadorCruce;
@@ -40,7 +41,7 @@ public class MiCruce implements OperadorCruce {
 		if (!s1.mismasSolicitudes(s2))
 			throw new Error("Las solicitudes no coinciden");
 
-		Solucion hijo = new Solucion(s1.getGenes());
+		Solucion hijo = new Solucion();
 
 		Camino auxiliar = null;
 		Camino nuevoPrimario = null;
@@ -50,15 +51,13 @@ public class MiCruce implements OperadorCruce {
 		 * Cálculos del Nuevo Camino Primario y del Nuevo Camino Secundario.
 		 */
 		for (int i = 0; i < size1; i++) {
-			Servicio gen1 = new Servicio(s1.getGenes().first().getSolicitud());
-			Servicio gen2 = new Servicio(s2.getGenes().first().getSolicitud());
-			gen1 = s1.getGenes().pollFirst();
-			gen2 = s2.getGenes().pollFirst();
+			Servicio gen1 = s1.getGenes().pollFirst();
+			Servicio gen2 = s2.getGenes().pollFirst();
+
 			Camino primario1 = gen1.getPrimario();
 			Camino primario2 = gen2.getPrimario();
 
-			auxiliar = new Camino(primario1.getOrigen());
-			auxiliar.setDestino(primario1.getDestino());
+			auxiliar = new Camino(primario1.getOrigen(),primario1.getDestino());
 			
 
 			/*
@@ -87,8 +86,8 @@ public class MiCruce implements OperadorCruce {
 			}
 
 			// se carga el nuevo Camino Primario.
-			nuevoPrimario = new Camino(primario1.getOrigen());
-			nuevoSecundario = new Camino(primario1.getOrigen());
+			nuevoPrimario = new Camino();
+			nuevoSecundario = new Camino();
 			// El inicio auxiliar ya se asigna al primer Nodo de Origen.
 			Nodo inicio = auxiliar.getOrigen();
 			Nodo fin = null;
@@ -128,7 +127,7 @@ public class MiCruce implements OperadorCruce {
 					for (Salto saltoAux : subCamino.getSaltos()) {
 						saltoAux.setEnlace(longitudDeOnda);
 						longitudDeOnda = salto.getEnlace().getLongitudDeOnda();
-						nuevoSecundario.addSalto(saltoAux);
+						nuevoPrimario.addSalto(saltoAux);
 					}
 				} else {
 					/*
@@ -150,6 +149,8 @@ public class MiCruce implements OperadorCruce {
 			 */
 			Nodo nodoA = primario1.getOrigen();
 			Nodo nodoB = primario1.getDestino();
+			Nivel nivel = gen1.getSolicitud().getNivel();
+			
 			Camino subCamino = nodoA.dijkstra(nodoB);
 			longitudDeOnda = -1;
 			// Se agrega el camino encontrado al Nuevo Camino Secundario
@@ -158,7 +159,7 @@ public class MiCruce implements OperadorCruce {
 				longitudDeOnda = salto.getEnlace().getLongitudDeOnda();
 				nuevoSecundario.addSalto(salto);
 			}
-			Servicio newServicio = new Servicio(nuevoPrimario, nuevoSecundario);
+			Servicio newServicio = new Servicio(nuevoPrimario, nuevoSecundario, nivel);
 			/*
 			 * Cargar Genes al hijo.
 			 */

@@ -16,6 +16,7 @@ import wdm.Camino;
 import wdm.CanalOptico;
 import wdm.Salto;
 import wdm.qop.Servicio;
+import wdm.qop.Solicitud;
 
 /**
  * Clase Solución que implementa al Individuo.
@@ -56,8 +57,14 @@ public class Solucion implements Individuo {
 		this.costo = 0.0;
 	}
 
-	public Solucion(Set<Servicio> servicios) {
+	public Solucion(Set<Solicitud> solicitudes) {
 		super();
+
+		Set<Servicio> servicios = new TreeSet<Servicio>();
+		for (Solicitud s : solicitudes) {
+			servicios.add(new Servicio(s));
+		}
+
 		this.genes = new TreeSet<Servicio>(servicios);
 		this.fitness = 0.0;
 		this.costo = 0.0;
@@ -81,8 +88,10 @@ public class Solucion implements Individuo {
 		for (Servicio gen : this.genes) {
 
 			Camino primario = gen.getPrimario();
+
 			for (Salto s : primario.getSaltos()) {
-				CanalOptico ca = s.getEnlace().getCanal();
+
+				CanalOptico ca = s.getCanal();
 				boolean inserto = auxiliar.add(ca);
 				// inserto es false cuando ya existía en auxiliar
 				if (!inserto)
@@ -91,7 +100,7 @@ public class Solucion implements Individuo {
 
 			total_LDO += primario.getCambiosLDO();
 		}
-		
+
 		// se descuentan los enlaces cuyos canales opticos ya existen.
 		total_Distancia = size - contador;
 
@@ -113,7 +122,7 @@ public class Solucion implements Individuo {
 		int size = 0;
 		for (Servicio gen : this.genes) {
 			if (gen != null)
-			size += gen.getPrimario().getDistancia();
+				size += gen.getPrimario().getDistancia();
 		}
 		return size;
 	}
@@ -220,4 +229,26 @@ public class Solucion implements Individuo {
 			return false;
 		return true;
 	}
+
+	@Override
+	public String toString() {
+		final int maxLen = genes.size();
+		return "Solucion [fitness=" + fitness + ", costo=" + costo + ", genes="
+				+ (genes != null ? toString(genes, maxLen) : null) + "]";
+	}
+
+	private String toString(Set<Servicio> collection, int maxLen) {
+		StringBuilder builder = new StringBuilder();
+		builder.append("[");
+		int i = 0;
+		for (Iterator<Servicio> iterator = collection.iterator(); iterator
+				.hasNext(); i++) {
+			if (i > 0)
+				builder.append(", ");
+			builder.append(iterator.next().toString());
+		}
+		builder.append("]");
+		return builder.toString();
+	}
+
 }

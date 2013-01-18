@@ -121,4 +121,10 @@ public class Solicitud {
 		return true;
 	}
 
+	@Override
+	public String toString() {
+		return "Solicitud [origen=" + origen + ", destino=" + destino
+				+ ", nivel=" + nivel + "]";
+	}
+
 }
