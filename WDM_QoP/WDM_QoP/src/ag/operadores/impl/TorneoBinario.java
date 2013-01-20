@@ -1,6 +1,9 @@
 package ag.operadores.impl;
 
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Random;
+import java.util.Set;
 
 import ag.Individuo;
 import ag.Poblacion;
@@ -9,15 +12,18 @@ import ag.operadores.OperadorSeleccion;
 public class TorneoBinario implements OperadorSeleccion {
 
 	@Override
-	public Individuo[] seleccionar(Poblacion poblacion) {
+	public Set<Individuo> seleccionar(Poblacion poblacion) {
+
 		if (poblacion == null)
-			throw new Error("La poblaci�n no existe.");
+			throw new Error("La poblacion no existe.");
 
 		// Tama�o de población seleccionada
 		int cantMejores = poblacion.getTamanho();
+		System.out.println("cantidad:" +cantMejores);
+		ArrayList<Individuo> individuos = poblacion.getIndividuosToArray();
 
 		// Cromosomas seleccionados
-		Individuo[] mejores = new Individuo[cantMejores];
+		Set<Individuo> respuesta = new HashSet<Individuo>();
 
 		// Se inicializa la clase Random
 		Random rand = new Random();
@@ -30,15 +36,16 @@ public class TorneoBinario implements OperadorSeleccion {
 			int ind1 = rand.nextInt(cantMejores);
 			int ind2 = rand.nextInt(cantMejores);
 
-			Individuo individuo1 = poblacion.getIndividuos().get(ind1);
-			Individuo individuo2 = poblacion.getIndividuos().get(ind2);
+			Individuo individuo1 = individuos.get(ind1);
+			Individuo individuo2 = individuos.get(ind2);
 
 			/*
 			 * Nos aseguramos que los individuos seleccionados sean distintos.
 			 */
 			while (individuo1.equals(individuo2)) {
+				System.out.println("$Hola:");
 				ind2 = rand.nextInt(cantMejores);
-				individuo2 = poblacion.getIndividuos().get(ind2);
+				individuo2 = individuos.get(ind2);
 			}
 
 			// Se extrae los fitness de los correspondientes individuos
@@ -48,14 +55,16 @@ public class TorneoBinario implements OperadorSeleccion {
 			// Competencia
 			if (fitness1 >= fitness2) {
 				// Ganó individuo 1
-				mejores[i] = individuo1;
+				System.out.println("#Respuesta"+i+": "+individuo1);
+				respuesta.add(individuo1);
 			} else {
 				// Ganó individuo 2
-				mejores[i] = individuo2;
+				System.out.println("#Respuesta"+i+": "+individuo2);
+				respuesta.add(individuo2);
 			}
 		}
 
-		return mejores;
+		return respuesta;
 	}
 
 }

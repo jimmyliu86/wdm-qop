@@ -3,9 +3,11 @@ package ag;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Set;
+import java.util.TreeSet;
 
 import ag.operadores.OperadorCruce;
 import ag.operadores.OperadorSeleccion;
+import ag.operadores.impl.MiCruce;
 import ag.operadores.impl.TorneoBinario;
 
 /**
@@ -23,17 +25,12 @@ public class Poblacion {
 	/*
 	 * Individuos de la población
 	 */
-	private ArrayList<Individuo> individuos;
+	private Set<Individuo> individuos;
 
 	/*
 	 * Hijos de los individuos selectos
 	 */
-	private ArrayList<Individuo> hijos;
-
-	/*
-	 * Valor de calidad de un cromosoma
-	 */
-	private ArrayList<Double> fitness;
+	private Set<Individuo> hijos;
 
 	/*
 	 * Operador de cruce
@@ -50,9 +47,12 @@ public class Poblacion {
 	 * 
 	 * @param individuos
 	 */
-	public Poblacion(ArrayList<Individuo> individuos) {
+	public Poblacion(Set<Individuo> individuos) {
 		this.individuos = individuos;
 		this.operadorSeleccion = new TorneoBinario();
+		this.operadorCruce = new MiCruce();
+		this.hijos = new TreeSet<Individuo>();
+
 	}
 
 	/**
@@ -73,30 +73,35 @@ public class Poblacion {
 		if (i.hasNext()) {
 			primero = i.next();
 			miPrimero = primero;
-			int index = 0;
 
 			// cruces en pares desde el principio
 			while (i.hasNext()) {
 				segundo = i.next();
 				this.seleccionar();
 				nuevo = operadorCruce.cruzar(primero, segundo);
-				this.hijos.set(index, nuevo);
-				index++;
+				this.hijos.add(nuevo);
 				primero = segundo;
 			}
 			// cruce entre el primero del grupo con el último.
 			nuevo = operadorCruce.cruzar(miPrimero, segundo);
-			this.hijos.set(index, nuevo);
+			this.hijos.add(nuevo);
 		}
 	}
 
+	public void evaluar() {
+		for (Individuo i : this.individuos) {
+			i.evaluar();
+		}
+	}
+	
 	/**
 	 * Operación de seleccion de Individuos para cruzar.
 	 * 
 	 * @return individuos seleccionados
 	 */
-	public Individuo[] seleccionar() {
-		return this.operadorSeleccion.seleccionar(this);
+	public Set<Individuo> seleccionar() {
+		Set<Individuo> selectos = this.operadorSeleccion.seleccionar(this);
+		return selectos;
 	}
 
 	/**
@@ -108,28 +113,25 @@ public class Poblacion {
 		return this.individuos.size();
 	}
 
-	public ArrayList<Individuo> getIndividuos() {
+	public Set<Individuo> getIndividuos() {
 		return individuos;
 	}
+	
+	public ArrayList<Individuo> getIndividuosToArray() {
+		ArrayList<Individuo> a = new ArrayList<Individuo>(this.individuos);
+		return a;
+	}
 
-	public void setIndividuos(ArrayList<Individuo> individuos) {
+	public void setIndividuos(Set<Individuo> individuos) {
 		this.individuos = individuos;
 	}
 
-	public ArrayList<Individuo> getHijos() {
+	public Set<Individuo> getHijos() {
 		return hijos;
 	}
 
-	public void setHijos(ArrayList<Individuo> hijos) {
+	public void setHijos(Set<Individuo> hijos) {
 		this.hijos = hijos;
-	}
-
-	public ArrayList<Double> getFitness() {
-		return fitness;
-	}
-
-	public void setFitness(ArrayList<Double> fitness) {
-		this.fitness = fitness;
 	}
 
 	public OperadorCruce getOperadorCruce() {
@@ -147,4 +149,5 @@ public class Poblacion {
 	public void setOperadorSeleccion(OperadorSeleccion operadorSeleccion) {
 		this.operadorSeleccion = operadorSeleccion;
 	}
+
 }

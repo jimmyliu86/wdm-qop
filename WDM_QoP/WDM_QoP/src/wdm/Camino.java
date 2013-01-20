@@ -222,13 +222,20 @@ public class Camino {
 		int ldo2 = 0;
 		Iterator<Salto> isaltos = this.saltos.iterator();
 		// al menos un enlace Salto debe existir.
-		ldo1 = isaltos.next().getEnlace().getLongitudDeOnda();
-		while (isaltos.hasNext()) {
-			ldo2 = isaltos.next().getEnlace().getLongitudDeOnda();
-			if (ldo1 != ldo2)
-				retorno++;
+		if (isaltos.hasNext()) {
 
-			ldo1 = ldo2;
+			Salto salto = isaltos.next();
+			if (salto.getEnlace() == null)
+				throw new Error("GetCambiosLDO: Enlace Nulo. ID:"+salto.getId());
+			ldo1 = salto.getEnlace().getLongitudDeOnda();
+			while (isaltos.hasNext()) {
+
+				ldo2 = isaltos.next().getEnlace().getLongitudDeOnda();
+				if (ldo1 != ldo2)
+					retorno++;
+
+				ldo1 = ldo2;
+			}
 		}
 
 		return retorno;
