@@ -1,51 +1,47 @@
 package wdm.qop;
 
-import javax.persistence.CascadeType;
+import wdm.*;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
 import javax.persistence.ManyToOne;
-
-import wdm.Nodo;
+import javax.persistence.CascadeType;
+import javax.persistence.Id;
 
 @Entity
-public class Solicitud {
-
+public class Solicitud implements Comparable<Solicitud>{
+	
 	@Id
 	@GeneratedValue
 	private long id;
-
-	@ManyToOne(cascade = CascadeType.ALL)
+	
+	@ManyToOne(cascade=CascadeType.ALL)
 	private Nodo origen;
-
-	@ManyToOne(cascade = CascadeType.ALL)
+	
+	@ManyToOne(cascade=CascadeType.ALL)
 	private Nodo destino;
-
+	
 	private Nivel nivel;
-
-	public Solicitud() {
-	}
-
+	
+	private EsquemaRestauracion esquema = EsquemaRestauracion.FullPath;
+	
+	public Solicitud(){}
+	
 	/**
 	 * Constructor principal
 	 * 
-	 * @param origen
-	 *            Nodo Origen
-	 * @param destino
-	 *            Nodo Destino
-	 * @param nivel
-	 *            Nivel de Calidad de Proteccion solicitada.
+	 * @param origen	Nodo Origen
+	 * @param destino	Nodo Destino
+	 * @param nivel		Nivel de Calidad de Proteccion solicitada.
 	 */
-	public Solicitud(Nodo origen, Nodo destino, Nivel nivel) {
+	public Solicitud(Nodo origen, Nodo destino, Nivel nivel){
 		this.origen = origen;
 		this.destino = destino;
 		this.nivel = nivel;
 	}
-
+	
 	/**
 	 * Getter del nodo Origen
-	 * 
-	 * @return Nodo origen
+	 * @return	Nodo origen
 	 */
 	public Nodo getOrigen() {
 		return origen;
@@ -53,8 +49,7 @@ public class Solicitud {
 
 	/**
 	 * Getter del nodo Destino
-	 * 
-	 * @return Nodo destino
+	 * @return	Nodo destino
 	 */
 	public Nodo getDestino() {
 		return destino;
@@ -62,7 +57,6 @@ public class Solicitud {
 
 	/**
 	 * Nivel de Calidad
-	 * 
 	 * @return
 	 */
 	public Nivel getNivel() {
@@ -88,43 +82,52 @@ public class Solicitud {
 	public void setNivel(Nivel nivel) {
 		this.nivel = nivel;
 	}
-
+	
+	@Override
+	public int hashCode() {
+		return origen.hashCode()*10000 + destino.hashCode();
+	}
+	
 	@Override
 	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
+		if (!(obj instanceof Solicitud)) return false;
+		
+		Solicitud b = (Solicitud) obj;
+		
+		return origen.equals(b.origen) && destino.equals(b.destino);
+	}
+	
+	@Override
+	public String toString() {
+		return origen + "_a_" + destino + "." + nivel.toString();
+	}
 
-		Solicitud other = (Solicitud) obj;
-		// id
-		if (id != other.id)
-			return false;
-		// origen
-		if (origen == null) {
-			if (other.origen != null)
-				return false;
-		} else if (!origen.equals(other.origen))
-			return false;
-		// destino
-		if (destino == null) {
-			if (other.destino != null)
-				return false;
-		} else if (!destino.equals(other.destino))
-			return false;
-		// nivel
-		if (nivel != other.nivel)
-			return false;
+	public EsquemaRestauracion getEsquema() {
+		return esquema;
+	}
 
-		return true;
+	public void setEsquema(EsquemaRestauracion esquema) {
+		this.esquema = esquema;
 	}
 
 	@Override
-	public String toString() {
-		return "Solicitud [origen=" + origen + ", destino=" + destino
-				+ ", nivel=" + nivel + "]";
+	public int compareTo(Solicitud s) {
+		int cmpOrd = this.nivel.ordinal() - s.nivel.ordinal();
+		
+		if (cmpOrd != 0) return cmpOrd;
+		
+		return hashCode() - s.hashCode();
 	}
+	
+	public Exclusividad getExclusividadPrimario(){
+		if (nivel == Nivel.Oro || nivel == Nivel.Plata1) return Exclusividad.Exclusivo;
 
+		return Exclusividad.SinReservasBronce;
+	}
+	
+	public Exclusividad getExclusividadAlternativo(){
+		if (nivel == Nivel.Oro) return Exclusividad.Exclusivo;
+		
+		return Exclusividad.NoExclusivo;
+	}
 }
