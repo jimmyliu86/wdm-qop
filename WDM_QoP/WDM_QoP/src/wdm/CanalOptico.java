@@ -13,48 +13,49 @@ import javax.persistence.OrderBy;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
+import wdm.qop.Exclusividad;
+import wdm.qop.Nivel;
+import wdm.qop.Servicio;
+
 @Entity
-@Table(name = "CanalOptico")
+@Table(name="CanalOptico")
 /**
  * Clase que representa los canales opticos que forman parte de la red.
  * <p>
- * Descripcion: Canal Óptico utilizado para representar la agrupacion de enlaces
+ * Descripcion: Canal optico utilizado para representar la agrupacion de enlaces
  * que estan definidos por longitud de onda, por fibra, y por canal.
  * </p>
  * 
  * @author aamadeo
  * 
  */
-public class CanalOptico {
+public class CanalOptico implements Comparable<CanalOptico> {
 
-	@OneToMany(cascade = CascadeType.ALL)
+	@OneToMany(cascade=CascadeType.ALL)
 	@OrderBy("longitudDeOnda ASC")
 	private Set<Enlace> enlaces = new HashSet<Enlace>();
-
-	@Id
-	@GeneratedValue
+	
+	@Id 
+	@GeneratedValue 
 	private int id;
-
-	// Cantidad de fibras de Onda del Canal Óptico.
+	
 	private int fibras;
-
-	// Cantidad de Longitudes de Onda del Canal Óptico.
+	
 	private int ldos;
-
+	
 	private int costo;
-
-	@ManyToOne(cascade = CascadeType.ALL)
+	
+	@ManyToOne(cascade=CascadeType.ALL)
 	private Nodo extremoA;
-
-	@ManyToOne(cascade = CascadeType.ALL)
+	
+	@ManyToOne(cascade=CascadeType.ALL)
 	private Nodo extremoB;
-
+	
 	@Transient
 	private boolean bloqueado = false;
-
-	public CanalOptico() {
-	}
-
+	
+	public CanalOptico(){}
+	
 	/**
 	 * Constructor principal. Setea los atributos principales y genera los
 	 * enlaces del canal.
@@ -77,8 +78,8 @@ public class CanalOptico {
 		this.enlaces.clear();
 		crearEnlaces();
 	}
-
-	public void crearEnlaces() {
+	
+	public void crearEnlaces(){
 		for (int i = 0; i < fibras; i++) {
 			for (int j = 0; j < ldos; j++) {
 				this.enlaces.add(new Enlace(i, j, this));
@@ -92,12 +93,11 @@ public class CanalOptico {
 	 */
 	public void inicializar() {
 		this.desbloquear();
-
+		
 		for (Enlace e : enlaces) {
 			e.inicializar();
 		}
 	}
-
 	/**
 	 * Getter del nodo Destino
 	 * 
@@ -156,47 +156,52 @@ public class CanalOptico {
 	public void setOrigen(Nodo a) {
 		this.extremoA = a;
 	}
-
-	public Nodo getOtroExtremo(Nodo a) {
-		if (!a.equals(extremoA) && !a.equals(extremoB))
-			return null;
-
-		if (a.equals(extremoA))
-			return extremoB;
-
+	
+	public Nodo getOtroExtremo(Nodo a){
+		if(! a.equals(extremoA) && ! a.equals(extremoB)) return null;
+		
+		if(a.equals(extremoA)) return extremoB;
+		
 		return extremoA;
 	}
-
-	public Enlace getEnlaceLibre() {
-		if (bloqueado)
-			return null;
-
-		Enlace[] enlaces = new Enlace[fibras * ldos];
-		int i = 0;
-		for (Enlace e : this.enlaces) {
-			if (!e.isBloqueado())
-				enlaces[i++] = e;
+	
+	public Enlace getEnlaceLibre(boolean exclusivo){
+		if(bloqueado){
+			System.out.println("Canal " + this + " esta bloqueado");
+			return null;		
 		}
-
-		int sorteado = (int) (Math.random() * (double) i);
-
-		return enlaces[sorteado];
-	}
-
-	public Enlace getEnlaceLibre(int ldO) {
-		if (bloqueado)
-			return null;
-
-		for (Enlace e : enlaces) {
-			if (!e.isBloqueado()) {
-				if (e.getLongitudDeOnda() == ldO)
-					return e;
+		
+		Enlace [] disponibles = new Enlace[fibras*ldos];
+		int i = 0;
+		for(Enlace e: this.enlaces){
+			if(!e.isBloqueado()){
+				if (!exclusivo || !e.estaReservado()){
+					disponibles[i++] = e;
+				}
 			}
 		}
-
-		return getEnlaceLibre();
+		
+		int sorteado = (int)(Math.random()*((double)i));
+		
+		return disponibles[sorteado];
 	}
-
+	
+	public Enlace getEnlaceLibre(boolean exclusivo, int ldO){
+		if(bloqueado)return null;
+		
+		for(Enlace e: enlaces){
+			if (!e.isBloqueado()){
+				if(e.getLongitudDeOnda() == ldO){
+					if (!exclusivo || !e.estaReservado()){
+						return e;
+					}
+				}
+			}
+		}
+		
+		return getEnlaceLibre(exclusivo);
+	}
+	
 	/**
 	 * Bloquear el enlace porque forma parte del camino primario de algun
 	 * Servicio
@@ -210,7 +215,13 @@ public class CanalOptico {
 	 * algun Servicio
 	 */
 	public void desbloquear() {
-		this.bloqueado = false;
+		int i = 0;
+		for(Enlace e : enlaces){
+			if(!e.isBloqueado()) break;
+			else i++;
+		}
+		
+		this.bloqueado = i == (fibras * ldos);
 	}
 
 	/**
@@ -242,49 +253,69 @@ public class CanalOptico {
 	public String toString() {
 		return extremoA + "-" + extremoB;
 	}
-
-	public int getUso() {
+	
+	public int getUso(){
 		double total = 0;
 		double utilizados = 0;
-		for (Enlace e : enlaces) {
-			total += 1;
-			if (e.isBloqueado())
-				utilizados += 1;
+		for(Enlace e : enlaces){
+			total+=1;
+			if(e.isBloqueado()) utilizados+=1;
 		}
-
-		return (int) (100.0 * utilizados / total);
+		
+		return (int) (100.0*utilizados/total);
 	}
 
-	/**
-	 * Función para controlar si otro Objeto CanalOptico es igual a este Objeto.
-	 */
 	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
+	public int compareTo(CanalOptico arg0) {
+		int cmpOrigen = extremoA.compareTo(arg0.extremoA);
+		
+		if ( cmpOrigen != 0 ) return cmpOrigen;
+		
+		return extremoB.compareTo(arg0.extremoB);
+	}
+	
+	public boolean tieneEnlacesExclusivos(){
+		for(Enlace e: enlaces){
+			if(!e.estaReservado() && !e.isBloqueado() ) {
+				return true;
+			}
+		}
+		
+		return false;
+	}
 
-		CanalOptico other = (CanalOptico) obj;
-		if (extremoA == null) {
-			if (other.extremoA != null)
-				return false;
-		} else if (!extremoA.equals(other.extremoA))
+	public boolean libreSegunExclusividad(Exclusividad exclusividad){
+
+		if ( Exclusividad.Exclusivo == exclusividad ) return tieneEnlacesExclusivos();
+		
+		if ( Exclusividad.SinReservasBronce == exclusividad ){
+			for(Enlace e: enlaces){
+				if(!e.isBloqueado()) {
+					boolean tieneReservasBronce = false;
+					
+					for(Servicio s: e.getReservas()){
+						if ( s.getSolicitud().getNivel() == Nivel.Bronce ){
+							tieneReservasBronce = true;
+							break;
+						}
+					}
+					
+					if ( ! tieneReservasBronce ) return true;
+				}
+			}
+			
 			return false;
-		if (extremoB == null) {
-			if (other.extremoB != null)
-				return false;
-		} else if (!extremoB.equals(other.extremoB))
-			return false;
-		if (fibras != other.fibras)
-			return false;
-		if (id != other.id)
-			return false;
-		if (ldos != other.ldos)
-			return false;
+		}
+		
 		return true;
 	}
-
+	
+	@Override
+	public boolean equals(Object obj) {
+		if(!(obj instanceof CanalOptico)) return false;
+		
+		CanalOptico b = (CanalOptico) obj;
+		
+		return this.extremoA.equals(b.extremoA) && this.extremoB.equals(b.extremoB);
+	}
 }
