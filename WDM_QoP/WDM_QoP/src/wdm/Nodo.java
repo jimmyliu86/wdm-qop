@@ -14,20 +14,23 @@ import javax.persistence.ManyToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
+import wdm.qop.Exclusividad;
+import wdm.qop.Nivel;
+
 @Entity
 @Table(name="Nodo")
 /**
  * Clase que representa a un Nodo de la red representada.
  * <P>
- * Descripción: representación del Nodo cuyos atributos son: etiqueta o clave,
- * si variable que indica que usa Conversor, y la lista de canales ópticos
+ * Descripcion: representacion del Nodo cuyos atributos son: etiqueta o clave,
+ * si variable que indica que usa Conversor, y la lista de canales opticos
  * directamente conectados a nodos vecinos y si mismo.
  * </p>
  * 
  * @author aamadeo
  * 
  */
-public class Nodo {
+public class Nodo implements Comparable<Nodo>{
 	
 	@Id
 	@GeneratedValue
@@ -40,14 +43,6 @@ public class Nodo {
 	
 	@Transient
 	private boolean bloqueado = false;
-	
-	public Nodo() {
-		label = "";
-	}
-
-	public Nodo(String label) {
-		this.label = label;
-	}
 
 	/**
 	 * Retorna la etiqueta del nodo.
@@ -97,7 +92,7 @@ public class Nodo {
 		HashSet<Nodo> visitados = new HashSet<Nodo>();
 
 		/* Inicio del algoritmo de busqueda en anchura */
-		Camino caminoBase = new Camino(this,this);
+		Camino caminoBase = new Camino(this);
 		aExplorar.add(caminoBase);
 
 		while (!aExplorar.isEmpty()) {
@@ -242,14 +237,14 @@ public class Nodo {
 	 *            Nodo destino
 	 * @return Camino mas corto al nodo destino.
 	 */
-	public Camino dijkstra(Nodo destino){
+	public Camino dijkstra(Nodo destino, Exclusividad exclusividad){
 		
 		PriorityQueue<NodoDijkstra> aVisitar = new PriorityQueue<NodoDijkstra>();
 		HashMap<Nodo,Integer> distancias = new HashMap<Nodo,Integer>();
 		HashSet<Nodo> visitados = new HashSet<Nodo>();
 		
 		NodoDijkstra nodoOrigen = new NodoDijkstra(this,0);
-		nodoOrigen.setCamino(new Camino(this,this));
+		nodoOrigen.setCamino(new Camino(this));
 		aVisitar.add(nodoOrigen);
 		distancias.put(this, new Integer(0));
 		
@@ -270,9 +265,16 @@ public class Nodo {
 				Nodo vecino = canal.getOtroExtremo(actual);
 				int costo = canal.getCosto();
 				
-				if (canal.estaBloqueado())	continue;
-				if (vecino.estaBloqueado())	continue;
+				/*Restriccion del Dijkstra*/
 				if (visitados.contains(vecino)) continue;
+				
+				/*Restricciones del problema de Calidad de Proteccion*/
+				if ( ! canal.libreSegunExclusividad(exclusividad)) continue;
+				
+				if (canal.estaBloqueado()) continue;
+				
+				if (vecino.estaBloqueado()) continue;
+
 				
 				if(distancias.containsKey(vecino)){
 					int dActual = distancias.get(vecino);
@@ -313,5 +315,7 @@ public class Nodo {
 		return super.hashCode();
 	}
 	
-	
+	public int compareTo(Nodo b){
+		return Integer.parseInt(label) - Integer.parseInt(b.label);
+	}
 }
