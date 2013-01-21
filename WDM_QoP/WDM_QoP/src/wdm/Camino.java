@@ -1,107 +1,100 @@
 package wdm;
 
-import java.util.Iterator;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.TreeSet;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.ManyToOne;
+import javax.persistence.CascadeType;
+import javax.persistence.Id;
 import javax.persistence.OrderBy;
 
+import wdm.qop.Nivel;
+import wdm.qop.Servicio;
+
 /**
- * Clase Camino, representa un camino por su nodo origen, y una lista de enlaces
- * que debe seguir
- * 
+ * Clase Camino, representa un camino por su nodo origen, y una lista de
+ * enlaces que debe seguir
  * @author albert
- * 
+ *
  */
 @Entity
 public class Camino {
+	
+	public static String BUFFER_DEBUG = "";
+	
 	@Id
 	@GeneratedValue
 	private long id;
-
-	@ManyToOne(cascade = CascadeType.ALL)
+	
+	@ManyToOne(cascade=CascadeType.ALL)
 	private Nodo origen;
-
-	@ManyToOne(cascade = CascadeType.ALL)
+	
+	@ManyToOne(cascade=CascadeType.ALL)
 	private Nodo destino;
-
-	@OneToMany(cascade = CascadeType.ALL)
+	
+	@OneToMany(cascade=CascadeType.ALL)
 	@OrderBy("secuencia ASC")
 	private Set<Salto> saltos;
-
+	
 	private int distancia = 0;
-
-	public Camino() {
-	}
-
+	
+	public Camino(){}
+	
 	/**
 	 * Constructor principal
-	 * 
 	 * @param origen
 	 */
-	public Camino(Nodo origen, Nodo destino) {
+	public Camino(Nodo origen){
 		this.origen = origen;
-		this.destino = destino;
+		this.destino = origen;
 		this.saltos = new TreeSet<Salto>();
 		this.saltos.clear();
 		this.distancia = 0;
 	}
-
+	
 	/**
-	 * Constructor apartir de un camino existente
-	 * 
-	 * @param c
-	 *            Camino existente
+	 * Constructor apartir de un camin existente
+	 * @param c	Camino existente
 	 */
-	public Camino(Camino c) {
+	public Camino(Camino c){
 		this.origen = c.origen;
-
+		
 		this.saltos = new TreeSet<Salto>();
 		this.saltos.addAll(c.saltos);
 		this.destino = c.destino;
 		this.distancia = c.distancia;
 	}
-
+	
 	/**
 	 * Metodo para agregar un salto al camino
-	 * 
 	 * @param salto
 	 */
-	public void addSalto(Salto salto) {
+	public void addSalto(Salto salto){
 		saltos.add(salto);
-
-		if (destino == null)
-			destino = origen;
-
+		
+		if (destino == null) destino = origen;
+		
 		destino = salto.getCanal().getOtroExtremo(destino);
 		distancia += salto.getCanal().getCosto();
 	}
-
-	public void addNull() {
-		saltos.add(null);
-	}
-
+	
 	/**
 	 * Utilizado para obtener el destino del camino
-	 * 
 	 * @return El ultimo nodo visitado en el camino
 	 */
-	public Nodo getDestino() {
+	public Nodo getDestino(){
 		return this.destino;
 	}
-
+	
 	/**
 	 * Utilizado para obtener la longitud del camino en saltos
-	 * 
-	 * @return La cantidad de saltos, es decir el tamaï¿½o de la lista saltos
+	 * @return La cantidad de saltos, es decir el tamaño de la lista saltos
 	 */
-	public int getDistancia() {
+	public int getDistancia(){
 		return this.distancia;
 	}
 
@@ -112,62 +105,67 @@ public class Camino {
 	public void setId(long id) {
 		this.id = id;
 	}
-
-	public Set<Salto> getSaltos() {
+	
+	public Set<Salto> getSaltos(){
 		return saltos;
 	}
-
-	public void setSaltos(Set<Salto> saltos) {
+	
+	public void setSaltos(Set<Salto> saltos){
 		this.saltos = saltos;
 	}
 
 	public void setDestino(Nodo destino) {
 		this.destino = destino;
 	}
-
-	public void bloquearCanales() {
-		for (Salto salto : saltos) {
+	
+	public void bloquearCanales(){
+		for(Salto salto : saltos){
 			salto.getCanal().bloquear();
 		}
 	}
-
-	public void bloquearNodos() {
+	
+	public void desbloquearCanales(){
+		for(Salto salto : saltos){
+			salto.getCanal().desbloquear();
+		}
+	}
+	
+	public void bloquearNodos(){
 		Nodo actual = this.origen;
 		actual.bloquear();
-
-		// int i = 0;
-		for (Salto salto : saltos) {
+		
+		int i = 0;
+		for(Salto salto : saltos){
 			CanalOptico canal = salto.getCanal();
 			Nodo anterior = actual;
 			actual = canal.getOtroExtremo(actual);
-			// i++;
-
-			// System.out.print("["+i+"/"+saltos.size()+"] ");
-			// System.out.println("Bloqueando : " + canal+"("+anterior+")");
-			if (actual == null)
-				System.out.println("c" + canal.getId() + "-" + anterior);
-
+			i++;
+			
+			if(actual == null) System.out.println("c"+canal.getId()+"-"+anterior);
+			
 			actual.bloquear();
 		}
 	}
-
-	public void desbloquearNodos() {
+	
+	public void desbloquearNodos(){
 		Nodo actual = this.origen;
-
-		// int i = 0;
-		for (Salto salto : saltos) {
+		
+		int i = 0;
+		actual.desbloquear();
+		for(Salto salto : saltos){
 			actual = salto.getCanal().getOtroExtremo(actual);
-			// i++;
-
+			i++;
+			
 			actual.desbloquear();
 		}
 	}
-
-	public void desbloquearEnlaces() {
-		for (Salto salto : saltos) {
+	
+	public void desbloquearEnlaces(){
+		for(Salto salto : saltos){
 			Enlace e = salto.getEnlace();
-			if (e != null)
-				e.desbloquear();
+			if ( e != null ) e.desbloquear();
+			
+			//BUFFER_DEBUG += e + " liberado\n";
 		}
 	}
 
@@ -178,66 +176,83 @@ public class Camino {
 	public void setOrigen(Nodo origen) {
 		this.origen = origen;
 	}
-
-	public void anexar(Camino c) {
-		if (!c.origen.equals(this.destino))
-			return;
-
-		int secuencia = this.saltos.size() + 1;
+	
+	public void anexar(Camino c){		
+		if ( ! c.origen.equals(this.destino) ) return;
+		
+		int secuencia = this.saltos.size()+1;
 		Nodo actual = this.destino;
-
-		for (Salto s : c.saltos) {
+		
+		for(Salto s: c.saltos){
 			actual = s.getCanal().getOtroExtremo(actual);
-			Salto newSalto = new Salto(secuencia++, s.getCanal());
+			Salto newSalto = new Salto(secuencia++,s.getCanal());
 			this.saltos.add(newSalto);
 		}
-
+		
 		this.distancia = distancia + c.distancia;
 		this.destino = c.destino;
 	}
-
-	public void setEnlaces() {
+	
+	public void setEnlaces(){
 		int ldo = -1;
-		for (Salto salto : saltos) {
+		for(Salto salto: saltos){
 			ldo = salto.setEnlace(ldo);
 		}
 	}
-
+	
+	public void fijarEnlaces(){
+		for(Salto salto: saltos){
+			salto.getEnlace().bloquear();
+		}		
+	}
+	
+	public void fijarReservas(Servicio s){
+		for(Salto salto: saltos){
+			salto.getEnlace().reservar(s);
+		}		
+	}
+	
 	@Override
-	public String toString() {
+	public String toString(){
 		String camino = origen.toString();
 		Nodo actual = origen;
-
-		for (Salto s : saltos) {
+		
+		for(Salto s: saltos){
 			actual = s.getCanal().getOtroExtremo(actual);
 			camino = camino + "-" + actual;
 		}
-
+		
 		return camino;
 	}
 
-	public int getCambiosLDO() {
-		int retorno = 0;
-		int ldo1 = 0;
-		int ldo2 = 0;
-		Iterator<Salto> isaltos = this.saltos.iterator();
-		// al menos un enlace Salto debe existir.
-		if (isaltos.hasNext()) {
-
-			Salto salto = isaltos.next();
-			if (salto.getEnlace() == null)
-				throw new Error("GetCambiosLDO: Enlace Nulo. ID:"+salto.getId());
-			ldo1 = salto.getEnlace().getLongitudDeOnda();
-			while (isaltos.hasNext()) {
-
-				ldo2 = isaltos.next().getEnlace().getLongitudDeOnda();
-				if (ldo1 != ldo2)
-					retorno++;
-
-				ldo1 = ldo2;
-			}
+	public void setReservas(Servicio servicio) {
+		int ldo = -1;
+		for(Salto salto : saltos){
+			ldo = salto.setReserva(ldo,servicio);
 		}
+	}
 
-		return retorno;
+	public void eliminarReservas(Servicio s) {
+		for(Salto salto: saltos){
+			salto.getEnlace().eliminarReserva(s);
+		}
+	}
+		
+	public Set<Enlace> getEnlaces(){
+		HashSet<Enlace> enlaces = new HashSet<Enlace>();
+		
+		for(Salto s: saltos){
+			enlaces.add(s.getEnlace());
+		}
+		
+		return enlaces;
+	}
+	
+	public boolean usaCanal(CanalOptico c){
+		for(Salto salto : saltos){
+			if(salto.getEnlace().getCanal().equals(c)) return true;
+		}
+		
+		return false;
 	}
 }
