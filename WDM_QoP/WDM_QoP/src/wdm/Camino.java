@@ -1,6 +1,7 @@
 package wdm;
 
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -255,4 +256,29 @@ public class Camino {
 		
 		return false;
 	}
+	
+    public int getCambiosLDO() {
+        int retorno = 0;
+        int ldo1 = 0;
+        int ldo2 = 0;
+        Iterator<Salto> isaltos = this.saltos.iterator();
+        // al menos un enlace Salto debe existir.
+        if (isaltos.hasNext()) {
+
+                Salto salto = isaltos.next();
+                if (salto.getEnlace() == null)
+                        throw new Error("GetCambiosLDO: Enlace Nulo. ID:"+salto.getId());
+                ldo1 = salto.getEnlace().getLongitudDeOnda();
+                while (isaltos.hasNext()) {
+
+                        ldo2 = isaltos.next().getEnlace().getLongitudDeOnda();
+                        if (ldo1 != ldo2)
+                                retorno++;
+
+                        ldo1 = ldo2;
+                }
+        }
+
+        return retorno;
+}
 }
