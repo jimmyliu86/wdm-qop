@@ -1,5 +1,12 @@
 package wdm.qop;
 
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.Map;
+import java.util.Set;
+
+
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -9,63 +16,49 @@ import javax.persistence.OneToOne;
 import javax.persistence.Transient;
 
 import wdm.Camino;
+import wdm.CanalOptico;
 import wdm.Nodo;
+import wdm.Salto;
 
 @Entity
-public class Servicio implements Comparable<Servicio> {
-
+public class Servicio implements Comparable<Servicio>{
+	
 	@Id
 	@GeneratedValue
 	private long id;
-
-	@ManyToOne(cascade = CascadeType.ALL)
-	private Solicitud solicitud;
-
-	@OneToOne(cascade = CascadeType.ALL)
+	
+	@ManyToOne(cascade=CascadeType.ALL)
+	private  Solicitud solicitud;
+	
+	@OneToOne(cascade=CascadeType.ALL)
 	private Camino primario;
-
-	@OneToOne(cascade = CascadeType.ALL)
+	
+	@OneToOne(cascade=CascadeType.ALL)
 	private Camino alternativo;
-
-	@Transient
+	
 	private double pFalla;
-
-	@Transient
+	
 	private double pRecuperacion;
-
+	
 	@Transient
-	private boolean disponible = true;
-
+	private boolean disponible = false;
+	
+	public static String BUFFER_DEBUG = "";
+	
+	public Servicio(){}
+	
 	/**
 	 * Constructor principal
-	 * 
-	 * @param solicitud
-	 *            Solicitud a la que se desea proveerle un servicio
+	 * @param solicitud	Solicitud a la que se desea proveerle un servicio
 	 */
 	public Servicio(Solicitud solicitud) {
 		super();
 		this.solicitud = solicitud;
-		this.inicializar();
-	}
-
-	/**
-	 * Constructor usado para crear hijos
-	 * 
-	 * @param primario
-	 * @param alternativo
-	 */
-	public Servicio(Camino primario, Camino alternativo, Nivel nivel) {
-		super();
-		this.primario = primario;
-		this.alternativo = alternativo;
-		this.solicitud = new Solicitud(primario.getOrigen(),
-				primario.getDestino(), nivel);
 	}
 
 	/**
 	 * Getter de la solicitud
-	 * 
-	 * @return Solicitud
+	 * @return	Solicitud
 	 */
 	public Solicitud getSolicitud() {
 		return solicitud;
@@ -73,26 +66,24 @@ public class Servicio implements Comparable<Servicio> {
 
 	/**
 	 * Obtiene la probabilidad de falla del servicio
-	 * 
-	 * @return Probabilidad de Falla
+	 * @return	Probabilidad de Falla
 	 */
 	public double getpFalla() {
-		return pFalla;
+		return ((int)(pFalla*10000.0))/100.0;
 	}
 
 	/**
 	 * Obtiene la probabilidad de recuperacion del servicio.
-	 * 
-	 * @return Probabilidad de servicio
+	 * @return	Probabilidad de servicio
 	 */
 	public double getpRecuperacion() {
-		return pRecuperacion;
+		return ((int)(pRecuperacion*10000.0))/100.0;
 	}
+
 
 	/**
 	 * Funcion de Simulacion, retorna true si el servicio esta disponible
-	 * 
-	 * @return Disponibildad del servicio
+	 * @return	Disponibildad del servicio
 	 */
 	public boolean estaDisponible() {
 		return disponible;
@@ -100,7 +91,6 @@ public class Servicio implements Comparable<Servicio> {
 
 	/**
 	 * Setter de la disponibilidad del servicio
-	 * 
 	 * @param disponible
 	 */
 	public void setDisponible(boolean disponible) {
@@ -130,64 +120,214 @@ public class Servicio implements Comparable<Servicio> {
 	public Camino getAlternativo() {
 		return alternativo;
 	}
+	
+	public void setPrimario(){
+		if (primario == null) return;
+		
+		if (solicitud.getNivel() != Nivel.Bronce){
+			primario.setEnlaces();
+		} else {
+			primario.setReservas(this);
+		}
+	}
+	
+	public void setAlternativo(){
+		if (alternativo == null) return;
+		
+		if(solicitud.getNivel() == Nivel.Oro){
+			alternativo.setEnlaces();
+		} else {
+			alternativo.setReservas(this);
+		}
+	}
+	
+	public void fijarRecursos(){
+		if (primario == null) return;
+		
+		if (solicitud.getNivel() != Nivel.Bronce){
+			primario.fijarEnlaces();
+		} else {
+			primario.fijarReservas(this);
+		}
+		
+		if (alternativo == null) return;
+		
+		if(solicitud.getNivel() == Nivel.Oro){
+			alternativo.fijarEnlaces();
+		} else {
+			alternativo.fijarReservas(this);
+		}
+	}
+	
+	public void liberarRecursos(){
+		if(primario == null) return;
+		
+		if ( solicitud.getNivel() != Nivel.Bronce ){
+			primario.desbloquearEnlaces();
+		} else {
+			primario.eliminarReservas(this);
+		}
+		
+		if (alternativo == null ) return;
+		
+		if( solicitud.getNivel() == Nivel.Oro ) {
+			alternativo.desbloquearEnlaces();
+		} else {
+			alternativo.eliminarReservas(this);
+		}
+	}
 
 	public void setAlternativo(Camino alternativo) {
 		this.alternativo = alternativo;
 	}
+	
+	public void buscarAlternativo(){
+		if (solicitud.getEsquema() == EsquemaRestauracion.FullPath){
+			primario.bloquearNodos();
+			primario.getDestino().desbloquear();
+			alternativo = primario.getOrigen().dijkstra(primario.getDestino(),solicitud.getExclusividadAlternativo() );
+			primario.desbloquearNodos();
+		} else if(solicitud.getEsquema() == EsquemaRestauracion.Segment){
+			primario.bloquearCanales();
+			alternativo = primario.getOrigen().dijkstra(primario.getDestino(),solicitud.getExclusividadAlternativo() );
+			primario.desbloquearCanales();	
+		}
+		
+	}
+	
+	public void randomizar(){
+		if( primario == null ) random();
+		
+		if (primario != null ) {
+			liberarRecursos();
+		}
+		
+		else return;
+		
+		Camino original = primario;
+				
+		/* 
+		 * Se busca un subcamino de distancia entre 1 y el 40% de longitud del camino original (4 saltos en promedio).
+		 * El subcamino tendra una distancia aleatoria (subcaminoDistancia).
+		 * Y el nodo origen tambien sera aleatorio.
+		 * 
+		 * El camino nuevo tiene tres partes :
+		 * Parte A : Origen - Medio1
+		 * Parte B : Medio1 - Medio2 (Subcamino nuevo donde no se utilizan los nodos intermedios del camino original) 
+		 * Parte C : Medio2 - Fin
+		 * 
+		 * El nuevo subcamino nuevo se hallar� bloqueando los canales originales del sub camino, y buscando
+		 * otro camino optimo. Luego se desbloquearan los canales originales del sub camino.
+		 */
+		double cantSaltos = original.getSaltos().size();
+		int subCaminoDistancia = 1 + (int) (Math.random()*cantSaltos*0.25);
+		int nodoIndex = (int) (Math.random()*(cantSaltos-(double)subCaminoDistancia));
 
+		Iterator<Salto> iterSaltos = original.getSaltos().iterator();
+		
+		/*
+		 * Se crea primeramente la parte A del camino nuevo
+		 */
+		Camino caminoMutante = new Camino(original.getOrigen());
+		Nodo actual = original.getOrigen();
+		actual.bloquear();
+		while(nodoIndex > 0) {
+			Salto salto = iterSaltos.next();
+			caminoMutante.addSalto(new Salto(salto.getSecuencia(), salto.getCanal()));
+			actual = salto.getCanal().getOtroExtremo(actual);
+			actual.bloquear();
+			nodoIndex--;
+		}
+		Nodo medio1 = actual;
+		Camino subCaminoViejo = new Camino(medio1);
+
+
+		/*
+		 * Se bloquean los canales intermedios entre Medio1 y Medio2
+		 */
+		int secuencia = 1;
+		while(subCaminoDistancia > 0){
+			CanalOptico canal = iterSaltos.next().getCanal();
+			actual = canal.getOtroExtremo(actual);
+			
+			subCaminoDistancia--;
+			
+			canal.bloquear();			
+			subCaminoViejo.addSalto(new Salto(secuencia++, canal));
+		}
+		Nodo medio2 = actual;
+		medio2.desbloquear();
+				
+		Camino parteC = new Camino(actual);
+		secuencia = 1;
+		while(iterSaltos.hasNext()){
+			CanalOptico canal = iterSaltos.next().getCanal();
+			actual = canal.getOtroExtremo(actual);
+			actual.bloquear();
+			parteC.addSalto(new Salto(secuencia++, canal));
+		}
+		parteC.getOrigen().desbloquear();
+		
+		/*Se calcula la parte B del camino nuevo*/
+		Camino subCaminoNuevo = medio1.dijkstra(medio2, solicitud.getExclusividadPrimario());
+		subCaminoViejo.desbloquearCanales();
+		primario.desbloquearNodos();
+		/*
+		 * Si no se puede encontrar un camino alternativo sin utilizar
+		 * los canales originales, se ignora la mutacion.
+		 */
+		if(subCaminoNuevo == null) {
+			/*
+			 * Se vuelve a fijar los recursos de los
+			 * caminos primario y alternativo originales.
+			 */
+			
+			fijarRecursos();
+			
+			return;
+		}
+						
+		caminoMutante.anexar(subCaminoNuevo);
+		caminoMutante.anexar(parteC);
+		
+		primario = caminoMutante;	
+		setPrimario();
+		
+		if(solicitud.getNivel() != Nivel.Bronce){
+			buscarAlternativo();
+			setAlternativo();
+		} else {
+			alternativo = null;
+		}
+	}
+	
+	public void random(){
+		Nodo origen = solicitud.getOrigen();
+		Nodo destino = solicitud.getDestino();
+		
+		primario = origen.dijkstra(destino, solicitud.getExclusividadPrimario());
+		
+		if(primario == null) {
+			return;
+		}
+		
+		setPrimario();
+		
+		if(solicitud.getNivel() != Nivel.Bronce){
+			buscarAlternativo();
+			setAlternativo();
+		}
+		
+		this.randomizar();
+	}
+	
 	@Override
 	public String toString() {
-		String retorno =  "Servicio [De:" + solicitud.getOrigen() + "-A:" + solicitud.getDestino() + "\n";
-		retorno += "[PRIMARIO: "+this.primario.toString()+"] \n";
-		retorno += "[ALTERNATIVO: "+this.alternativo.toString()+"] ";
-		retorno += "] \n";
-		return retorno;
+		return "s"+solicitud.getOrigen()+"_"+solicitud.getDestino();
 	}
 
 	@Override
-	public int compareTo(Servicio otro) {
-		int retorno = (int) (this.getSolicitud().getId() - otro.getSolicitud()
-				.getId());
-		return retorno;
-	}
-
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		Servicio other = (Servicio) obj;
-		if (solicitud == null) {
-			if (other.solicitud != null)
-				return false;
-		} else if (!solicitud.equals(other.solicitud))
-			return false;
-		return true;
-	}
-
-	/**
-	 * Función para crear un camino primario y otro secundario.
-	 */
-	public void inicializar() {
-		this.primario = crearPrimario();
-		this.primario.bloquearCanales();
-		this.alternativo = crearPrimario();
-		if (this.solicitud.getNivel().equals(Nivel.Oro))
-			this.alternativo.bloquearNodos();
-	}
-
-	private Camino crearPrimario() {
-		Camino route = null;
-		Nodo origen = this.solicitud.getOrigen();
-		Nodo destino = this.solicitud.getDestino();
-		route = origen.dijkstra(destino);
-		// TODO: verificar si está correcto
-		if (route == null)
-			route = new Camino(origen, destino);
-		route.setEnlaces();
-		return route;
+	public int compareTo(Servicio arg0) {
+		return solicitud.compareTo(arg0.solicitud);
 	}
 }
