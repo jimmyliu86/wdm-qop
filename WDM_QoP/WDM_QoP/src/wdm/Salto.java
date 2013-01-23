@@ -67,8 +67,8 @@ public class Salto implements Comparable<Salto>{
 	}
 	
 	public int setEnlace(int ldO){
-		if(ldO < 0 ) this.enlace = canal.getEnlaceLibre();
-		else 		 this.enlace = canal.getEnlaceLibre(ldO);
+		if(ldO < 0 ) this.enlace = canal.getEnlaceLibre(true);
+		else 		 this.enlace = canal.getEnlaceLibre(true,ldO);
 		
 		enlace.bloquear();
 		

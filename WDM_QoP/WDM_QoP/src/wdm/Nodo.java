@@ -15,7 +15,6 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 
 import wdm.qop.Exclusividad;
-import wdm.qop.Nivel;
 
 @Entity
 @Table(name="Nodo")
@@ -92,7 +91,7 @@ public class Nodo implements Comparable<Nodo>{
 		HashSet<Nodo> visitados = new HashSet<Nodo>();
 
 		/* Inicio del algoritmo de busqueda en anchura */
-		Camino caminoBase = new Camino(this);
+		Camino caminoBase = new Camino(this,this);
 		aExplorar.add(caminoBase);
 
 		while (!aExplorar.isEmpty()) {
@@ -244,7 +243,7 @@ public class Nodo implements Comparable<Nodo>{
 		HashSet<Nodo> visitados = new HashSet<Nodo>();
 		
 		NodoDijkstra nodoOrigen = new NodoDijkstra(this,0);
-		nodoOrigen.setCamino(new Camino(this));
+		nodoOrigen.setCamino(new Camino(this,this));
 		aVisitar.add(nodoOrigen);
 		distancias.put(this, new Integer(0));
 		

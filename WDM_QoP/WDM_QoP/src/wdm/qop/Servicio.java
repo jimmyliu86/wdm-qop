@@ -1,11 +1,6 @@
 package wdm.qop;
 
-import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.Map;
-import java.util.Set;
-
 
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
@@ -54,6 +49,27 @@ public class Servicio implements Comparable<Servicio>{
 	public Servicio(Solicitud solicitud) {
 		super();
 		this.solicitud = solicitud;
+		System.out.println("Ramdomizar...");
+		this.liberarRecursos();
+		System.out.println(this.getPrimario());
+		this.randomizar();
+		System.out.println(this.getPrimario());
+		System.out.println("FIN Ramdomizar...");
+	}
+	
+	/**
+	 * Constructor usado para crear hijos
+	 * 
+	 * @param primario
+	 * @param alternativo
+	 * @param nivel
+	 */
+	public Servicio(Camino primario, Camino alternativo, Nivel nivel) {
+		super();
+		this.primario = primario;
+		this.alternativo = alternativo;
+		this.solicitud = new Solicitud(primario.getOrigen(),
+				primario.getDestino(), nivel);
 	}
 
 	/**
@@ -216,7 +232,7 @@ public class Servicio implements Comparable<Servicio>{
 		 * Parte B : Medio1 - Medio2 (Subcamino nuevo donde no se utilizan los nodos intermedios del camino original) 
 		 * Parte C : Medio2 - Fin
 		 * 
-		 * El nuevo subcamino nuevo se hallará bloqueando los canales originales del sub camino, y buscando
+		 * El nuevo subcamino nuevo se hallarï¿½ bloqueando los canales originales del sub camino, y buscando
 		 * otro camino optimo. Luego se desbloquearan los canales originales del sub camino.
 		 */
 		double cantSaltos = original.getSaltos().size();
@@ -228,7 +244,7 @@ public class Servicio implements Comparable<Servicio>{
 		/*
 		 * Se crea primeramente la parte A del camino nuevo
 		 */
-		Camino caminoMutante = new Camino(original.getOrigen());
+		Camino caminoMutante = new Camino(original.getOrigen(), original.getOrigen());
 		Nodo actual = original.getOrigen();
 		actual.bloquear();
 		while(nodoIndex > 0) {
@@ -239,7 +255,7 @@ public class Servicio implements Comparable<Servicio>{
 			nodoIndex--;
 		}
 		Nodo medio1 = actual;
-		Camino subCaminoViejo = new Camino(medio1);
+		Camino subCaminoViejo = new Camino(medio1, medio1);
 
 
 		/*
@@ -258,7 +274,7 @@ public class Servicio implements Comparable<Servicio>{
 		Nodo medio2 = actual;
 		medio2.desbloquear();
 				
-		Camino parteC = new Camino(actual);
+		Camino parteC = new Camino(actual,actual);
 		secuencia = 1;
 		while(iterSaltos.hasNext()){
 			CanalOptico canal = iterSaltos.next().getCanal();

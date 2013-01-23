@@ -30,11 +30,12 @@ public class WDMFullTest {
 
 	@Before
 	public void setUp() throws Exception {
-		NSFNET = em.find(Red.class, 123);
+		NSFNET = em.find(Red.class, 247);
 		NSFNET.inicializar();
+		
 	}
 
-	@Test
+	//@Test
 	public void testRed() {
 		System.out.println("Prueba RED.");
 		NSFNET.imprimirRed();
@@ -43,7 +44,7 @@ public class WDMFullTest {
 		// cargarPrueba("prueba2");
 	}
 
-	@Test
+	//@Test
 	public void testInicializar() {
 		Set<CanalOptico> canales1 = NSFNET.getCanales();
 		NSFNET.inicializar();
@@ -51,7 +52,7 @@ public class WDMFullTest {
 		assertTrue(canales1.size() == canales2.size());
 	}
 
-	@Test
+	//@Test
 	public void testProbNiveles() {
 
 		double total = probNiveles[0] + probNiveles[1] + probNiveles[2];
@@ -62,7 +63,7 @@ public class WDMFullTest {
 	public void testSolucion() {
 		// 0. Ya se cuenta con la red NSFNET.
 		// 1. Obtener el caso de prueba (Solicitudes)
-		Caso prueba1 = em.find(Caso.class, "prueba1");
+		Caso prueba1 = em.find(Caso.class, "test1");
 		// 2. Crear las soluciones con las Solicitudes
 		Solucion solucion = new Solucion(prueba1.getSolicitudes());
 		solucion.evaluar();
@@ -70,7 +71,8 @@ public class WDMFullTest {
 		System.out.println(prueba1.getSolicitudes().toString());
 		System.out.println(solucion.toString());
 		System.out.println("FIN Prueba Solucion.");
-		assertTrue(prueba1.getSolicitudes().size() == 3);
+		assertTrue(prueba1.getSolicitudes().size() == 2);
+		
 	}
 
 	@Test
@@ -78,8 +80,8 @@ public class WDMFullTest {
 
 		// 2. Crear las soluciones con las Solicitudes
 
-		Set<Individuo> individuos = this.obtenerPrueba(10);
-		assertTrue(individuos.size() == 3);
+		Set<Individuo> individuos = this.obtenerPrueba(2);
+		assertTrue(individuos.size() == 2);
 
 		System.out.println("Prueba Algoritmo Genetico.");
 		Poblacion p = new Poblacion(individuos);
@@ -107,7 +109,7 @@ public class WDMFullTest {
 	private void cargarPrueba(String nombre, int cantidad) {
 
 		for (int i = 1; i <= cantidad; i++) {
-			Caso prueba = new Caso(NSFNET, 3, probNiveles);
+			Caso prueba = new Caso(NSFNET, 2, probNiveles);
 			String nombreUtil = nombre + i;
 			prueba.setNombre(nombreUtil);
 			em.getTransaction().begin();
@@ -119,11 +121,15 @@ public class WDMFullTest {
 	private Set<Individuo> obtenerPrueba(int cantidad) {
 		Set<Individuo> individuos = new HashSet<Individuo>(cantidad);
 
-		Caso prueba1 = em.find(Caso.class, "prueba1");
+		Caso prueba1 = em.find(Caso.class, "test1");
 		
 
 		for (int i = 0; i < cantidad; i++) {
 			Solucion solucion = new Solucion(prueba1.getSolicitudes());
+			System.out.println("------------");
+			System.out.println(solucion.getGenes().toString());
+			System.out.println("$------------$");
+			
 			individuos.add(solucion);
 		}
 		

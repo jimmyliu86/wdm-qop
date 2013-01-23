@@ -5,15 +5,14 @@ import java.util.Iterator;
 import java.util.Set;
 import java.util.TreeSet;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
-import javax.persistence.OneToMany;
-import javax.persistence.ManyToOne;
-import javax.persistence.CascadeType;
 import javax.persistence.Id;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.OrderBy;
 
-import wdm.qop.Nivel;
 import wdm.qop.Servicio;
 
 /**
@@ -48,10 +47,11 @@ public class Camino {
 	/**
 	 * Constructor principal
 	 * @param origen
+	 * @param destino
 	 */
-	public Camino(Nodo origen){
+	public Camino(Nodo origen, Nodo destino){
 		this.origen = origen;
-		this.destino = origen;
+		this.destino = destino;
 		this.saltos = new TreeSet<Salto>();
 		this.saltos.clear();
 		this.distancia = 0;
@@ -79,8 +79,10 @@ public class Camino {
 		
 		if (destino == null) destino = origen;
 		
-		destino = salto.getCanal().getOtroExtremo(destino);
-		distancia += salto.getCanal().getCosto();
+		if (salto != null) {
+			destino = salto.getCanal().getOtroExtremo(destino);
+			distancia += salto.getCanal().getCosto();
+		}
 	}
 	
 	/**
@@ -93,7 +95,7 @@ public class Camino {
 	
 	/**
 	 * Utilizado para obtener la longitud del camino en saltos
-	 * @return La cantidad de saltos, es decir el tamaño de la lista saltos
+	 * @return La cantidad de saltos, es decir el tamaï¿½o de la lista saltos
 	 */
 	public int getDistancia(){
 		return this.distancia;
@@ -135,12 +137,10 @@ public class Camino {
 		Nodo actual = this.origen;
 		actual.bloquear();
 		
-		int i = 0;
 		for(Salto salto : saltos){
 			CanalOptico canal = salto.getCanal();
 			Nodo anterior = actual;
 			actual = canal.getOtroExtremo(actual);
-			i++;
 			
 			if(actual == null) System.out.println("c"+canal.getId()+"-"+anterior);
 			
@@ -151,11 +151,9 @@ public class Camino {
 	public void desbloquearNodos(){
 		Nodo actual = this.origen;
 		
-		int i = 0;
 		actual.desbloquear();
 		for(Salto salto : saltos){
 			actual = salto.getCanal().getOtroExtremo(actual);
-			i++;
 			
 			actual.desbloquear();
 		}
@@ -229,7 +227,7 @@ public class Camino {
 	public void setReservas(Servicio servicio) {
 		int ldo = -1;
 		for(Salto salto : saltos){
-			ldo = salto.setReserva(ldo,servicio);
+			ldo = salto.setEnlace(ldo);
 		}
 	}
 

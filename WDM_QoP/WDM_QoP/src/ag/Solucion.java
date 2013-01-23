@@ -62,7 +62,9 @@ public class Solucion implements Individuo {
 
 		Set<Servicio> servicios = new TreeSet<Servicio>();
 		for (Solicitud s : solicitudes) {
-			servicios.add(new Servicio(s));
+			Servicio servicio = new Servicio(s);
+			servicio.setDisponible(true);
+			servicios.add(servicio);
 		}
 
 		this.genes = new TreeSet<Servicio>(servicios);
@@ -121,8 +123,13 @@ public class Solucion implements Individuo {
 	public int cantidadEnlaces() {
 		int size = 0;
 		for (Servicio gen : this.genes) {
-			if (gen != null)
+			if (gen != null ) {
+				if (gen.getPrimario() == null)
+					gen.randomizar();
 				size += gen.getPrimario().getDistancia();
+				
+			}
+				
 		}
 		return size;
 	}

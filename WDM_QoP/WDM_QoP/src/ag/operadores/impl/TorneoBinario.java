@@ -43,7 +43,7 @@ public class TorneoBinario implements OperadorSeleccion {
 			 * Nos aseguramos que los individuos seleccionados sean distintos.
 			 */
 			while (individuo1.equals(individuo2)) {
-				System.out.println("$Hola:");
+				//System.out.println("$Hola:");
 				ind2 = rand.nextInt(cantMejores);
 				individuo2 = individuos.get(ind2);
 			}

@@ -11,6 +11,7 @@ import wdm.CanalOptico;
 import wdm.Nodo;
 import wdm.Red;
 import wdm.Salto;
+import wdm.qop.Exclusividad;
 import wdm.qop.Nivel;
 import wdm.qop.Servicio;
 import wdm.qop.Solicitud;
@@ -171,7 +172,7 @@ public class OptimizerWDMQoPFullPath {
 		
 		
 		System.out.println("Buscando camino primario");
-		Camino primario = origen.dijkstra(destino);
+		Camino primario = origen.dijkstra(destino,Exclusividad.Exclusivo);
 		primario.bloquearNodos();
 		
 		System.out.println("Primario : " + primario.getDistancia());
@@ -185,7 +186,7 @@ public class OptimizerWDMQoPFullPath {
 		System.out.println();
 		
 		System.out.println("Buscando camino alternativo");
-		Camino alternativo = origen.dijkstra(destino);
+		Camino alternativo = origen.dijkstra(destino, Exclusividad.Exclusivo);
 		System.out.println("Alternativo : " + alternativo.getDistancia());
 		System.out.print("A");
 		actual = origen;

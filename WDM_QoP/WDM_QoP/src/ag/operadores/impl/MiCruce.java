@@ -5,6 +5,7 @@ import java.util.Iterator;
 import wdm.Camino;
 import wdm.Nodo;
 import wdm.Salto;
+import wdm.qop.Exclusividad;
 import wdm.qop.Nivel;
 import wdm.qop.Servicio;
 import ag.Solucion;
@@ -71,7 +72,7 @@ public class MiCruce implements OperadorCruce {
 					if (primario2.getSaltos().contains(salto)) {
 						auxiliar.addSalto(salto);
 					} else {
-						auxiliar.addNull();
+						auxiliar.addSalto(null);
 					}
 				}
 
@@ -80,7 +81,7 @@ public class MiCruce implements OperadorCruce {
 					if (primario1.getSaltos().contains(salto)) {
 						auxiliar.addSalto(salto);
 					} else {
-						auxiliar.addNull();
+						auxiliar.addSalto(null);
 					}
 				}
 			}
@@ -122,7 +123,7 @@ public class MiCruce implements OperadorCruce {
 					 * desde el Nodo inicio al Nodo fin para completar los
 					 * caminos faltantes.
 					 */
-					Camino subCamino = inicio.dijkstra(fin);
+					Camino subCamino = inicio.dijkstra(fin, Exclusividad.Exclusivo);
 					// Se agrega el camino encontrado al Nuevo Camino Primario
 					for (Salto saltoAux : subCamino.getSaltos()) {
 						saltoAux.setEnlace(longitudDeOnda);
@@ -151,7 +152,7 @@ public class MiCruce implements OperadorCruce {
 			Nodo nodoB = primario1.getDestino();
 			Nivel nivel = gen1.getSolicitud().getNivel();
 			
-			Camino subCamino = nodoA.dijkstra(nodoB);
+			Camino subCamino = nodoA.dijkstra(nodoB, Exclusividad.NoExclusivo);
 			longitudDeOnda = -1;
 			// Se agrega el camino encontrado al Nuevo Camino Secundario
 			for (Salto salto : subCamino.getSaltos()) {
