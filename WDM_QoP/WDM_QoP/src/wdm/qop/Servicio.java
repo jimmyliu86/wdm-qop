@@ -49,12 +49,6 @@ public class Servicio implements Comparable<Servicio>{
 	public Servicio(Solicitud solicitud) {
 		super();
 		this.solicitud = solicitud;
-		System.out.println("Ramdomizar...");
-		this.liberarRecursos();
-		System.out.println(this.getPrimario());
-		this.randomizar();
-		System.out.println(this.getPrimario());
-		System.out.println("FIN Ramdomizar...");
 	}
 	
 	/**
@@ -143,7 +137,7 @@ public class Servicio implements Comparable<Servicio>{
 		if (solicitud.getNivel() != Nivel.Bronce){
 			primario.setEnlaces();
 		} else {
-			primario.setReservas(this);
+			primario.setReservas(this, Exclusividad.SinReservasBronce);
 		}
 	}
 	
@@ -153,7 +147,7 @@ public class Servicio implements Comparable<Servicio>{
 		if(solicitud.getNivel() == Nivel.Oro){
 			alternativo.setEnlaces();
 		} else {
-			alternativo.setReservas(this);
+			alternativo.setReservas(this, Exclusividad.NoExclusivo);
 		}
 	}
 	
@@ -244,7 +238,7 @@ public class Servicio implements Comparable<Servicio>{
 		/*
 		 * Se crea primeramente la parte A del camino nuevo
 		 */
-		Camino caminoMutante = new Camino(original.getOrigen(), original.getOrigen());
+		Camino caminoMutante = new Camino(original.getOrigen());
 		Nodo actual = original.getOrigen();
 		actual.bloquear();
 		while(nodoIndex > 0) {
@@ -255,7 +249,7 @@ public class Servicio implements Comparable<Servicio>{
 			nodoIndex--;
 		}
 		Nodo medio1 = actual;
-		Camino subCaminoViejo = new Camino(medio1, medio1);
+		Camino subCaminoViejo = new Camino(medio1);
 
 
 		/*
@@ -274,7 +268,7 @@ public class Servicio implements Comparable<Servicio>{
 		Nodo medio2 = actual;
 		medio2.desbloquear();
 				
-		Camino parteC = new Camino(actual,actual);
+		Camino parteC = new Camino(actual);
 		secuencia = 1;
 		while(iterSaltos.hasNext()){
 			CanalOptico canal = iterSaltos.next().getCanal();

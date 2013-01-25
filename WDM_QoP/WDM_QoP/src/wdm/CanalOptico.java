@@ -165,7 +165,7 @@ public class CanalOptico implements Comparable<CanalOptico> {
 		return extremoA;
 	}
 	
-	public Enlace getEnlaceLibre(boolean exclusivo){
+	public Enlace getEnlaceLibre(Exclusividad exclusividad){
 		if(bloqueado){
 			System.out.println("Canal " + this + " esta bloqueado");
 			return null;		
@@ -175,7 +175,7 @@ public class CanalOptico implements Comparable<CanalOptico> {
 		int i = 0;
 		for(Enlace e: this.enlaces){
 			if(!e.isBloqueado()){
-				if (!exclusivo || !e.estaReservado()){
+				if (e.cumpleExclusividad(exclusividad)){
 					disponibles[i++] = e;
 				}
 			}
@@ -186,21 +186,22 @@ public class CanalOptico implements Comparable<CanalOptico> {
 		return disponibles[sorteado];
 	}
 	
-	public Enlace getEnlaceLibre(boolean exclusivo, int ldO){
+	public Enlace getEnlaceLibre(Exclusividad exclusividad, int ldO){
 		if(bloqueado)return null;
 		
 		for(Enlace e: enlaces){
 			if (!e.isBloqueado()){
 				if(e.getLongitudDeOnda() == ldO){
-					if (!exclusivo || !e.estaReservado()){
+					if (e.cumpleExclusividad(exclusividad)){
 						return e;
 					}
 				}
 			}
 		}
 		
-		return getEnlaceLibre(exclusivo);
+		return getEnlaceLibre(exclusividad);
 	}
+	
 	
 	/**
 	 * Bloquear el enlace porque forma parte del camino primario de algun

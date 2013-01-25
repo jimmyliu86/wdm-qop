@@ -7,6 +7,9 @@ import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.Transient;
 
+import wdm.qop.Exclusividad;
+import wdm.qop.Servicio;
+
 @Entity
 public class Salto implements Comparable<Salto>{
 	
@@ -67,8 +70,8 @@ public class Salto implements Comparable<Salto>{
 	}
 	
 	public int setEnlace(int ldO){
-		if(ldO < 0 ) this.enlace = canal.getEnlaceLibre(true);
-		else 		 this.enlace = canal.getEnlaceLibre(true,ldO);
+		if(ldO < 0 ) this.enlace = canal.getEnlaceLibre(Exclusividad.Exclusivo);
+		else 		 this.enlace = canal.getEnlaceLibre(Exclusividad.Exclusivo,ldO);
 		
 		enlace.bloquear();
 		
@@ -81,5 +84,12 @@ public class Salto implements Comparable<Salto>{
 		return this.secuencia - b.secuencia;
 	}
 	
-	
+	public int setReserva(int ldO, Servicio servicio, Exclusividad exclusividad) {
+		if(ldO < 0 ) this.enlace = canal.getEnlaceLibre(exclusividad);
+		else 		 this.enlace = canal.getEnlaceLibre(exclusividad,ldO);
+		
+		enlace.reservar(servicio);
+		
+		return enlace.getLongitudDeOnda();
+	}
 }

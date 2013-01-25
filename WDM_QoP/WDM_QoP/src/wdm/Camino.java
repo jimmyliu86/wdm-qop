@@ -13,6 +13,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OrderBy;
 
+import wdm.qop.Exclusividad;
 import wdm.qop.Servicio;
 
 /**
@@ -49,9 +50,9 @@ public class Camino {
 	 * @param origen
 	 * @param destino
 	 */
-	public Camino(Nodo origen, Nodo destino){
+	public Camino(Nodo origen){
 		this.origen = origen;
-		this.destino = destino;
+		this.destino = origen;
 		this.saltos = new TreeSet<Salto>();
 		this.saltos.clear();
 		this.distancia = 0;
@@ -163,8 +164,6 @@ public class Camino {
 		for(Salto salto : saltos){
 			Enlace e = salto.getEnlace();
 			if ( e != null ) e.desbloquear();
-			
-			//BUFFER_DEBUG += e + " liberado\n";
 		}
 	}
 
@@ -224,10 +223,10 @@ public class Camino {
 		return camino;
 	}
 
-	public void setReservas(Servicio servicio) {
+	public void setReservas(Servicio servicio, Exclusividad exclusividad) {
 		int ldo = -1;
 		for(Salto salto : saltos){
-			ldo = salto.setEnlace(ldo);
+			ldo = salto.setReserva(ldo,servicio,exclusividad);
 		}
 	}
 
@@ -278,5 +277,5 @@ public class Camino {
         }
 
         return retorno;
-}
+    }
 }

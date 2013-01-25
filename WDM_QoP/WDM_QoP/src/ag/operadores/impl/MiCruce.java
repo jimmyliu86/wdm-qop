@@ -58,7 +58,8 @@ public class MiCruce implements OperadorCruce {
 			Camino primario1 = gen1.getPrimario();
 			Camino primario2 = gen2.getPrimario();
 
-			auxiliar = new Camino(primario1.getOrigen(),primario1.getDestino());
+			auxiliar = new Camino(primario1.getOrigen());
+			auxiliar.setDestino(primario1.getDestino());
 			
 
 			/*

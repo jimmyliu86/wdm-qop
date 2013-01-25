@@ -1,5 +1,8 @@
 package wdm;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
@@ -11,11 +14,13 @@ import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
+import wdm.qop.Servicio;
+
 
 /**
- * Clase que representa la red sobre la que se simularán las solicitudes.
+ * Clase que representa la red sobre la que se simularan las solicitudes.
  * <p>
- * Descripción: Red cuyos componentes son: una instancia de la misma Red, un
+ * Descripcion: Red cuyos componentes son: una instancia de la misma Red, un
  * conjunto de nodos y un conjunto de canales.
  * </p>
  * 
@@ -198,5 +203,188 @@ public class Red {
 			System.out.print("["+co.getExtremoA().getLabel()+"->"+co.getExtremoB().getLabel()+"] ");
 		}
 		System.out.println("] \n]");
+	}
+	
+	/**
+	 * Grafica el grafo de utilizacion de la red. Donde :
+	 * a) El color verde : indica baja utilizacion del canal (uso <=33%)
+	 * b) El color azul : indica utilizacion media del canal (33% < uso <= 66%)
+	 * c) El color rojo : indica utilizacion alta del canal (66% < uso < 100%)
+	 * d) El color negro : indica total utilizacion del canal (uso = 100%)
+	 * 
+	 * Las lineas solidas indican que el canal tiene enlaces sin reservas. Las lineas
+	 * cortadas indica que el canal no tiene enlaces sin reservas, es decir que no
+	 * tiene enlaces exclusivos.
+	 * 
+	 * @param dir	Directorio (existente) donde crear la imagen.
+	 * @param dif	Cadena utilizada para diferenciar a varias imagenes el mismo grafo
+	 */
+	public void utilizacion(String dir, String dif){
+		String graphName = this.nombre + "_utilizacion" + dif;
+		String fileName = graphName + ".gv";
+		String cmd = "\"C:\\Program Files (x86)\\Graphviz 2.28\\bin\\dot.exe\"";
+		cmd += " -Ksfdp -Goverlap=prism -Tpng -o \"" + dir + "\\" + graphName + ".png\" \"";
+		cmd += dir + "\\" + fileName + "\"";
+		
+		try {
+			FileWriter fw = new FileWriter(new File(dir+"/"+fileName));
+			
+			fw.write("graph " + graphName + " {\n");
+			
+			for(Nodo nodo: nodos){
+				String spec = " [penwidth=1];\n";
+				fw.write(nodo + spec);
+			}
+			
+			for(CanalOptico canal: canales){
+				int uso = canal.getUso();
+				int grosor = 1 + uso / 15;
+				
+				String spec = "[penwidth="+grosor+", weight=2";
+				
+				if (! canal.tieneEnlacesExclusivos() ){
+					spec += " style=\"dashed\"";
+				}
+				
+				if ( 0 == uso){
+					spec += ", color=\"#AAAAAA\"];";
+				} else if( 0 < uso && uso <= 33){
+					spec += ", color=\"#11AA11\"];";
+				} else if (33 < uso && uso <= 66){
+					spec += ", color=\"#AAAA11\"];";
+				} else if (66 < uso && uso < 100){
+					spec += ", color=\"#AA1111\"];";
+				} else {
+					spec += ", color=\"#000000\"];";
+				}
+				
+				fw.write(canal.getExtremoA() + " -- " + canal.getExtremoB() + spec);
+			}
+			
+			fw.write("}");
+			fw.flush();
+			fw.close();
+			
+			Process p = Runtime.getRuntime().exec(cmd);
+			p.waitFor();
+			
+			File dotFile = new File(dir+"\\"+fileName);
+			dotFile.delete();
+			
+		} catch (IOException e){
+			e.printStackTrace();
+			System.exit(1);
+		} catch (InterruptedException ie){
+			ie.printStackTrace();
+			System.exit(1);
+		}
+	}
+	
+	
+	/**
+	 * Indica los canales del grafo utilizados por el servicio <b>s</b>.
+	 * 
+	 * @param s			Servicio a graficar
+	 * @param dir		Directorio donde crear la imagen
+	 * @param nombre	Nombre de la imagen a crear. Por defecto se utiliza el nombre del grafo
+	 * 					+ "_" + el valor toString() del servicio. 
+	 */
+	public void drawServicio(Servicio s, String dir, String nombre){
+		String graphName = nombre == null ? this.nombre + "_" + s : nombre;
+		String fileName = graphName + ".gv";
+		String cmd = "\"C:\\Program Files (x86)\\Graphviz 2.28\\bin\\dot.exe\"";
+		cmd += " -Ksfdp -Goverlap=prism -Tpng -o \"" + dir + "\\" + graphName + ".png\" \"";
+		cmd += dir + "\\" + fileName + "\"";
+		
+		Nodo origen = s.getSolicitud().getOrigen();
+		Nodo destino = s.getSolicitud().getDestino();
+		
+		HashSet<Nodo> nodosPrimarios = new HashSet<Nodo>();
+		HashSet<Nodo> nodosAlternativos = new HashSet<Nodo>();
+		HashSet<CanalOptico> canalesPrimarios = new HashSet<CanalOptico>();
+		HashSet<CanalOptico> canalesAlternativos = new HashSet<CanalOptico>();
+		
+		if(s.getPrimario() != null){
+			Nodo actual = s.getPrimario().getOrigen();
+			nodosPrimarios.add(actual);
+			for(Salto salto : s.getPrimario().getSaltos()){
+				CanalOptico canal = salto.getCanal();
+				actual = canal.getOtroExtremo(actual);
+							
+				nodosPrimarios.add(actual);
+				canalesPrimarios.add(canal);
+			}
+			
+			Camino alternativo = s.getAlternativo();
+			if ( alternativo != null) {
+				actual = s.getAlternativo().getOrigen();
+				nodosAlternativos.add(actual);
+				
+				for(Salto salto : s.getAlternativo().getSaltos()){
+					CanalOptico canal = salto.getCanal();
+
+					actual = canal.getOtroExtremo(actual);
+					nodosAlternativos.add(actual);
+									
+					canalesAlternativos.add(canal);
+				}
+			}
+		}
+		
+		try {
+			FileWriter fw = new FileWriter(new File(dir+"\\"+fileName));
+			
+			fw.write("graph " + graphName + " {\n");
+			
+			for(Nodo nodo: nodos){
+				String spec = " ";
+				
+				if(origen.equals(nodo) || destino.equals(nodo)){
+					spec += " [penwidth=3, style=filled, fillcolor=\"#AA1111\"];\n";
+				} else if(nodosPrimarios.contains(nodo)){
+					spec += " [penwidth=3, style=filled, fillcolor=\"#11AA11\"];\n";
+				} else if (nodosAlternativos.contains(nodo)){
+					spec += " [penwidth=3, style=filled, fillcolor=\"#1111AA\"];\n";
+				} else {
+					spec += "[penwidth=1];\n";
+				}
+				
+				fw.write(nodo + spec);
+			}
+			
+			for(CanalOptico canal: canales){
+				String spec = " ";
+				
+				if(canalesPrimarios.contains(canal)){
+					spec += "[penwidth=3, weight=2, color=\"#11AA11\"";
+				} else if (canalesAlternativos.contains(canal)){
+					spec += "[penwidth=3, weight=2, color=\"#1111AA\"";
+				} else {
+					spec += "[penwidth=1";
+				}
+				
+				spec += ", label=\"" + canal.getCosto() + "\"];";
+				
+				fw.write(canal.getExtremoA() + " -- " + canal.getExtremoB() + spec);
+			}
+			
+			fw.write("}");
+			fw.flush();
+			fw.close();
+			
+			Process p = Runtime.getRuntime().exec(cmd);
+			p.waitFor();
+			
+			File dotFile = new File(dir+"\\"+fileName);
+			dotFile.delete();
+		} catch (IOException e) {
+			e.printStackTrace();
+			System.exit(1);
+		} catch (InterruptedException ie){
+			ie.printStackTrace();
+			System.exit(1);
+		}
+		
+		
 	}
 }

@@ -10,6 +10,8 @@ import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.Transient;
 
+import wdm.qop.Exclusividad;
+import wdm.qop.Nivel;
 import wdm.qop.Servicio;
 
 /**
@@ -263,5 +265,16 @@ public class Enlace {
 		//System.out.println("Desloqueando " + canal + "." + longitudDeOnda);
 		this.bloqueado = false;
 		this.canal.desbloquear();
+	}
+	
+	public boolean cumpleExclusividad(Exclusividad exclusividad){
+		if (exclusividad == Exclusividad.Exclusivo) return (reservas.size() == 0);
+		if (exclusividad == Exclusividad.SinReservasBronce){
+			for(Servicio s: reservas){
+				if(s.getSolicitud().getNivel() == Nivel.Bronce) return false;
+			}
+		}
+		
+		return true;
 	}
 }
