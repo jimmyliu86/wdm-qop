@@ -1,9 +1,9 @@
 package ag;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
-import java.util.TreeSet;
 
 import ag.operadores.OperadorCruce;
 import ag.operadores.OperadorSeleccion;
@@ -51,7 +51,7 @@ public class Poblacion {
 		this.individuos = individuos;
 		this.operadorSeleccion = new TorneoBinario();
 		this.operadorCruce = new MiCruce();
-		this.hijos = new TreeSet<Individuo>();
+		this.hijos = new HashSet<Individuo>();
 
 	}
 
@@ -63,12 +63,12 @@ public class Poblacion {
 	 * 
 	 * @param selectos
 	 */
-	public void cruzar(Set<Solucion> selectos) {
-		Solucion primero = null;
-		Solucion miPrimero = null;
-		Solucion segundo = null;
-		Solucion nuevo = null;
-		Iterator<Solucion> i = selectos.iterator();
+	public void cruzar(Set<Individuo> selectos) {
+		Individuo primero = null;
+		Individuo miPrimero = null;
+		Individuo segundo = null;
+		Individuo nuevo = null;
+		Iterator<Individuo> i = selectos.iterator();
 
 		if (i.hasNext()) {
 			primero = i.next();

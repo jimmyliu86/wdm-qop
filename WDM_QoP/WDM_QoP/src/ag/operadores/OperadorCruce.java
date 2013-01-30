@@ -1,5 +1,6 @@
 package ag.operadores;
 
+import ag.Individuo;
 import ag.Solucion;
 
 /**
@@ -14,12 +15,12 @@ public interface OperadorCruce {
 	 * Realiza una operación de cruce entre dos Individuos, produciendo un
 	 * conjunto de Individuos hijos.
 	 * 
-	 * @param i1
+	 * @param primero
 	 *            Primer Individuo a cruzar
-	 * @param i2
+	 * @param segundo
 	 *            Segundo Individuo a cruzar
 	 * @return Individuos hijos
 	 */
-	public Solucion cruzar(Solucion i1, Solucion i2);
+	public Individuo cruzar(Individuo primero, Individuo segundo);
 
 }

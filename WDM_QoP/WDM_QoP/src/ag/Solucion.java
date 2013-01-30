@@ -85,22 +85,28 @@ public class Solucion implements Individuo {
 		double total_LDO = 0.0;
 		int contador = 0;
 
-		Set<CanalOptico> auxiliar = new HashSet<CanalOptico>(size);
+		Set<CanalOptico> auxiliar = new HashSet<CanalOptico>();
 
 		for (Servicio gen : this.genes) {
 
 			Camino primario = gen.getPrimario();
 
-			for (Salto s : primario.getSaltos()) {
+			if (primario == null) {
+				contador += 10;
+			} else {
 
-				CanalOptico ca = s.getCanal();
-				boolean inserto = auxiliar.add(ca);
-				// inserto es false cuando ya existía en auxiliar
-				if (!inserto)
-					contador++;
+				for (Salto s : primario.getSaltos()) {
+
+					CanalOptico ca = s.getCanal();
+					boolean inserto = auxiliar.add(ca);
+					// inserto es false cuando ya existía en auxiliar
+					if (!inserto)
+						contador++;
+				}
+				total_LDO += primario.getCambiosLDO();
 			}
 
-			total_LDO += primario.getCambiosLDO();
+			
 		}
 
 		// se descuentan los enlaces cuyos canales opticos ya existen.
@@ -123,13 +129,14 @@ public class Solucion implements Individuo {
 	public int cantidadEnlaces() {
 		int size = 0;
 		for (Servicio gen : this.genes) {
-			if (gen != null ) {
+			if (gen != null) {
 				if (gen.getPrimario() == null)
-					gen.randomizar();
-				size += gen.getPrimario().getDistancia();
-				
+					size -= 10;
+				else
+					size += gen.getPrimario().getDistancia();
+
 			}
-				
+
 		}
 		return size;
 	}
@@ -240,7 +247,8 @@ public class Solucion implements Individuo {
 	@Override
 	public String toString() {
 		final int maxLen = genes.size();
-		return "[Solucion [fitness=" + fitness + ", costo=" + costo + ", \ngenes="
+		return "[Solucion [fitness=" + fitness + ", costo=" + costo
+				+ ", \ngenes="
 				+ (genes != null ? toString(genes, maxLen) : null) + "]";
 	}
 
