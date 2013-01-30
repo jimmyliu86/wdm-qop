@@ -66,11 +66,11 @@ public class WDMFullTest {
 		Caso prueba1 = em.find(Caso.class, "test1");
 		// 2. Crear las soluciones con las Solicitudes
 		Solucion solucion = new Solucion(prueba1.getSolicitudes());
-		solucion.evaluar();
-		System.out.println("Prueba Solucion.");
+		//solucion.evaluar();
+		//System.out.println("Prueba Solucion.");
 		System.out.println(prueba1.getSolicitudes().toString());
 		System.out.println(solucion.toString());
-		System.out.println("FIN Prueba Solucion.");
+		//System.out.println("FIN Prueba Solucion.");
 		assertTrue(prueba1.getSolicitudes().size() == 2);
 		
 	}
@@ -80,25 +80,30 @@ public class WDMFullTest {
 
 		// 2. Crear las soluciones con las Solicitudes
 
-		Set<Individuo> individuos = this.obtenerPrueba(2);
-		assertTrue(individuos.size() == 2);
+		Set<Individuo> individuos = this.obtenerPrueba(6);
+		assertTrue(individuos.size() == 6);
 
 		System.out.println("Prueba Algoritmo Genetico.");
 		Poblacion p = new Poblacion(individuos);
-		System.out.println("Evaluando...");
-		p.evaluar();
-		System.out.println("Fin Evaluacion.");
-		System.out.println("Seleccionando...");
+		//System.out.println("Evaluando...");
+		//p.evaluar();
+		//System.out.println("Fin Evaluacion.");
+		//System.out.println("Seleccionando...");
 		Set<Individuo> seleccionados = p.seleccionar();
-		System.out.println("Fin Seleccion.");
+		//System.out.println("Fin Seleccion.");
 		
 		int i1 = 0;
 		for (Individuo i : seleccionados) {
 			i1++;
 			System.out.println("@Individuo " + i1 + " :" + i.toString());
 		}
-		System.out.println("FIN Prueba Algoritmo Genetico.");
-		assertTrue(seleccionados.size() == 2);
+		System.out.println("FIN Prueba Algoritmo Genetico."+ seleccionados.size());
+		//assertTrue(seleccionados.size() == 2);
+		
+		System.out.println("Cruzando...");
+		p.cruzar(seleccionados);
+		System.out.println("FIN Cruzando...");
+		assertNotNull("$Hay cruce.",p);
 	}
 
 	/**
