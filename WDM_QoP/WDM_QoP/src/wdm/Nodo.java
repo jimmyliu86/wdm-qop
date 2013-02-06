@@ -229,6 +229,20 @@ public class Nodo implements Comparable<Nodo>{
 		}
 	}
 	
+	public Camino dijkstra(Nodo destino, Exclusividad exclusividad) {
+		Camino c = dijkstra(destino,exclusividad,true);
+		
+		if ( c != null) return c;
+		
+		c = dijkstra(destino, exclusividad, false);
+		
+		if ( c == null ) return null; 
+		
+		c.agregarFibras(exclusividad);
+		
+		return c;
+	}
+	
 	/**
 	 * Retorna el camino mas corto al nodo especificado utilizando el algoritmo de dijkstra.
 	 * 
@@ -236,7 +250,7 @@ public class Nodo implements Comparable<Nodo>{
 	 *            Nodo destino
 	 * @return Camino mas corto al nodo destino.
 	 */
-	public Camino dijkstra(Nodo destino, Exclusividad exclusividad){
+	public Camino dijkstra(Nodo destino, Exclusividad exclusividad, boolean restrictivo){
 		
 		PriorityQueue<NodoDijkstra> aVisitar = new PriorityQueue<NodoDijkstra>();
 		HashMap<Nodo,Integer> distancias = new HashMap<Nodo,Integer>();
@@ -268,7 +282,9 @@ public class Nodo implements Comparable<Nodo>{
 				if (visitados.contains(vecino)) continue;
 				
 				/*Restricciones del problema de Calidad de Proteccion*/
-				if ( ! canal.libreSegunExclusividad(exclusividad)) continue;
+				if ( restrictivo ){
+					if ( ! canal.libreSegunExclusividad(exclusividad)) continue;
+				}
 				
 				if (canal.estaBloqueado()) continue;
 				

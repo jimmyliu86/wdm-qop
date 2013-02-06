@@ -191,28 +191,22 @@ public class Servicio implements Comparable<Servicio>{
 		this.alternativo = alternativo;
 	}
 	
-	public void buscarAlternativo(){
+	public void buscarAlternativo() {
 		if (solicitud.getEsquema() == EsquemaRestauracion.FullPath){
 			primario.bloquearNodos();
 			primario.getDestino().desbloquear();
-			alternativo = primario.getOrigen().dijkstra(primario.getDestino(),solicitud.getExclusividadAlternativo() );
+			alternativo = primario.getOrigen().dijkstra(primario.getDestino(),solicitud.getExclusividadAlternativo(), true );
 			primario.desbloquearNodos();
 		} else if(solicitud.getEsquema() == EsquemaRestauracion.Segment){
 			primario.bloquearCanales();
-			alternativo = primario.getOrigen().dijkstra(primario.getDestino(),solicitud.getExclusividadAlternativo() );
+			alternativo = primario.getOrigen().dijkstra(primario.getDestino(),solicitud.getExclusividadAlternativo(), true );
 			primario.desbloquearCanales();	
 		}
 		
 	}
 	
-	public void randomizar(){
-		if( primario == null ) random();
-		
-		if (primario != null ) {
-			liberarRecursos();
-		}
-		
-		else return;
+	public void randomizar() {
+		liberarRecursos();
 		
 		Camino original = primario;
 				
@@ -311,15 +305,11 @@ public class Servicio implements Comparable<Servicio>{
 		}
 	}
 	
-	public void random(){
+	public void random() {
 		Nodo origen = solicitud.getOrigen();
 		Nodo destino = solicitud.getDestino();
 		
 		primario = origen.dijkstra(destino, solicitud.getExclusividadPrimario());
-		
-		if(primario == null) {
-			return;
-		}
 		
 		setPrimario();
 		

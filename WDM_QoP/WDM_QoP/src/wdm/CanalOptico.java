@@ -35,11 +35,16 @@ public class CanalOptico implements Comparable<CanalOptico> {
 	@OrderBy("longitudDeOnda ASC")
 	private Set<Enlace> enlaces = new HashSet<Enlace>();
 	
+	@Transient
+	private Set<Enlace> enlacesNecesarios = new HashSet<Enlace>();
+	
 	@Id 
 	@GeneratedValue 
 	private int id;
 	
 	private int fibras;
+	
+	@Transient int fibrasExtra = 0;
 	
 	private int ldos;
 	
@@ -73,6 +78,7 @@ public class CanalOptico implements Comparable<CanalOptico> {
 		this.extremoA = a;
 		this.extremoB = b;
 		this.fibras = fibras;
+		this.fibrasExtra= 0;
 		this.ldos = ldos;
 
 		this.enlaces.clear();
@@ -93,6 +99,9 @@ public class CanalOptico implements Comparable<CanalOptico> {
 	 */
 	public void inicializar() {
 		this.desbloquear();
+		this.fibrasExtra = 0;
+		this.enlacesNecesarios.clear();
+		this.enlacesNecesarios.addAll(enlaces);
 		
 		for (Enlace e : enlaces) {
 			e.inicializar();
@@ -127,6 +136,18 @@ public class CanalOptico implements Comparable<CanalOptico> {
 
 	public void setId(int id) {
 		this.id = id;
+	}
+	
+	public void agregarFibraExtra(){
+		this.fibrasExtra++;
+		
+		for ( int i = 0; i < ldos; i++ ){
+			enlacesNecesarios.add(new Enlace(fibras + fibrasExtra, i, this));
+		}
+	}
+	
+	public int getFibrasExtra(){
+		return this.fibrasExtra;
 	}
 
 	public int getFibras() {
@@ -166,14 +187,11 @@ public class CanalOptico implements Comparable<CanalOptico> {
 	}
 	
 	public Enlace getEnlaceLibre(Exclusividad exclusividad){
-		if(bloqueado){
-			System.out.println("Canal " + this + " esta bloqueado");
-			return null;		
-		}
+		if(bloqueado) return null;		
 		
-		Enlace [] disponibles = new Enlace[fibras*ldos];
+		Enlace [] disponibles = new Enlace[enlacesNecesarios.size()];
 		int i = 0;
-		for(Enlace e: this.enlaces){
+		for(Enlace e: this.enlacesNecesarios){
 			if(!e.isBloqueado()){
 				if (e.cumpleExclusividad(exclusividad)){
 					disponibles[i++] = e;
@@ -189,7 +207,7 @@ public class CanalOptico implements Comparable<CanalOptico> {
 	public Enlace getEnlaceLibre(Exclusividad exclusividad, int ldO){
 		if(bloqueado)return null;
 		
-		for(Enlace e: enlaces){
+		for(Enlace e: enlacesNecesarios){
 			if (!e.isBloqueado()){
 				if(e.getLongitudDeOnda() == ldO){
 					if (e.cumpleExclusividad(exclusividad)){
@@ -211,22 +229,12 @@ public class CanalOptico implements Comparable<CanalOptico> {
 		this.bloqueado = true;
 	}
 
-	/**
-	 * Desbloquea el enlace porque ya no forma parte del camino primario de
-	 * algun Servicio
-	 */
 	public void desbloquear() {
-		int i = 0;
-		for(Enlace e : enlaces){
-			if(!e.isBloqueado()) break;
-			else i++;
-		}
-		
-		this.bloqueado = i == (fibras * ldos);
+		this.bloqueado = false;
 	}
 
 	/**
-	 * Retorna true si el enlace está bloqueado.
+	 * Retorna true si el enlace esta bloqueado.
 	 * 
 	 * @return
 	 */
@@ -245,9 +253,21 @@ public class CanalOptico implements Comparable<CanalOptico> {
 	public Set<Enlace> getEnlaces() {
 		return enlaces;
 	}
+	
+	public Enlace getEnlace(int fibra, int ldo){
+		for(Enlace e : enlacesNecesarios){
+			if ( e.getFibra() == fibra && e.getLongitudDeOnda() == ldo) return e;
+		}
+		
+		return null;
+	}
 
 	public void setEnlaces(Set<Enlace> enlaces) {
 		this.enlaces = enlaces;
+		this.enlacesNecesarios.clear();
+		this.enlacesNecesarios.addAll(enlaces);
+		
+		System.out.println("enlacesNecesarios : " + enlacesNecesarios.size());
 	}
 
 	@Override
@@ -258,7 +278,7 @@ public class CanalOptico implements Comparable<CanalOptico> {
 	public int getUso(){
 		double total = 0;
 		double utilizados = 0;
-		for(Enlace e : enlaces){
+		for(Enlace e : enlacesNecesarios){
 			total+=1;
 			if(e.isBloqueado()) utilizados+=1;
 		}
@@ -276,7 +296,7 @@ public class CanalOptico implements Comparable<CanalOptico> {
 	}
 	
 	public boolean tieneEnlacesExclusivos(){
-		for(Enlace e: enlaces){
+		for(Enlace e: enlacesNecesarios){
 			if(!e.estaReservado() && !e.isBloqueado() ) {
 				return true;
 			}
@@ -290,7 +310,7 @@ public class CanalOptico implements Comparable<CanalOptico> {
 		if ( Exclusividad.Exclusivo == exclusividad ) return tieneEnlacesExclusivos();
 		
 		if ( Exclusividad.SinReservasBronce == exclusividad ){
-			for(Enlace e: enlaces){
+			for(Enlace e: enlacesNecesarios){
 				if(!e.isBloqueado()) {
 					boolean tieneReservasBronce = false;
 					

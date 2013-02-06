@@ -187,6 +187,7 @@ public class Red {
 	}
 	
 	public void inicializar(){
+		
 		for(CanalOptico canal: canales){
 			canal.inicializar();
 		}
@@ -384,7 +385,5 @@ public class Red {
 			ie.printStackTrace();
 			System.exit(1);
 		}
-		
-		
 	}
 }

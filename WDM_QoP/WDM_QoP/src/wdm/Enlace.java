@@ -251,20 +251,10 @@ public class Enlace {
 	
 	public void bloquear(){
 		this.bloqueado = true;
-		
-		//System.out.println("Bloqueando " + canal + "." + longitudDeOnda);
-	
-		for(Enlace e : canal.getEnlaces()){
-			if(!e.bloqueado) return;
-		}
-		
-		canal.bloquear();
 	}
 	
 	public void desbloquear(){
-		//System.out.println("Desloqueando " + canal + "." + longitudDeOnda);
 		this.bloqueado = false;
-		this.canal.desbloquear();
 	}
 	
 	public boolean cumpleExclusividad(Exclusividad exclusividad){

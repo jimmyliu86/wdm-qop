@@ -200,14 +200,44 @@ public class Camino {
 	
 	public void fijarEnlaces(){
 		for(Salto salto: saltos){
-			salto.getEnlace().bloquear();
+			Enlace e = salto.getEnlace();
+			
+			/*
+			 * Si el servicio utiliza una fibra extra
+			 */
+			if(e.getFibra() >= e.getCanal().getFibras()){
+				salto.getCanal().agregarFibraExtra();
+				
+				/*
+				 * Se actualiza la referencia al enlace extra.
+				 */
+				e = e.getCanal().getEnlace(e.getFibra(), e.getLongitudDeOnda());
+				salto.setEnlace(e);
+			}
+			
+			e.bloquear();
 		}		
 	}
 	
 	public void fijarReservas(Servicio s){
 		for(Salto salto: saltos){
-			salto.getEnlace().reservar(s);
-		}		
+			Enlace e = salto.getEnlace();
+			
+			/*
+			 * Si el servicio utiliza una fibra extra
+			 */
+			if(e.getFibra() >= e.getCanal().getFibras()){
+				salto.getCanal().agregarFibraExtra();
+				
+				/*
+				 * Se actualiza la referencia al enlace extra.
+				 */
+				e = e.getCanal().getEnlace(e.getFibra(), e.getLongitudDeOnda());
+				salto.setEnlace(e);
+			}
+			
+			e.reservar(s);
+		}
 	}
 	
 	@Override
@@ -277,5 +307,15 @@ public class Camino {
         }
 
         return retorno;
+    }
+    
+    public void agregarFibras(Exclusividad exclusividad){
+    	for(Salto s: saltos){
+    		CanalOptico c = s.getCanal();
+    		
+    		if ( ! c.libreSegunExclusividad(exclusividad) ){
+    			c.agregarFibraExtra();
+    		}
+    	}
     }
 }
