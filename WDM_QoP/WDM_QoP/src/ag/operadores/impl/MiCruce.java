@@ -1,7 +1,8 @@
 package ag.operadores.impl;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
-import java.util.Set;
 import java.util.TreeSet;
 
 import wdm.Camino;
@@ -40,11 +41,11 @@ public class MiCruce implements OperadorCruce {
 		Solucion s1 = (Solucion) i1;
 		Solucion s2 = (Solucion) i2;
 		System.out.println("----------------");
-		System.out.println ("@S1@"+s1+"@S1@");
-		System.out.println ("@S2@"+s2+"@S2@");
+		System.out.println("@S1@" + s1 + "@S1@");
+		System.out.println("@S2@" + s2 + "@S2@");
 
 		Solucion hijo = new Solucion();
-		Set<Servicio> hijoAux = new TreeSet<Servicio>();
+		Collection<Servicio> hijoAux = new ArrayList<Servicio>();
 
 		Camino caminoAux = null;
 		Camino nuevoPrimario = null;
@@ -63,52 +64,38 @@ public class MiCruce implements OperadorCruce {
 			i++;
 			gen1 = iterador1.next();
 			gen2 = iterador2.next();
-			System.out.println("Iterando["+i+"]... ");
 			Camino primario1 = gen1.getPrimario();
 			Camino primario2 = gen2.getPrimario();
-			if (primario1 == null && primario2 == null)
+			
+			// TODO: Esto es un error y luego debe ser manejado
+			if (primario1 == null || primario2 == null)
 				continue;
-			else if (primario1 == null) {
-				hijo.getGenes().add(gen2);
-			} else {
-				hijo.getGenes().add(gen1);
-			}
 
 			caminoAux = new Camino(primario1.getOrigen());
-			caminoAux.setDestino(primario1.getDestino());
+			// caminoAux.setDestino(primario1.getDestino());
 
 			/*
 			 * P1. Se copian los Caminos cuyos genes son iguales entre los genes
 			 * de los padres. Se recorre el primario más corto de entre los
 			 * padres.
 			 */
-			if (primario1.getSaltos().size() <= primario2.getSaltos().size()) {
-
-				for (Salto salto : primario1.getSaltos()) {
-					if (primario2.getSaltos().contains(salto)) {
-						caminoAux.addSalto(salto);
-					} else {
-						caminoAux.addSalto(null);
-					}
-				}
-
-			} else {
-				for (Salto salto : primario2.getSaltos()) {
-					if (primario1.getSaltos().contains(salto)) {
-						caminoAux.addSalto(salto);
-					} else {
-						caminoAux.addSalto(null);
-					}
+			for (Salto salto : primario1.getSaltos()) {
+				if (primario2.getSaltos().contains(salto)) {
+					caminoAux.addSalto(salto);
+				} else {
+					caminoAux.addSalto(null);
 				}
 			}
-
-			// se carga el nuevo Camino Primario.
-			nuevoPrimario = new Camino();
-			nuevoSecundario = new Camino();
+			
 			// El inicio auxiliar ya se asigna al primer Nodo de Origen.
 			Nodo inicio = caminoAux.getOrigen();
 			Nodo fin = null;
 			int longitudDeOnda = -1;
+			
+			// se carga el nuevo Camino Primario.
+			nuevoPrimario = new Camino(inicio);
+			nuevoSecundario = new Camino(inicio);
+
 
 			Iterator<Salto> saltos = caminoAux.getSaltos().iterator();
 
@@ -168,7 +155,7 @@ public class MiCruce implements OperadorCruce {
 			Nodo nodoA = primario1.getOrigen();
 			Nodo nodoB = primario1.getDestino();
 			Nivel nivel = gen1.getSolicitud().getNivel();
-			
+
 			Exclusividad e;
 			if (nivel.equals(Nivel.Oro))
 				e = Exclusividad.Exclusivo;
@@ -176,33 +163,34 @@ public class MiCruce implements OperadorCruce {
 				e = Exclusividad.SinReservasBronce;
 			else
 				e = Exclusividad.Exclusivo.NoExclusivo;
-			
-			
+
 			Camino subCamino = nodoA.dijkstra(nodoB, e);
-			
+
 			longitudDeOnda = -1;
 			// Se agrega el camino encontrado al Nuevo Camino Secundario
 			if (subCamino == null)
 				continue;
-			
+
 			for (Salto salto : subCamino.getSaltos()) {
 				int valor = salto.setEnlace(longitudDeOnda);
 				if (valor == -5)
 					break;
-				
+
 				longitudDeOnda = salto.getEnlace().getLongitudDeOnda();
 				nuevoSecundario.addSalto(salto);
 			}
-			Servicio newServicio = new Servicio(nuevoPrimario, nuevoSecundario,gen1.getSolicitud());
+			Servicio newServicio = new Servicio(nuevoPrimario, nuevoSecundario,
+					gen1.getSolicitud());
 			/*
 			 * Cargar Genes al hijo.
 			 */
 
-			System.out.println ("Hijo:"+i+" #New#"+newServicio+"NEW");
+			System.out.println("+Gen:" + i + " #New#" + newServicio + "NEW");
 			hijoAux.add(newServicio);
 		}
-		hijo.setGenes(hijoAux);
-		
+		Collection<Servicio> aux = new TreeSet<Servicio>(hijoAux);
+		hijo.setGenes(aux);
+
 		return hijo;
 	}
 }

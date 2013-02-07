@@ -1,5 +1,6 @@
 package ag;
 
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
@@ -192,8 +193,8 @@ public class Solucion implements Individuo {
 		return (TreeSet<Servicio>) genes;
 	}
 
-	public void setGenes(Set<Servicio> genes) {
-		this.genes = (TreeSet<Servicio>) genes;
+	public void setGenes(Collection<Servicio> hijoAux) {
+		this.genes = (TreeSet<Servicio>) hijoAux;
 	}
 
 	/**

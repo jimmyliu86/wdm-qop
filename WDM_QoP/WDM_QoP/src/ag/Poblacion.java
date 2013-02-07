@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Random;
 
 import ag.operadores.OperadorCruce;
 import ag.operadores.OperadorSeleccion;
@@ -73,7 +74,7 @@ public class Poblacion {
 	 * 
 	 * @param selectos
 	 */
-	public void cruzar(Collection<Individuo> selectos) {
+	public void cruzar0(Collection<Individuo> selectos) {
 		Individuo primero = null;
 		Individuo miPrimero = null;
 		Individuo segundo = null;
@@ -96,6 +97,49 @@ public class Poblacion {
 			nuevo = operadorCruce.cruzar(miPrimero, segundo);
 			this.hijos.add(nuevo);
 		}
+	}
+
+	/*
+	 * Nuevo Cruce Aleatorio.
+	 */
+	public void cruzar(Collection<Individuo> selectos) {
+
+		if (selectos == null)
+			throw new Error("No hay selección.");
+
+		// Tamaño de población seleccionada
+		int cantMejores = selectos.size();
+
+		// Auxiliar de Individuos
+		List<Individuo> individuos = new ArrayList<Individuo>(selectos);
+
+		// Se inicializa la clase Random
+		Random rand = new Random();
+		rand.nextInt();
+
+		for (int i = 0; i < cantMejores; i++) {
+
+			// Se eligen a dos individuos (torneo "binario")
+			int ind1 = rand.nextInt(cantMejores);
+			int ind2 = rand.nextInt(cantMejores);
+
+			// Nos aseguramos que no sean del mismo indice.
+			int limite = 1;
+			while (ind1 != ind2 && limite < 10) {
+				ind2 = rand.nextInt(cantMejores);
+				limite++;
+			}
+
+			Individuo individuo1 = individuos.get(ind1);
+			Individuo individuo2 = individuos.get(ind2);
+			Individuo hijo = null;
+			System.out.println("&) Cruce N°"+i);
+
+			// Se extrae los fitness de los correspondientes individuos
+			hijo = operadorCruce.cruzar(individuo1, individuo2);
+			this.hijos.add(hijo);
+		}
+
 	}
 
 	public void evaluar() {
