@@ -125,7 +125,7 @@ public class Poblacion {
 
 			// Nos aseguramos que no sean del mismo indice.
 			int limite = 1;
-			while (ind1 != ind2 && limite < 10) {
+			while (ind1 == ind2 && limite < 10) {
 				ind2 = rand.nextInt(cantMejores);
 				limite++;
 			}
@@ -134,7 +134,8 @@ public class Poblacion {
 			Individuo individuo2 = individuos.get(ind2);
 			Individuo hijo = null;
 			System.out.println("&) Cruce N°"+i);
-
+			System.out.println("++I1:"+individuo1);
+			System.out.println("++I2:"+individuo2);
 			// Se extrae los fitness de los correspondientes individuos
 			hijo = operadorCruce.cruzar(individuo1, individuo2);
 			this.hijos.add(hijo);
