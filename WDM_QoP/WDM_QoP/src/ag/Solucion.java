@@ -72,6 +72,12 @@ public class Solucion implements Individuo {
 		this.costo = 0.0;
 	}
 
+	public void random() {
+		for (Servicio s : this.genes) {
+			s.random();
+		}
+	}
+
 	/**
 	 * Calcula el costo en función de la Fórmula de Evaluación Definida.
 	 * <p>
@@ -106,7 +112,6 @@ public class Solucion implements Individuo {
 				total_LDO += primario.getCambiosLDO();
 			}
 
-			
 		}
 
 		// se descuentan los enlaces cuyos canales opticos ya existen.
@@ -198,6 +203,7 @@ public class Solucion implements Individuo {
 	 * @param solucion
 	 * @return
 	 */
+	@Deprecated
 	public boolean mismasSolicitudes(Solucion solucion) {
 		int contador = 0;
 		boolean retorno = false;
@@ -247,14 +253,14 @@ public class Solucion implements Individuo {
 	@Override
 	public String toString() {
 		final int maxLen = genes.size();
-		return "[Solucion [fitness=" + fitness + ", costo=" + costo
-				+ ", \ngenes="
-				+ (genes != null ? toString(genes, maxLen) : null) + "]";
+		return "\n[Solucion " + this.id + ":\n [fitness=" + fitness + ", costo="
+				+ costo + ", genes="
+				+ (genes != null ? toString(genes, maxLen) : "Vacio.") + "]";
 	}
 
 	private String toString(Set<Servicio> collection, int maxLen) {
 		StringBuilder builder = new StringBuilder();
-		builder.append("\n[");
+		builder.append(" [");
 		int i = 0;
 		for (Iterator<Servicio> iterator = collection.iterator(); iterator
 				.hasNext(); i++) {

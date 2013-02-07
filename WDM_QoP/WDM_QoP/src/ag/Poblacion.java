@@ -1,9 +1,9 @@
 package ag;
 
 import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.Collection;
 import java.util.Iterator;
-import java.util.Set;
+import java.util.List;
 
 import ag.operadores.OperadorCruce;
 import ag.operadores.OperadorSeleccion;
@@ -25,12 +25,12 @@ public class Poblacion {
 	/*
 	 * Individuos de la población
 	 */
-	private Set<Individuo> individuos;
+	private Collection<Individuo> individuos;
 
 	/*
 	 * Hijos de los individuos selectos
 	 */
-	private Set<Individuo> hijos;
+	private Collection<Individuo> hijos;
 
 	/*
 	 * Operador de cruce
@@ -47,12 +47,22 @@ public class Poblacion {
 	 * 
 	 * @param individuos
 	 */
-	public Poblacion(Set<Individuo> individuos) {
+	public Poblacion(Collection<Individuo> individuos) {
 		this.individuos = individuos;
 		this.operadorSeleccion = new TorneoBinario();
 		this.operadorCruce = new MiCruce();
-		this.hijos = new HashSet<Individuo>();
+		this.hijos = new ArrayList<Individuo>();
 
+	}
+
+	public void generarPoblacion() {
+		int ind1 = 1;
+		for (Individuo i : this.individuos) {
+			Solucion s = (Solucion) i;
+			s.random();
+			s.setId(ind1);
+			ind1++;
+		}
 	}
 
 	/**
@@ -63,7 +73,7 @@ public class Poblacion {
 	 * 
 	 * @param selectos
 	 */
-	public void cruzar(Set<Individuo> selectos) {
+	public void cruzar(Collection<Individuo> selectos) {
 		Individuo primero = null;
 		Individuo miPrimero = null;
 		Individuo segundo = null;
@@ -93,14 +103,15 @@ public class Poblacion {
 			i.evaluar();
 		}
 	}
-	
+
 	/**
 	 * Operación de seleccion de Individuos para cruzar.
 	 * 
 	 * @return individuos seleccionados
 	 */
-	public Set<Individuo> seleccionar() {
-		Set<Individuo> selectos = this.operadorSeleccion.seleccionar(this);
+	public Collection<Individuo> seleccionar() {
+		Collection<Individuo> selectos = this.operadorSeleccion
+				.seleccionar(this);
 		return selectos;
 	}
 
@@ -113,24 +124,24 @@ public class Poblacion {
 		return this.individuos.size();
 	}
 
-	public Set<Individuo> getIndividuos() {
+	public Collection<Individuo> getIndividuos() {
 		return individuos;
 	}
-	
+
 	public ArrayList<Individuo> getIndividuosToArray() {
 		ArrayList<Individuo> a = new ArrayList<Individuo>(this.individuos);
 		return a;
 	}
 
-	public void setIndividuos(Set<Individuo> individuos) {
+	public void setIndividuos(List<Individuo> individuos) {
 		this.individuos = individuos;
 	}
 
-	public Set<Individuo> getHijos() {
+	public Collection<Individuo> getHijos() {
 		return hijos;
 	}
 
-	public void setHijos(Set<Individuo> hijos) {
+	public void setHijos(List<Individuo> hijos) {
 		this.hijos = hijos;
 	}
 
@@ -148,6 +159,27 @@ public class Poblacion {
 
 	public void setOperadorSeleccion(OperadorSeleccion operadorSeleccion) {
 		this.operadorSeleccion = operadorSeleccion;
+	}
+
+	@Override
+	public String toString() {
+		return "Poblacion [individuos="
+				+ (individuos != null ? toString(individuos, individuos.size())
+						: null) + "]";
+	}
+
+	private String toString(Collection<?> collection, int maxLen) {
+		StringBuilder builder = new StringBuilder();
+		builder.append("[");
+		int i = 0;
+		for (Iterator<?> iterator = collection.iterator(); iterator.hasNext()
+				&& i < maxLen; i++) {
+			if (i > 0)
+				builder.append(", ");
+			builder.append(iterator.next());
+		}
+		builder.append("]");
+		return builder.toString();
 	}
 
 }

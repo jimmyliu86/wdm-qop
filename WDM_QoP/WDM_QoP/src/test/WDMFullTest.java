@@ -3,7 +3,9 @@ package test;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import javax.persistence.EntityManager;
@@ -32,10 +34,10 @@ public class WDMFullTest {
 	public void setUp() throws Exception {
 		NSFNET = em.find(Red.class, 247);
 		NSFNET.inicializar();
-		
+
 	}
 
-	//@Test
+	// @Test
 	public void testRed() {
 		System.out.println("Prueba RED.");
 		NSFNET.imprimirRed();
@@ -44,7 +46,7 @@ public class WDMFullTest {
 		// cargarPrueba("prueba2");
 	}
 
-	//@Test
+	// @Test
 	public void testInicializar() {
 		Set<CanalOptico> canales1 = NSFNET.getCanales();
 		NSFNET.inicializar();
@@ -52,58 +54,103 @@ public class WDMFullTest {
 		assertTrue(canales1.size() == canales2.size());
 	}
 
-	//@Test
+	// @Test
 	public void testProbNiveles() {
 
 		double total = probNiveles[0] + probNiveles[1] + probNiveles[2];
 		assertTrue(total == 1.0);
 	}
 
-	@Test
+	// @Test
 	public void testSolucion() {
+
+		System.out.println("Prueba Solucion.");
+
 		// 0. Ya se cuenta con la red NSFNET.
-		// 1. Obtener el caso de prueba (Solicitudes)
+		// 1. Obtener el caso de prueba (Solicitudes
 		Caso prueba1 = em.find(Caso.class, "test1");
 		// 2. Crear las soluciones con las Solicitudes
 		Solucion solucion = new Solucion(prueba1.getSolicitudes());
-		//solucion.evaluar();
-		//System.out.println("Prueba Solucion.");
-		System.out.println(prueba1.getSolicitudes().toString());
-		System.out.println(solucion.toString());
-		//System.out.println("FIN Prueba Solucion.");
-		assertTrue(prueba1.getSolicitudes().size() == 2);
-		
+		solucion.random();
+		// 3. Se evaluarn las Soluciones.
+		solucion.evaluar();
+
+		// Se imprimen Solicitudes
+		System.out.println(prueba1.getSolicitudes());
+		// Se imprime Solución a las Solicitudes
+
+		System.out.println("FIN Prueba Solucion.");
+		// Evaluaciones
+		assertNotNull(solucion);
+		assertNotNull(solucion.getGenes());
+		assertTrue(prueba1.getSolicitudes().size() == solucion.getGenes()
+				.size());
+
+		System.out.println(solucion);
 	}
 
-	@Test
+	// @Test
 	public void algoritmoGenetico() {
 
 		// 2. Crear las soluciones con las Solicitudes
 
-		Set<Individuo> individuos = this.obtenerPrueba(6);
-		assertTrue(individuos.size() == 6);
+		Set<Individuo> individuos = this.obtenerPrueba(4);
+		assertTrue(individuos.size() == 4);
 
 		System.out.println("Prueba Algoritmo Genetico.");
 		Poblacion p = new Poblacion(individuos);
-		//System.out.println("Evaluando...");
-		//p.evaluar();
-		//System.out.println("Fin Evaluacion.");
-		//System.out.println("Seleccionando...");
-		Set<Individuo> seleccionados = p.seleccionar();
-		//System.out.println("Fin Seleccion.");
-		
+		p.generarPoblacion();
+		System.out.println("Evaluando...");
+		p.evaluar();
+		System.out.println("Fin Evaluacion.");
+		// System.out.println("Seleccionando...");
+		Collection<Individuo> seleccionados = p.seleccionar();
+		// System.out.println("Fin Seleccion.");
+
 		int i1 = 0;
 		for (Individuo i : seleccionados) {
 			i1++;
 			System.out.println("@Individuo " + i1 + " :" + i.toString());
 		}
-		System.out.println("FIN Prueba Algoritmo Genetico."+ seleccionados.size());
-		//assertTrue(seleccionados.size() == 2);
-		
+		System.out.println("Cantidad Selecionados:" + seleccionados.size());
+		System.out.println("FIN Prueba Algoritmo Genetico.");
+
+		// assertTrue(seleccionados.size() == 2);
+
 		System.out.println("Cruzando...");
 		p.cruzar(seleccionados);
 		System.out.println("FIN Cruzando...");
-		assertNotNull("$Hay cruce.",p);
+		assertNotNull("$Hay cruce.", p);
+	}
+
+	@Test
+	public void testCruce() {
+
+		// 2. Crear las soluciones con las Solicitudes
+
+		System.out.println("Prueba Cruce ... Obteniendo Caso de Prueba. ");
+		Set<Individuo> individuos = this.obtenerPrueba(4);
+		assertTrue(individuos.size() == 4);
+
+		System.out.println("Prueba Cruce ... Continua. ");
+		Poblacion p = new Poblacion(individuos);
+		p.generarPoblacion();
+		
+		System.out.println("Prueba Cruce ... Población Inicial. ");
+		System.out.println(p.toString());
+		p.evaluar();
+		Collection<Individuo> seleccionados = p.seleccionar();
+		Poblacion p2 = new Poblacion(seleccionados);
+		assertTrue("No son del mismo tamaño:" + seleccionados.size() + " y "
+				+ p.getTamanho(), seleccionados.size() == p.getTamanho());
+		
+		System.out.println("Prueba Cruce ... Seleccionados. ");
+		System.out.println(p2.toString());
+		
+		System.out.println("---------------------------- ");
+		System.out.println("Prueba Cruce ... Cruzando... ");
+		p.cruzar(seleccionados);
+		System.out.println("... FIN Prueba Cruce.");
 	}
 
 	/**
@@ -127,17 +174,14 @@ public class WDMFullTest {
 		Set<Individuo> individuos = new HashSet<Individuo>(cantidad);
 
 		Caso prueba1 = em.find(Caso.class, "test1");
-		
 
 		for (int i = 0; i < cantidad; i++) {
 			Solucion solucion = new Solucion(prueba1.getSolicitudes());
-			System.out.println("------------");
-			System.out.println(solucion.getGenes().toString());
-			System.out.println("$------------$");
-			
+			System.out.println(">" + i + ">" + solucion.getGenes().toString());
+
 			individuos.add(solucion);
 		}
-		
+
 		return individuos;
 	}
 

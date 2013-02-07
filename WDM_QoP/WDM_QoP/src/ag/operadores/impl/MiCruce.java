@@ -1,6 +1,8 @@
 package ag.operadores.impl;
 
 import java.util.Iterator;
+import java.util.Set;
+import java.util.TreeSet;
 
 import wdm.Camino;
 import wdm.Nodo;
@@ -37,14 +39,12 @@ public class MiCruce implements OperadorCruce {
 	public Individuo cruzar(Individuo i1, Individuo i2) {
 		Solucion s1 = (Solucion) i1;
 		Solucion s2 = (Solucion) i2;
-		/*
-		 * Comprobamos que las solicitudes sea las mismas ¿Es necesaria esta
-		 * comprobación?
-		 */
-		if (!s1.mismasSolicitudes(s2))
-			throw new Error("Las solicitudes no coinciden");
+		System.out.println("----------------");
+		System.out.println ("@S1@"+s1+"@S1@");
+		System.out.println ("@S2@"+s2+"@S2@");
 
 		Solucion hijo = new Solucion();
+		Set<Servicio> hijoAux = new TreeSet<Servicio>();
 
 		Camino caminoAux = null;
 		Camino nuevoPrimario = null;
@@ -58,11 +58,12 @@ public class MiCruce implements OperadorCruce {
 		/*
 		 * Cálculos del Nuevo Camino Primario y del Nuevo Camino Secundario.
 		 */
+		int i = 0;
 		while (iterador1.hasNext() && iterador2.hasNext()) {
-
+			i++;
 			gen1 = iterador1.next();
 			gen2 = iterador2.next();
-
+			System.out.println("Iterando["+i+"]... ");
 			Camino primario1 = gen1.getPrimario();
 			Camino primario2 = gen2.getPrimario();
 			if (primario1 == null && primario2 == null)
@@ -167,23 +168,41 @@ public class MiCruce implements OperadorCruce {
 			Nodo nodoA = primario1.getOrigen();
 			Nodo nodoB = primario1.getDestino();
 			Nivel nivel = gen1.getSolicitud().getNivel();
-
-			Camino subCamino = nodoA.dijkstra(nodoB, Exclusividad.NoExclusivo);
+			
+			Exclusividad e;
+			if (nivel.equals(Nivel.Oro))
+				e = Exclusividad.Exclusivo;
+			else if (nivel.equals(Nivel.Bronce))
+				e = Exclusividad.SinReservasBronce;
+			else
+				e = Exclusividad.Exclusivo.NoExclusivo;
+			
+			
+			Camino subCamino = nodoA.dijkstra(nodoB, e);
+			
 			longitudDeOnda = -1;
 			// Se agrega el camino encontrado al Nuevo Camino Secundario
+			if (subCamino == null)
+				continue;
+			
 			for (Salto salto : subCamino.getSaltos()) {
-				salto.setEnlace(longitudDeOnda);
+				int valor = salto.setEnlace(longitudDeOnda);
+				if (valor == -5)
+					break;
+				
 				longitudDeOnda = salto.getEnlace().getLongitudDeOnda();
 				nuevoSecundario.addSalto(salto);
 			}
-			Servicio newServicio = new Servicio(nuevoPrimario, nuevoSecundario,
-					nivel);
+			Servicio newServicio = new Servicio(nuevoPrimario, nuevoSecundario,gen1.getSolicitud());
 			/*
 			 * Cargar Genes al hijo.
 			 */
-			hijo.getGenes().add(newServicio);
-		}
 
+			System.out.println ("Hijo:"+i+" #New#"+newServicio+"NEW");
+			hijoAux.add(newServicio);
+		}
+		hijo.setGenes(hijoAux);
+		
 		return hijo;
 	}
 }
