@@ -73,9 +73,15 @@ public class Salto implements Comparable<Salto>{
 		if(ldO < 0 ) this.enlace = canal.getEnlaceLibre(Exclusividad.Exclusivo);
 		else 		 this.enlace = canal.getEnlaceLibre(Exclusividad.Exclusivo,ldO);
 		
-		enlace.bloquear();
+		// mrodas: se agrega control de null
+		int retorno = -5;
+		if (this.enlace != null) {
+			enlace.bloquear();
+			retorno = enlace.getLongitudDeOnda();
+		}
+			
 		
-		return enlace.getLongitudDeOnda();
+		return retorno;
 	}
 
 	@Override

@@ -50,6 +50,13 @@ public class Servicio implements Comparable<Servicio>{
 		super();
 		this.solicitud = solicitud;
 	}
+
+	public Servicio(Camino primario, Camino alternativo, Solicitud solicitud) {
+		super();
+		this.primario = primario;
+		this.alternativo = alternativo;
+		this.solicitud = solicitud;
+	}
 	
 	/**
 	 * Constructor usado para crear hijos

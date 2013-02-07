@@ -76,6 +76,10 @@ public class Camino {
 	 * @param salto
 	 */
 	public void addSalto(Salto salto){
+		// mrodas: se agrega control de null
+		if (saltos == null)
+			return;
+		
 		saltos.add(salto);
 		
 		if (destino == null) destino = origen;
