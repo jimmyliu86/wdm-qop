@@ -223,7 +223,9 @@ public class Red {
 	public void utilizacion(String dir, String dif){
 		String graphName = this.nombre + "_utilizacion" + dif;
 		String fileName = graphName + ".gv";
-		String cmd = "\"C:\\Program Files (x86)\\Graphviz 2.28\\bin\\dot.exe\"";
+		//String cmd = "\"C:\\Program Files (x86)\\Graphviz 2.28\\bin\\dot.exe\"";
+		String cmd = "\"C:\\Program Files\\Graphviz2.30\\bin\\dot.exe\"";
+		
 		cmd += " -Ksfdp -Goverlap=prism -Tpng -o \"" + dir + "\\" + graphName + ".png\" \"";
 		cmd += dir + "\\" + fileName + "\"";
 		
@@ -233,7 +235,7 @@ public class Red {
 			fw.write("graph " + graphName + " {\n");
 			
 			for(Nodo nodo: nodos){
-				String spec = " [penwidth=1];\n";
+				String spec = " [penwidth=1 " + (nodo.estaBloqueado() ? ", style=filled, fillcolor=\"#000000\")" : "") +  " ];\n";
 				fw.write(nodo + spec);
 			}
 			
@@ -293,7 +295,8 @@ public class Red {
 	public void drawServicio(Servicio s, String dir, String nombre){
 		String graphName = nombre == null ? this.nombre + "_" + s : nombre;
 		String fileName = graphName + ".gv";
-		String cmd = "\"C:\\Program Files (x86)\\Graphviz 2.28\\bin\\dot.exe\"";
+		String cmd = "\"C:\\Program Files\\Graphviz2.30\\bin\\dot.exe\"";
+		//String cmd = "\"C:\\Program Files (x86)\\Graphviz 2.28\\bin\\dot.exe\"";
 		cmd += " -Ksfdp -Goverlap=prism -Tpng -o \"" + dir + "\\" + graphName + ".png\" \"";
 		cmd += dir + "\\" + fileName + "\"";
 		

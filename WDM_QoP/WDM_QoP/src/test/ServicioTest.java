@@ -27,7 +27,7 @@ public class ServicioTest {
 	private static Red red = em.find(Red.class, 247);
 	
 	//Oficina Albert
-	private String dirbase = "C:\\Users\\amadeoa\\Tesis\\graph\\ServicioTest";
+	private String dirbase = "C:\\Users\\mrodas\\Desktop\\Descargas\\tesis";
 	
 	private Nodo getNodo(String label){
 		for(Nodo n: red.getNodos()){

@@ -130,8 +130,11 @@ public class Nodo implements Comparable<Nodo>{
 	 * @param b
 	 * @return
 	 */
-	public boolean equals(Nodo b) {
-		return this.label == b.label;
+	public boolean equals(Object b) {
+		
+		if (! ( b instanceof Nodo) ) return false;
+		
+		return this.label.equalsIgnoreCase(((Nodo)b).label);
 	}
 	
 	public void addCanal(CanalOptico canal){

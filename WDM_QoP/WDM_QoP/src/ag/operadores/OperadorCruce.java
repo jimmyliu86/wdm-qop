@@ -1,7 +1,6 @@
 package ag.operadores;
 
 import ag.Individuo;
-import ag.Solucion;
 
 /**
  * Interfaz OperadorCruce que define la implementación de una operación de

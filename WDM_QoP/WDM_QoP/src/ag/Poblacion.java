@@ -6,6 +6,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 
+import wdm.Red;
 import ag.operadores.OperadorCruce;
 import ag.operadores.OperadorSeleccion;
 import ag.operadores.impl.MiCruce;
@@ -38,6 +39,8 @@ public class Poblacion {
 	 */
 	private OperadorCruce operadorCruce;
 
+	private static Red red;
+
 	/*
 	 * Operador de selecci�n
 	 */
@@ -56,10 +59,19 @@ public class Poblacion {
 
 	}
 
+	public static Red getRed() {
+		return red;
+	}
+
+	public static void setRed(Red red) {
+		Poblacion.red = red;
+	}
+
 	public void generarPoblacion() {
 		int ind1 = 1;
 		for (Individuo i : this.individuos) {
 			Solucion s = (Solucion) i;
+			Poblacion.red.inicializar();
 			s.random();
 			s.setId(ind1);
 			ind1++;
@@ -133,11 +145,14 @@ public class Poblacion {
 			Individuo individuo1 = individuos.get(ind1);
 			Individuo individuo2 = individuos.get(ind2);
 			Individuo hijo = null;
-			System.out.println("&) Cruce N°"+i);
-			System.out.println("++I1:"+individuo1);
-			System.out.println("++I2:"+individuo2);
+			System.out.println("&) Cruce N°" + i);
+			System.out.println("++I1:" + individuo1);
+			System.out.println("++I2:" + individuo2);
 			// Se extrae los fitness de los correspondientes individuos
-			hijo = operadorCruce.cruzar(individuo1, individuo2);
+			
+			red.inicializar();
+			hijo = this.operadorCruce.cruzar(individuo1, individuo2);
+			
 			this.hijos.add(hijo);
 		}
 

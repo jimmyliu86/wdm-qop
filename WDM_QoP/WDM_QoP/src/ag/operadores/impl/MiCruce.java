@@ -2,7 +2,10 @@ package ag.operadores.impl;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
 import java.util.TreeSet;
 
 import wdm.Camino;
@@ -12,6 +15,7 @@ import wdm.qop.Exclusividad;
 import wdm.qop.Nivel;
 import wdm.qop.Servicio;
 import ag.Individuo;
+import ag.Poblacion;
 import ag.Solucion;
 import ag.operadores.OperadorCruce;
 
@@ -40,18 +44,20 @@ public class MiCruce implements OperadorCruce {
 	public Individuo cruzar(Individuo i1, Individuo i2) {
 		Solucion s1 = (Solucion) i1;
 		Solucion s2 = (Solucion) i2;
+
 		System.out.println("----------------");
 		System.out.println("@S1@" + s1 + "@S1@");
 		System.out.println("@S2@" + s2 + "@S2@");
 
-		Solucion hijo = new Solucion();
 		Collection<Servicio> hijoAux = new ArrayList<Servicio>();
+		Solucion hijo = new Solucion();
 
-		Camino caminoAux = null;
+		Set<Nodo> primeros = new HashSet<Nodo>();
+		List<Nodo> iguales = new ArrayList<Nodo>();
+
 		Camino nuevoPrimario = null;
-		Camino nuevoSecundario = null;
 		Iterator<Servicio> iterador1 = s1.getGenes().iterator();
-		Iterator<Servicio> iterador2 = s1.getGenes().iterator();
+		Iterator<Servicio> iterador2 = s2.getGenes().iterator();
 
 		Servicio gen1 = null;
 		Servicio gen2 = null;
@@ -62,132 +68,82 @@ public class MiCruce implements OperadorCruce {
 		int i = 0;
 		while (iterador1.hasNext() && iterador2.hasNext()) {
 			i++;
+			iguales.clear();
 			gen1 = iterador1.next();
 			gen2 = iterador2.next();
 			Camino primario1 = gen1.getPrimario();
 			Camino primario2 = gen2.getPrimario();
-			
-			// TODO: Esto es un error y luego debe ser manejado
-			if (primario1 == null || primario2 == null)
-				continue;
+			Nivel nivel = gen1.getSolicitud().getNivel();
 
-			caminoAux = new Camino(primario1.getOrigen());
-			// caminoAux.setDestino(primario1.getDestino());
+			Exclusividad exclusividadPrimario = gen1.getSolicitud()
+					.getExclusividadPrimario();
 
+			Nodo nodo = primario1.getOrigen();
+			primeros.add(nodo);
 			/*
-			 * P1. Se copian los Caminos cuyos genes son iguales entre los genes
-			 * de los padres. Se recorre el primario más corto de entre los
-			 * padres.
+			 * P1. Se copian los Nodos iguales entre los genes de los padres.
 			 */
 			for (Salto salto : primario1.getSaltos()) {
-				if (primario2.getSaltos().contains(salto)) {
-					caminoAux.addSalto(salto);
-				} else {
-					caminoAux.addSalto(null);
+				nodo = salto.getCanal().getOtroExtremo(nodo);
+				primeros.add(nodo);
+			}
+
+			nodo = primario2.getOrigen();
+
+			for (Salto salto : primario2.getSaltos()) {
+				nodo = salto.getCanal().getOtroExtremo(nodo);
+				if (primeros.contains(nodo)) {
+					iguales.add(nodo);
 				}
 			}
-			
-			// El inicio auxiliar ya se asigna al primer Nodo de Origen.
-			Nodo inicio = caminoAux.getOrigen();
-			Nodo fin = null;
-			int longitudDeOnda = -1;
-			
+
+			Nodo inicio = primario1.getOrigen();
+
 			// se carga el nuevo Camino Primario.
 			nuevoPrimario = new Camino(inicio);
-			nuevoSecundario = new Camino(inicio);
 
+			for (Nodo next : iguales) {
+				Camino subCamino = inicio.dijkstra(next, exclusividadPrimario);
 
-			Iterator<Salto> saltos = caminoAux.getSaltos().iterator();
+				if (subCamino == null) {
+					String dir = "C:\\Users\\mrodas\\Desktop\\Descargas\\tesis";
+					Poblacion.getRed().drawServicio(gen1, dir, "cruce_error_a");
+					Poblacion.getRed().drawServicio(gen2, dir, "cruce_error_b");
+					Poblacion.getRed().utilizacion(dir, "");
 
-			while (saltos.hasNext()) {
-				Salto salto = saltos.next();
+					System.err.println("Desde " + inicio + " hasta " + next);
+					System.err.println(nuevoPrimario);
 
-				/*
-				 * Caso null: los genes con valor null son los que se deben
-				 * sustituir por nuevos caminos (a través de SPD).
-				 */
-				if (salto == null) {
-					/*
-					 * Primero: Se debe obtener el Nodo inicio y el Nodo fin
-					 */
-					while (salto == null && saltos.hasNext()) {
-						salto = saltos.next();
-					}
-					if (saltos.hasNext()) { // sigue por el medio del Servicio
-						fin = salto.getEnlace().getExtremoA();
-						longitudDeOnda = salto.getEnlace().getLongitudDeOnda();
-					} else {
-						// Llegó al último Nodo y no hay camino
-						fin = caminoAux.getDestino();
-					}
-
-					/*
-					 * P2: Se utiliza el algoritmo Shortest Path Disjktra (SPD)
-					 * desde el Nodo inicio al Nodo fin para completar los
-					 * caminos faltantes.
-					 */
-					Camino subCamino = inicio.dijkstra(fin,
-							Exclusividad.Exclusivo);
-					// Se agrega el camino encontrado al Nuevo Camino Primario
-					for (Salto saltoAux : subCamino.getSaltos()) {
-						saltoAux.setEnlace(longitudDeOnda);
-						longitudDeOnda = salto.getEnlace().getLongitudDeOnda();
-						nuevoPrimario.addSalto(saltoAux);
-					}
-				} else {
-					/*
-					 * Caso not null: los genes not null (que son iguales entre
-					 * los padres) se agregan directamente. LDO ya está
-					 * asignado.
-					 */
-					salto.getEnlace().setLongitudDeOnda(longitudDeOnda);
-					longitudDeOnda = salto.getEnlace().getLongitudDeOnda();
-					nuevoPrimario.addSalto(salto);
-					// se asigna como inicio del siguiente el fin de este salto.
-					inicio = salto.getEnlace().getExtremoB();
+					System.exit(1);
 				}
+
+				nuevoPrimario.anexar(subCamino);
+				subCamino.bloquearNodos();
+				inicio = next;
 			}
+
+			nuevoPrimario.desbloquearNodos();
+
+			Servicio newServicio = new Servicio(gen1.getSolicitud());
+			newServicio.setPrimario(nuevoPrimario);
+			newServicio.setPrimario();
 
 			/*
 			 * Cargar Nuevo Secundario: Realizar algoritmo Shortest Path
 			 * Disjktra (SPD) desde el Nodo inicio al Nodo fin.
 			 */
-			Nodo nodoA = primario1.getOrigen();
-			Nodo nodoB = primario1.getDestino();
-			Nivel nivel = gen1.getSolicitud().getNivel();
-
-			Exclusividad e;
-			if (nivel.equals(Nivel.Oro))
-				e = Exclusividad.Exclusivo;
-			else if (nivel.equals(Nivel.Bronce))
-				e = Exclusividad.SinReservasBronce;
-			else
-				e = Exclusividad.Exclusivo.NoExclusivo;
-
-			Camino subCamino = nodoA.dijkstra(nodoB, e);
-
-			longitudDeOnda = -1;
-			// Se agrega el camino encontrado al Nuevo Camino Secundario
-			if (subCamino == null)
-				continue;
-
-			for (Salto salto : subCamino.getSaltos()) {
-				int valor = salto.setEnlace(longitudDeOnda);
-				if (valor == -5)
-					break;
-
-				longitudDeOnda = salto.getEnlace().getLongitudDeOnda();
-				nuevoSecundario.addSalto(salto);
+			if (nivel != Nivel.Bronce) {
+				newServicio.buscarAlternativo();
+				newServicio.setAlternativo();
 			}
-			Servicio newServicio = new Servicio(nuevoPrimario, nuevoSecundario,
-					gen1.getSolicitud());
 			/*
 			 * Cargar Genes al hijo.
 			 */
 
-			System.out.println("+Gen:" + i + " #New#" + newServicio + "NEW");
+			System.out.println("+Gen:" + i + " #New#" + newServicio + "#New.#");
 			hijoAux.add(newServicio);
 		}
+
 		Collection<Servicio> aux = new TreeSet<Servicio>(hijoAux);
 		hijo.setGenes(aux);
 

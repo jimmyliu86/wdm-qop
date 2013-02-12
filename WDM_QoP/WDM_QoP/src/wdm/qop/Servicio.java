@@ -202,11 +202,11 @@ public class Servicio implements Comparable<Servicio>{
 		if (solicitud.getEsquema() == EsquemaRestauracion.FullPath){
 			primario.bloquearNodos();
 			primario.getDestino().desbloquear();
-			alternativo = primario.getOrigen().dijkstra(primario.getDestino(),solicitud.getExclusividadAlternativo(), true );
+			alternativo = primario.getOrigen().dijkstra(primario.getDestino(),solicitud.getExclusividadAlternativo() );
 			primario.desbloquearNodos();
 		} else if(solicitud.getEsquema() == EsquemaRestauracion.Segment){
 			primario.bloquearCanales();
-			alternativo = primario.getOrigen().dijkstra(primario.getDestino(),solicitud.getExclusividadAlternativo(), true );
+			alternativo = primario.getOrigen().dijkstra(primario.getDestino(),solicitud.getExclusividadAlternativo() );
 			primario.desbloquearCanales();	
 		}
 		
@@ -328,9 +328,40 @@ public class Servicio implements Comparable<Servicio>{
 		this.randomizar();
 	}
 	
+	public boolean oroTieneAlternativo() {
+		boolean respuesta = false;
+		if (this.solicitud.getNivel() == Nivel.Oro)
+			if (this.alternativo == null)
+				respuesta = true;
+		return respuesta;
+	}
+	
+	public boolean plataTieneAlternativo() {
+		boolean respuesta = false;
+		if (this.solicitud.getNivel() == Nivel.Plata1)
+			if (this.alternativo == null)
+				respuesta = true;
+		return respuesta;
+	}
+	
 	@Override
 	public String toString() {
-		return "s"+solicitud.getOrigen()+"_"+solicitud.getDestino();
+		String retorno = "(DE:"+solicitud.getOrigen()+" A:"+solicitud.getDestino()+");";
+		String camino1 = null;
+		String camino2 = null;
+		
+		if (primario != null)
+			camino1 = "Primario: ["+primario.toString()+"];";
+		else
+			camino1 = "Primario: [Vacio];";
+		
+		if (alternativo != null)
+			camino2 = "Secundario: ["+alternativo.toString()+"]";
+		else
+			camino2 = "Secundario: [Vacio];";
+		
+		retorno = "{"+retorno +" "+ camino1 +" "+camino2+"}";
+		return retorno;
 	}
 
 	@Override
@@ -338,3 +369,4 @@ public class Servicio implements Comparable<Servicio>{
 		return solicitud.compareTo(arg0.solicitud);
 	}
 }
+

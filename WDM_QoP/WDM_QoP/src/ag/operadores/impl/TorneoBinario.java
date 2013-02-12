@@ -7,6 +7,7 @@ import java.util.Random;
 
 import ag.Individuo;
 import ag.Poblacion;
+import ag.Solucion;
 import ag.operadores.OperadorSeleccion;
 
 public class TorneoBinario implements OperadorSeleccion {
@@ -52,7 +53,22 @@ public class TorneoBinario implements OperadorSeleccion {
 			boolean valor = true;
 
 			// Competencia
-			if (fitness1 >= fitness2) {
+			boolean evaluacion = false;
+			int comparacion = comparar(individuo1, individuo2);
+
+			if (comparacion < 0)
+				evaluacion = true;
+			else if (comparacion > 0)
+				evaluacion = false;
+			else {
+				if (fitness1 >= fitness2) {
+					evaluacion = true;
+				} else {
+					evaluacion = false;
+				}
+			}
+
+			if (evaluacion) {
 				// Ganó individuo 1
 				valor = respuesta.add(individuo1);
 			} else {
@@ -66,6 +82,24 @@ public class TorneoBinario implements OperadorSeleccion {
 						+ respuesta);
 			}
 		}
+
+		return respuesta;
+	}
+
+	private int comparar(Individuo individuo1, Individuo individuo2) {
+		int respuesta = 0;
+		int oro = ((Solucion) individuo1).getContadorFailOro();
+		oro -= ((Solucion) individuo2).getContadorFailOro();
+		int plata = ((Solucion) individuo1).getContadorFailPlata();
+		plata -= ((Solucion) individuo2).getContadorFailPlata();
+
+		if (oro == 0)
+			if (plata == 0)
+				respuesta = 0;
+			else
+				respuesta = plata;
+		else
+			respuesta = oro;
 
 		return respuesta;
 	}

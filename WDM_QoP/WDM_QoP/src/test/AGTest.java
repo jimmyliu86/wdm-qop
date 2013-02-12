@@ -62,7 +62,7 @@ public class AGTest {
 
 		Solucion s2 = new Solucion(getSolicitudes());
 
-		assertTrue(s1.mismasSolicitudes(s2));
+		assertTrue(s1.equals(s2));
 
 	}
 

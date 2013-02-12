@@ -3,9 +3,13 @@ package test;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import javax.persistence.EntityManager;
@@ -18,6 +22,7 @@ import org.junit.Test;
 import wdm.CanalOptico;
 import wdm.Red;
 import wdm.qop.Caso;
+import wdm.qop.Servicio;
 import ag.Individuo;
 import ag.Poblacion;
 import ag.Solucion;
@@ -27,8 +32,10 @@ public class WDMFullTest {
 	private static EntityManagerFactory emf = Persistence
 			.createEntityManagerFactory("tesis");
 	private static EntityManager em = emf.createEntityManager();
+
 	Red NSFNET;
 	double[] probNiveles = { 0.4, 0.3, 0.3 };
+	public Poblacion p;
 
 	@Before
 	public void setUp() throws Exception {
@@ -133,9 +140,10 @@ public class WDMFullTest {
 		assertTrue(individuos.size() == 4);
 
 		System.out.println("Prueba Cruce ... Continua. ");
-		Poblacion p = new Poblacion(individuos);
+		p = new Poblacion(individuos);
+		Poblacion.setRed(NSFNET);
 		p.generarPoblacion();
-		
+
 		System.out.println("Prueba Cruce ... Población Inicial. ");
 		System.out.println(p.toString());
 		p.evaluar();
@@ -143,14 +151,16 @@ public class WDMFullTest {
 		Poblacion p2 = new Poblacion(seleccionados);
 		assertTrue("No son del mismo tamaño:" + seleccionados.size() + " y "
 				+ p.getTamanho(), seleccionados.size() == p.getTamanho());
-		
+
 		System.out.println("Prueba Cruce ... Seleccionados. ");
 		System.out.println(p2.toString());
-		
+
 		System.out.println("---------------------------- ");
 		System.out.println("Prueba Cruce ... Cruzando... ");
+
 		p.cruzar(seleccionados);
 		System.out.println("... FIN Prueba Cruce.");
+		// crearHTML();
 	}
 
 	/**
@@ -183,6 +193,57 @@ public class WDMFullTest {
 		}
 
 		return individuos;
+	}
+
+	private void crearHTML() {
+		String nombreRed = NSFNET.getNombre();
+		String dirbase = "C:\\Users\\mrodas\\Desktop\\Descargas\\tesis";
+		File template = new File(dirbase + "\\template.html");
+		File index = new File(dirbase + "\\index.html");
+
+		try {
+			FileWriter fw = new FileWriter(index, false);
+			BufferedReader br = new BufferedReader(new FileReader(template));
+
+			String linea = br.readLine();
+			while (linea != null) {
+				int i = 0;
+				if (linea.matches(".*COMPLETAR.*")) {
+					fw.write("nombreRed = '" + nombreRed + "'\n");
+					for (Individuo in : p.getHijos()) {
+						Solucion sol = (Solucion) in;
+
+						for (Servicio s : sol.getGenes()) {
+							String origen = s.getSolicitud().getOrigen()
+									.getLabel();
+							String destino = s.getSolicitud().getDestino()
+									.getLabel();
+							String calidad = s.getSolicitud().getNivel()
+									.toString();
+
+							fw.write("servicios[" + i + "] = {origen: '"
+									+ origen + "', destino: '" + destino
+									+ "', calidad: '" + calidad + "'}\n");
+
+							i++;
+						}
+						break;
+					}
+				} else {
+					fw.write(linea + "\n");
+				}
+
+				linea = br.readLine();
+			}
+
+			fw.flush();
+			fw.close();
+			br.close();
+
+		} catch (IOException e) {
+			e.printStackTrace();
+			System.exit(1);
+		}
 	}
 
 }

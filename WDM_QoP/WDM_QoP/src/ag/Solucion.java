@@ -12,6 +12,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.ManyToMany;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 import wdm.Camino;
 import wdm.CanalOptico;
@@ -51,6 +52,11 @@ public class Solucion implements Individuo {
 	// Valor por cambio de longitud de onda
 	public static double b = 2;
 
+	@Transient
+	private int contadorFailOro = 0;
+	@Transient
+	private int contadorFailPlata = 0;
+
 	public Solucion() {
 		super();
 		this.genes = new TreeSet<Servicio>();
@@ -74,8 +80,10 @@ public class Solucion implements Individuo {
 	}
 
 	public void random() {
+
 		for (Servicio s : this.genes) {
 			s.random();
+
 		}
 	}
 
@@ -96,22 +104,23 @@ public class Solucion implements Individuo {
 
 		for (Servicio gen : this.genes) {
 
+			if (gen.oroTieneAlternativo())
+				this.contadorFailOro++;
+
+			if (gen.plataTieneAlternativo())
+				this.contadorFailPlata++;
+
 			Camino primario = gen.getPrimario();
 
-			if (primario == null) {
-				contador += 10;
-			} else {
+			for (Salto s : primario.getSaltos()) {
 
-				for (Salto s : primario.getSaltos()) {
-
-					CanalOptico ca = s.getCanal();
-					boolean inserto = auxiliar.add(ca);
-					// inserto es false cuando ya existía en auxiliar
-					if (!inserto)
-						contador++;
-				}
-				total_LDO += primario.getCambiosLDO();
+				CanalOptico ca = s.getCanal();
+				boolean inserto = auxiliar.add(ca);
+				// inserto es false cuando ya existía en auxiliar
+				if (!inserto)
+					contador++;
 			}
+			total_LDO += primario.getCambiosLDO();
 
 		}
 
@@ -197,43 +206,6 @@ public class Solucion implements Individuo {
 		this.genes = (TreeSet<Servicio>) hijoAux;
 	}
 
-	/**
-	 * Función que contrala si tiene las mismas solicitudes que la solicitud
-	 * recibida.
-	 * 
-	 * @param solucion
-	 * @return
-	 */
-	@Deprecated
-	public boolean mismasSolicitudes(Solucion solucion) {
-		int contador = 0;
-		boolean retorno = false;
-
-		if (this.getGenes().size() != solucion.getGenes().size()) {
-			return retorno;
-		}
-
-		int size = this.getGenes().size();
-		Iterator<Servicio> i1 = this.getGenes().iterator();
-		Iterator<Servicio> i2 = solucion.getGenes().iterator();
-
-		for (int i = 0; i < size; i++) {
-			Servicio s1 = i1.next();
-			Servicio s2 = i2.next();
-			if (s1.getSolicitud().equals(s2.getSolicitud())) {
-				contador++;
-			} else {
-				retorno = false;
-				i = size;
-			}
-		}
-
-		if (contador == size)
-			retorno = true;
-
-		return retorno;
-	}
-
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)
@@ -254,8 +226,8 @@ public class Solucion implements Individuo {
 	@Override
 	public String toString() {
 		final int maxLen = genes.size();
-		return "\n[Solucion " + this.id + ":\n [fitness=" + fitness + ", costo="
-				+ costo + ", genes="
+		return "\n[Solucion " + this.id + ":\n [fitness=" + fitness
+				+ ", costo=" + costo + ", genes="
 				+ (genes != null ? toString(genes, maxLen) : "Vacio.") + "]";
 	}
 
@@ -271,6 +243,22 @@ public class Solucion implements Individuo {
 		}
 		builder.append("]");
 		return builder.toString();
+	}
+
+	public int getContadorFailOro() {
+		return contadorFailOro;
+	}
+
+	public void setContadorFailOro(int contadorFailOro) {
+		this.contadorFailOro = contadorFailOro;
+	}
+
+	public int getContadorFailPlata() {
+		return contadorFailPlata;
+	}
+
+	public void setContadorFailPlata(int contadorFailPlata) {
+		this.contadorFailPlata = contadorFailPlata;
 	}
 
 }
