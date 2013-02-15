@@ -1,11 +1,10 @@
 package test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertTrue;
 
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.Set;
-import java.util.TreeSet;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -14,74 +13,113 @@ import javax.persistence.Persistence;
 import org.junit.Before;
 import org.junit.Test;
 
-import wdm.Camino;
 import wdm.Red;
 import wdm.qop.Caso;
-import wdm.qop.Nivel;
-import wdm.qop.Servicio;
-import wdm.qop.Solicitud;
+import ag.Individuo;
+import ag.Poblacion;
 import ag.Solucion;
 
 public class AGTest {
 
-	Solucion s = null;
-
-	@Test
-	public void testSolucion() {
-		Solucion s1 = new Solucion(this.getSolicitudes());
-
-		Solucion s2 = new Solucion(this.getSolicitudes());
-
-		assertEquals(s1.getGenes(), s2.getGenes());
-		assertNotSame("No son lo mismo.", s1, s2);
-	}
-
-	@Test
-	public void testEvaluar() {
-		Solucion s1 = new Solucion(this.getSolicitudes());
-		Set<Servicio> genes = new TreeSet<Servicio>();
-		Camino primario = new Camino();
-		Camino secundario = new Camino();
-		Servicio serv = new Servicio(primario, secundario, Nivel.Oro);
-		serv.setId(1);
-		s1.setGenes(genes);
-
-		Solucion s2 = new Solucion(this.getSolicitudes());
-		s2.setGenes(genes);
-
-		s1.evaluar();
-		s2.evaluar();
-		System.out.println(" $ " + s1.getFitness() + " - " + s2.getFitness()
-				+ " $ ");
-		assertTrue(s1.getFitness() == s2.getFitness());
-	}
-
-	@Test
-	public void testMismasSolicitudes() {
-		Solucion s1 = new Solucion(getSolicitudes());
-
-		Solucion s2 = new Solucion(getSolicitudes());
-
-		assertTrue(s1.equals(s2));
-
-	}
-
 	private static EntityManagerFactory emf = Persistence
 			.createEntityManagerFactory("tesis");
 	private static EntityManager em = emf.createEntityManager();
+
 	Red NSFNET;
 	double[] probNiveles = { 0.4, 0.3, 0.3 };
+	public Poblacion p;
 
 	@Before
 	public void setUp() throws Exception {
-		NSFNET = em.find(Red.class, 123);
+		NSFNET = em.find(Red.class, 247);
 		NSFNET.inicializar();
+		boolean cargar = false;
+		if (cargar)
+			cargarPrueba("prueba", 2);
+
 	}
 
-	private Set<Solicitud> getSolicitudes() {
-		Caso prueba1 = em.find(Caso.class, "prueba1");
-		Set<Solicitud> solicitudes = prueba1.getSolicitudes();
-		return solicitudes;
+	@Test
+	public void algoritmoGenetico() {
+
+		System.out.println("Prueba Algoritmo Genetico.");
+		// 0. Obtener Poblacion Inicial
+		System.out.println("Población Inicial...");
+		this.obtenerPoblacion();
+		int generacion = 0;
+
+		while (generacion < 4) {
+
+			System.out.println(" * Generación Nº " + generacion);
+			// System.out.println("Evaluando...");
+			// p.evaluar();
+			// System.out.println("Fin Evaluacion.");
+			System.out.println("Seleccionando...");
+			Collection<Individuo> seleccionados = p.seleccionar();
+			System.out.println("Fin Seleccion.");
+
+			System.out.println("Cruzando...");
+			p.cruzar(seleccionados);
+			System.out.println("FIN Cruzando...");
+			System.out.println("Imprimiendo...");
+			System.out.println(p.toString());
+			System.out.println("Fin Impresion.");
+			generacion++;
+		}
+
+		System.out.println("FIN Prueba Algoritmo Genetico.");
+	}
+
+	/*
+	 * Función para cargar un Caso de prueba en la Base de Datos.
+	 * 
+	 * @param nombre
+	 */
+	private void cargarPrueba(String nombre, int cantidad) {
+
+		for (int i = 1; i <= cantidad; i++) {
+			Caso prueba = new Caso(NSFNET, 2, probNiveles);
+			String nombreUtil = nombre + i;
+			prueba.setNombre(nombreUtil);
+			em.getTransaction().begin();
+			em.persist(prueba);
+			em.getTransaction().commit();
+		}
+	}
+
+	/*
+	 * Funcion para obtener una cantidad de Individuos para la población Inicial
+	 */
+	private Set<Individuo> obtenerPrueba(int cantidad) {
+		Set<Individuo> individuos = new HashSet<Individuo>(cantidad);
+
+		Caso prueba1 = em.find(Caso.class, "test1");
+
+		for (int i = 0; i < cantidad; i++) {
+			Solucion solucion = new Solucion(prueba1.getSolicitudes());
+			System.out.println(">" + i + ">" + solucion.getGenes().toString());
+
+			individuos.add(solucion);
+		}
+
+		return individuos;
+	}
+
+	/*
+	 * Obtiene la población Inicial a partir de la Prueba cargada
+	 */
+	private void obtenerPoblacion() {
+
+		// 0. Obtener Poblacion Inicial
+		Set<Individuo> individuos = this.obtenerPrueba(4);
+		assertTrue(individuos.size() == 4);
+
+		System.out.println("----Población Inicial.---- ");
+		// 1. Se crea la Poblacion Inicial
+		p = new Poblacion(individuos);
+		Poblacion.setRed(NSFNET);
+		p.generarPoblacion();
+		System.out.println(p.toString());
 	}
 
 }

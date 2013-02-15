@@ -3,11 +3,6 @@ package test;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
@@ -22,7 +17,6 @@ import org.junit.Test;
 import wdm.CanalOptico;
 import wdm.Red;
 import wdm.qop.Caso;
-import wdm.qop.Servicio;
 import ag.Individuo;
 import ag.Poblacion;
 import ag.Solucion;
@@ -34,7 +28,7 @@ public class WDMFullTest {
 	private static EntityManager em = emf.createEntityManager();
 
 	Red NSFNET;
-	double[] probNiveles = {0.4, 0.3, 0.3};
+	double[] probNiveles = { 0.4, 0.3, 0.3 };
 	public Poblacion p;
 
 	@Before
@@ -78,7 +72,7 @@ public class WDMFullTest {
 
 		// 0. Ya se cuenta con la red NSFNET.
 		// 1. Obtener el caso de prueba (Solicitudes
-		Caso prueba1 = em.find(Caso.class, "prueba1");
+		Caso prueba1 = em.find(Caso.class, "test1");
 		// 2. Crear las soluciones con las Solicitudes
 		Solucion solucion = new Solucion(prueba1.getSolicitudes());
 		solucion.random();
@@ -125,36 +119,6 @@ public class WDMFullTest {
 
 	}
 
-	@Test
-	public void algoritmoGenetico() {
-
-		System.out.println("Prueba Algoritmo Genetico.");
-		// 0. Obtener Poblacion Inicial
-		System.out.println("Población Inicial...");
-		this.obtenerPoblacion();
-		int generacion = 0;
-
-		while (generacion < 10) {
-
-			System.out.println(" * Generación Nº " + generacion);
-			// System.out.println("Evaluando...");
-			// p.evaluar();
-			// System.out.println("Fin Evaluacion.");
-			System.out.println("Seleccionando...");
-			Collection<Individuo> seleccionados = p.seleccionar();
-			System.out.println("Fin Seleccion.");
-
-			System.out.println("Cruzando...");
-			p.cruzar(seleccionados);
-			System.out.println("FIN Cruzando...");
-			System.out.println("Imprimiendo...");
-			System.out.println(p.toString());
-			System.out.println("Fin Impresion.");
-		}
-
-		System.out.println("FIN Prueba Algoritmo Genetico.");
-	}
-
 	/*
 	 * Función para cargar un Caso de prueba en la Base de Datos.
 	 * 
@@ -178,7 +142,7 @@ public class WDMFullTest {
 	private Set<Individuo> obtenerPrueba(int cantidad) {
 		Set<Individuo> individuos = new HashSet<Individuo>(cantidad);
 
-		Caso prueba1 = em.find(Caso.class, "prueba1");
+		Caso prueba1 = em.find(Caso.class, "test1");
 
 		for (int i = 0; i < cantidad; i++) {
 			Solucion solucion = new Solucion(prueba1.getSolicitudes());
@@ -189,6 +153,7 @@ public class WDMFullTest {
 
 		return individuos;
 	}
+
 	/*
 	 * Obtiene la población Inicial a partir de la Prueba cargada
 	 */
