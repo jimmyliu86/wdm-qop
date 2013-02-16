@@ -322,4 +322,24 @@ public class Camino {
     		}
     	}
     }
+    
+    public boolean contiene(Nodo nodo) {
+    	boolean retorno = false;
+    	for (Salto s : this.saltos){
+    		
+    		CanalOptico c = s.getCanal();
+    		Nodo a = c.getExtremoA();
+    		if (a.equals(nodo)) {
+    			retorno = true;
+    			break;
+    		}
+    		
+    		Nodo b = c.getExtremoB();
+    		if (b.equals(nodo)) {
+    			retorno = true;
+    			break;
+    		}    		
+    	}
+    	return retorno;
+    }
 }

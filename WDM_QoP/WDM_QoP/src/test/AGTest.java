@@ -15,6 +15,7 @@ import org.junit.Test;
 
 import wdm.Red;
 import wdm.qop.Caso;
+import wdm.qop.Servicio;
 import ag.Individuo;
 import ag.Poblacion;
 import ag.Solucion;
@@ -46,9 +47,11 @@ public class AGTest {
 		// 0. Obtener Poblacion Inicial
 		System.out.println("Población Inicial...");
 		this.obtenerPoblacion();
+		p.evaluar();
+		this.imprimirGrafo("Primer_Mejor");
 		int generacion = 0;
-
-		while (generacion < 4) {
+		
+		while (generacion < 200) {
 
 			System.out.println(" * Generación Nº " + generacion);
 			// System.out.println("Evaluando...");
@@ -65,7 +68,10 @@ public class AGTest {
 			System.out.println(p.toString());
 			System.out.println("Fin Impresion.");
 			generacion++;
+			p.siguienteGeneracion();
 		}
+		p.evaluar();
+		this.imprimirGrafo("Mejor_Camino");
 
 		System.out.println("FIN Prueba Algoritmo Genetico.");
 	}
@@ -120,6 +126,18 @@ public class AGTest {
 		Poblacion.setRed(NSFNET);
 		p.generarPoblacion();
 		System.out.println(p.toString());
+	}
+	
+	private void imprimirGrafo(String id) {
+		Solucion mejor = p.getMejor();
+		String dir = "C:\\Users\\mrodas\\Desktop\\Descargas\\tesis";
+		int i = 0;
+		for (Servicio s : mejor.getGenes() ) {
+			Poblacion.getRed().drawServicio(s, dir, id+"_"+s.getId()+"_"+i+"");
+			i++;
+		}
+		
+		Poblacion.getRed().utilizacion(dir, "");
 	}
 
 }

@@ -105,7 +105,7 @@ public class WDMFullTest {
 		// p.evaluar();
 		// 1. Se realiza la Seleccion
 		Collection<Individuo> seleccionados = p.seleccionar();
-		Poblacion p2 = new Poblacion(seleccionados);
+		//Poblacion p2 = new Poblacion(seleccionados);
 		// System.out.println(p2.toString());
 		assertTrue("No son del mismo tamaño:" + seleccionados.size() + " y "
 				+ p.getTamanho(), seleccionados.size() == p.getTamanho());

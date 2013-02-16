@@ -45,6 +45,8 @@ public class Poblacion {
 	 * Operador de selecci�n
 	 */
 	private OperadorSeleccion operadorSeleccion;
+	
+	private Solucion mejor;
 
 	/**
 	 * Constructor de la Población.
@@ -56,7 +58,15 @@ public class Poblacion {
 		this.operadorSeleccion = new TorneoBinario();
 		this.operadorCruce = new MiCruce();
 		this.hijos = new ArrayList<Individuo>();
+		this.mejor = new Solucion();
+		this.mejor.setFitness(0);
 
+	}
+	
+	public void siguienteGeneracion() {
+		this.individuos = this.hijos;
+		this.hijos = new ArrayList<Individuo>();
+		Poblacion.red.inicializar();
 	}
 
 	public static Red getRed() {
@@ -145,9 +155,9 @@ public class Poblacion {
 			Individuo individuo1 = individuos.get(ind1);
 			Individuo individuo2 = individuos.get(ind2);
 			Individuo hijo = null;
-			System.out.println("&) Cruce N°" + i);
-			System.out.println("++I1:" + individuo1);
-			System.out.println("++I2:" + individuo2);
+			//System.out.println("&) Cruce N°" + i);
+			//System.out.println("++I1:" + individuo1);
+			//System.out.println("++I2:" + individuo2);
 			// Se extrae los fitness de los correspondientes individuos
 			
 			red.inicializar();
@@ -158,9 +168,16 @@ public class Poblacion {
 
 	}
 
+	/**
+	 * Evaluación de todos los individuos de la Población. Obtiene el mejor.
+	 */
 	public void evaluar() {
+		
 		for (Individuo i : this.individuos) {
 			i.evaluar();
+			if (this.mejor.getFitness() < ((Solucion)i).getFitness() )
+				this.mejor = (Solucion)i;
+			
 		}
 	}
 
@@ -240,6 +257,14 @@ public class Poblacion {
 		}
 		builder.append("]");
 		return builder.toString();
+	}
+
+	public Solucion getMejor() {
+		return mejor;
+	}
+
+	public void setMejor(Solucion mejor) {
+		this.mejor = mejor;
 	}
 
 }

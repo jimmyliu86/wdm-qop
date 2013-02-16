@@ -45,9 +45,9 @@ public class MiCruce implements OperadorCruce {
 		Solucion s1 = (Solucion) i1;
 		Solucion s2 = (Solucion) i2;
 
-		System.out.println("----------------");
-		System.out.println("@S1@" + s1 + "@S1@");
-		System.out.println("@S2@" + s2 + "@S2@");
+		System.out.println("---------------------------");
+		System.out.println("@Padre1@" + s1 + "@Padre1@.");
+		System.out.println("@Padre2@" + s2 + "@Padre2@.");
 
 		Collection<Servicio> hijoAux = new ArrayList<Servicio>();
 		Solucion hijo = new Solucion();
@@ -65,9 +65,8 @@ public class MiCruce implements OperadorCruce {
 		/*
 		 * Cálculos del Nuevo Camino Primario y del Nuevo Camino Secundario.
 		 */
-		int i = 0;
 		while (iterador1.hasNext() && iterador2.hasNext()) {
-			i++;
+
 			iguales.clear();
 			gen1 = iterador1.next();
 			gen2 = iterador2.next();
@@ -103,6 +102,10 @@ public class MiCruce implements OperadorCruce {
 			nuevoPrimario = new Camino(inicio);
 
 			for (Nodo next : iguales) {
+
+				if (nuevoPrimario.contiene(next))
+					continue;
+
 				Camino subCamino = inicio.dijkstra(next, exclusividadPrimario);
 
 				if (subCamino == null) {
@@ -139,13 +142,14 @@ public class MiCruce implements OperadorCruce {
 			/*
 			 * Cargar Genes al hijo.
 			 */
-
-			System.out.println("+Gen:" + i + " #New#" + newServicio + "#New.#");
 			hijoAux.add(newServicio);
 		}
 
 		Collection<Servicio> aux = new TreeSet<Servicio>(hijoAux);
 		hijo.setGenes(aux);
+
+		System.out.println(" #Hijo#" + hijo + "#Hijo.#");
+		System.out.println("---------------------------");
 
 		return hijo;
 	}
